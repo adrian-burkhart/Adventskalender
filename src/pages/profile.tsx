@@ -1,14 +1,18 @@
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
+import { GetServerSidePropsContext } from "next"
 
-export default function Profile({ user }) {
-  console.log(user)
+interface User {
+  id: string
+  email: string
+  phone: string
+}
+
+export default function Profile({ user }: { user: User }) {
   return <div>Hello {user.email}</div>
 }
 
-export const getServerSideProps = async (ctx) => {
-  // Create authenticated Supabase Client
+export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const supabase = createPagesServerClient(ctx)
-  // Check if we have a session
   const {
     data: { session },
   } = await supabase.auth.getSession()

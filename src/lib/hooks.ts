@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react"
 import { PostgrestError } from "@supabase/supabase-js"
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
+import Error from "next/error"
+import { createClient } from "next-sanity"
 
 export interface User {
   id: string
@@ -63,3 +65,59 @@ export const useUpdatePlayerScore = () => {
 
   return { updatePlayerScore, error, loading }
 }
+
+export interface Question {
+  answer: string
+  question: string
+  reward: number
+  answer_options: string[]
+}
+
+export interface Year {
+  year: string
+  questions: Question[]
+}
+
+const client = createClient({
+  projectId: "jrlkjoz0",
+  dataset: "production",
+  apiVersion: "2023-10-21",
+  useCdn: false,
+})
+
+const useYears = () => {
+  const [years, setYears] = useState<Year[] | null>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  const fetchData = async () => {
+    try {
+      setLoading(true)
+      const years = await client.fetch(`
+        *[_type == "year"]{
+          year,
+          "questions": questions[] -> {
+            answer,
+            question,
+            reward,
+            answer_options
+          }
+        }
+      `)
+
+      setYears(years)
+    } catch (e) {
+      setError(e as Error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  return { years, loading, error }
+}
+
+export default useYears

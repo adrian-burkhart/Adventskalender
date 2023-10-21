@@ -19,6 +19,7 @@
     "lodash": "^4.17.21",
     "luxon": "^3.4.3",
     "next": "13.5.6",
+    "next-sanity": "^5.5.8",
     "npm": "^10.2.1",
     "prettier": "^3.0.3",
     "prettier-plugin-tailwindcss": "^0.5.6",

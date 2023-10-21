@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { usePlayers } from "@/lib/hooks"
+import useYears, { usePlayers } from "@/lib/hooks"
 import { useUpdatePlayerScore } from "@/lib/hooks"
 
 export default function Home() {
@@ -9,17 +9,24 @@ export default function Home() {
     loading: updateLoading,
     error: updateError,
   } = useUpdatePlayerScore()
+  const { years, loading: yearsLoading, error: yearsError } = useYears()
 
   const handleUpdateScore = (playerId: string, newScore: number) => {
     updatePlayerScore(playerId, newScore)
   }
 
-  if (fetchLoading || updateLoading) {
+  if (fetchLoading || updateLoading || yearsLoading) {
     return <div>Loading...</div>
   }
 
-  if (fetchError || updateError) {
-    return <div>Error: {(fetchError || updateError)!.message}</div>
+  if (fetchError || updateError || yearsError) {
+    return (
+      <div>
+        {yearsError
+          ? "Error"
+          : `Error: ${(fetchError || updateError)!.message}`}
+      </div>
+    )
   }
 
   return (
@@ -36,6 +43,18 @@ export default function Home() {
               >
                 Increment Score
               </button>
+            </div>
+          ))}
+        {years &&
+          years.map((year) => (
+            <div key={year.year}>
+              <h2>{year.year}</h2>
+              {year.questions.map((question) => (
+                <div key={question.question}>
+                  <h3>{question.question}</h3>
+                  {/* Render more question details here */}
+                </div>
+              ))}
             </div>
           ))}
       </div>
