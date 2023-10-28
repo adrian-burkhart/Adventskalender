@@ -25,6 +25,7 @@ const Page = memo(() => {
   const questions = years
     ?.find((y) => y.year === year)
     ?.questions.find((q) => q.door_number === Number(doorNumber))
+
   return (
     <Layout>
       <main>

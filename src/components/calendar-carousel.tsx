@@ -1,20 +1,27 @@
 import { memo } from "react"
 import { useSelectedYear } from "@/lib/context"
 import Link from "next/link"
+import doorClosedOne from "../../public/images/door-closed-1.webp"
+import doorClosedTwo from "../../public/images/door-closed-2.webp"
+// import doorOpen from "../../public/images/door-open.webp"
+import Image from "next/image"
 
-const CalendarDoor = memo(({ doorNumber }: { doorNumber: number }) => {
-  const { selectedYear } = useSelectedYear()!
+type DoorState = "closed-one" | "closed-two" | "open"
 
-  const route = selectedYear ? `/${selectedYear.year}${doorNumber}` : ""
+const CalendarDoor = memo(
+  ({ state, doorNumber }: { state: DoorState; doorNumber: number }) => {
+    const { selectedYear } = useSelectedYear()!
 
-  return (
-    <Link href={route}>
-      <div className="flex h-48 w-32 items-center justify-center bg-red-500 shadow-md hover:bg-red-900">
-        <div>{doorNumber}</div>
-      </div>
-    </Link>
-  )
-})
+    const imageUrl = state === "closed-one" ? doorClosedOne : doorClosedTwo
+    const route = selectedYear ? `/${selectedYear.year}${doorNumber}` : ""
+
+    return (
+      <Link className="flex items-center justify-center shadow-md" href={route}>
+        <Image src={imageUrl} alt={`Tür Nummer ${doorNumber}`} />
+      </Link>
+    )
+  },
+)
 
 const Calendar = memo(() => {
   const { selectedYear } = useSelectedYear()!
@@ -28,9 +35,15 @@ const Calendar = memo(() => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center gap-4">
-      {selectedYear.questions.map((question, i) => {
-        return <CalendarDoor key={i} doorNumber={i + 1} />
+    <div className="flex w-full flex-col gap-4">
+      {selectedYear.questions.map((_, i) => {
+        return (
+          <CalendarDoor
+            state={i % 2 === 0 ? "closed-one" : "closed-two"}
+            key={i}
+            doorNumber={i + 1}
+          />
+        )
       })}
     </div>
   )

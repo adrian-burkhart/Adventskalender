@@ -1,3 +1,4 @@
+// @ts-ignore
 import useSound from "use-sound"
 import { memo } from "react"
 
