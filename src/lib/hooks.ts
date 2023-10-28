@@ -10,19 +10,19 @@ interface Score {
   year: string
   score: number
 }
-export interface User {
+export interface Player {
   id: string
   created_at: string
   name: string
   scores: Score[]
-  doors_opened: { year: string; opened: number[] }[]
+  doors_opened: { year: string; door_number: number }[]
 }
 
 export const usePlayers = () => {
   const supabaseClient = useSupabaseClient()
   const user = useUser()
 
-  const [data, setData] = useState<User[] | null>(null)
+  const [data, setData] = useState<Player[] | null>(null)
   const [error, setError] = useState<PostgrestError | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -50,7 +50,7 @@ export const usePlayer = () => {
   const supabaseClient = useSupabaseClient()
   const user = useUser()
 
-  const [data, setData] = useState<User | null>(null)
+  const [data, setData] = useState<Player | null>(null)
   const [error, setError] = useState<PostgrestError | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
 
@@ -182,4 +182,113 @@ export const useYears = () => {
   }, [])
 
   return { years, loading, error }
+}
+
+export type DoorState = "closed-one" | "closed-two" | "open"
+export interface Door {
+  year: string
+  door_number: number
+}
+
+export const useDoors = (
+  player: Player | null,
+  year: Year | null,
+  doorNumber: number,
+  state: DoorState,
+) => {
+  const supabaseClient = useSupabaseClient()
+  const [error, setError] = useState<PostgrestError | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [doorState, setDoorState] = useState(isOpen ? "open" : state)
+
+  const openDoor = async () => {
+    if (player === null) {
+      console.error("No player id")
+      return
+    }
+    if (year === null) {
+      console.error("No year selected")
+      return
+    }
+    const existingDoors = player?.doors_opened || []
+    const isAlreadyOpened = existingDoors.some(
+      (door) => door.year === year.year && door.door_number === doorNumber,
+    )
+    if (isAlreadyOpened) {
+      console.log("Door is already opened")
+      return
+    }
+    const updatedDoors = [
+      ...(player?.doors_opened || []),
+      { year: year.year, door_number: doorNumber },
+    ]
+
+    setLoading(true)
+
+    const { data, error } = await supabaseClient
+      .from("players")
+      .update({
+        doors_opened: updatedDoors,
+      })
+      .eq("id", player.id)
+      .select()
+
+    setLoading(false)
+
+    if (error) {
+      setError(error)
+      return
+    }
+
+    if (data) {
+      console.log("Updated")
+    }
+  }
+
+  const getIsDoorOpen = async () => {
+    if (player === null) {
+      console.error("No player id")
+      return false
+    }
+    if (year === null) {
+      console.error("No year selected")
+      return false
+    }
+
+    setLoading(true)
+
+    const { data, error } = await supabaseClient
+      .from("players")
+      .select("doors_opened")
+      .eq("id", player.id)
+
+    setLoading(false)
+
+    if (error) {
+      setError(error)
+      console.error("Failed to fetch door state", error)
+      return false
+    }
+
+    const doorsOpened = data?.[0]?.doors_opened || []
+
+    const doorOpened = doorsOpened.some(
+      (door: Door) =>
+        door.year === year.year && door.door_number === doorNumber,
+    )
+
+    setIsOpen(doorOpened)
+  }
+  useEffect(() => {
+    getIsDoorOpen().catch((err) => {
+      console.error(
+        "An error occurred while checking if the door is open:",
+        err,
+      )
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [player, year, doorNumber])
+
+  return { openDoor, isOpen, doorState, setDoorState, error, loading }
 }
