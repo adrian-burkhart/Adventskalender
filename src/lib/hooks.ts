@@ -1,10 +1,9 @@
-import { createContext, useContext, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { PostgrestError } from "@supabase/supabase-js"
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
 import Error from "next/error"
 import { createClient } from "next-sanity"
-import { dateNowUtc, dateTimeFromIso } from "./dateTime"
-import { last } from "lodash"
+import { DateTime } from "luxon"
 
 interface Score {
   year: string
@@ -184,43 +183,88 @@ export const useYears = () => {
   return { years, loading, error }
 }
 
-export type DoorState = "closed-one" | "closed-two" | "open"
+export type DoorState = "closed" | "open" | "locked"
 export interface Door {
   year: string
   door_number: number
 }
 
-export const useDoors = (
-  player: Player | null,
-  year: Year | null,
-  doorNumber: number,
-  state: DoorState,
-) => {
+export const useDoors = (player: Player | null, year: Year | null) => {
   const supabaseClient = useSupabaseClient()
   const [error, setError] = useState<PostgrestError | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
-  const [isOpen, setIsOpen] = useState<boolean>(false)
-  const [doorState, setDoorState] = useState(isOpen ? "open" : state)
+  const [doorStates, setDoorStates] = useState<DoorState[]>(
+    Array(24).fill("locked"),
+  )
 
-  const openDoor = async () => {
-    if (player === null) {
-      console.error("No player id")
+  useEffect(() => {
+    const fetchDoorStates = async () => {
+      if (player === null || year === null) {
+        console.error("Missing player id or year")
+        return
+      }
+
+      setLoading(true)
+
+      const { data, error } = await supabaseClient
+        .from("players")
+        .select("doors_opened")
+        .eq("id", player.id)
+
+      setLoading(false)
+
+      if (error) {
+        setError(error)
+        return
+      }
+
+      const today = DateTime.local().startOf("day")
+      const doorsOpened = data?.[0]?.doors_opened || []
+
+      const newDoorStates = doorStates.map((_, index) => {
+        const doorNumber = index + 1
+        const doorDate = DateTime.fromObject({
+          year: parseInt(year.year),
+          month: 12,
+          day: doorNumber,
+        })
+
+        if (doorDate > today) {
+          return "locked"
+        }
+
+        const doorOpened = doorsOpened.some(
+          (door: Door) =>
+            door.year === year.year && door.door_number === doorNumber,
+        )
+
+        return doorOpened ? "open" : "closed"
+      })
+
+      setDoorStates(newDoorStates)
+    }
+
+    fetchDoorStates()
+  }, [player, year])
+
+  const openDoor = async (doorNumber: number) => {
+    if (player === null || year === null) {
+      console.error("Missing player id or year")
       return
     }
-    if (year === null) {
-      console.error("No year selected")
-      return
-    }
+
     const existingDoors = player?.doors_opened || []
     const isAlreadyOpened = existingDoors.some(
       (door) => door.year === year.year && door.door_number === doorNumber,
     )
+
     if (isAlreadyOpened) {
       console.log("Door is already opened")
       return
     }
+
     const updatedDoors = [
-      ...(player?.doors_opened || []),
+      ...existingDoors,
       { year: year.year, door_number: doorNumber },
     ]
 
@@ -232,7 +276,6 @@ export const useDoors = (
         doors_opened: updatedDoors,
       })
       .eq("id", player.id)
-      .select()
 
     setLoading(false)
 
@@ -241,54 +284,10 @@ export const useDoors = (
       return
     }
 
-    if (data) {
-      console.log("Updated")
-    }
+    const updatedDoorStates = [...doorStates]
+    updatedDoorStates[doorNumber - 1] = "open"
+    setDoorStates(updatedDoorStates)
   }
 
-  const getIsDoorOpen = async () => {
-    if (player === null) {
-      console.error("No player id")
-      return false
-    }
-    if (year === null) {
-      console.error("No year selected")
-      return false
-    }
-
-    setLoading(true)
-
-    const { data, error } = await supabaseClient
-      .from("players")
-      .select("doors_opened")
-      .eq("id", player.id)
-
-    setLoading(false)
-
-    if (error) {
-      setError(error)
-      console.error("Failed to fetch door state", error)
-      return false
-    }
-
-    const doorsOpened = data?.[0]?.doors_opened || []
-
-    const doorOpened = doorsOpened.some(
-      (door: Door) =>
-        door.year === year.year && door.door_number === doorNumber,
-    )
-
-    setIsOpen(doorOpened)
-  }
-  useEffect(() => {
-    getIsDoorOpen().catch((err) => {
-      console.error(
-        "An error occurred while checking if the door is open:",
-        err,
-      )
-    })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [player, year, doorNumber])
-
-  return { openDoor, isOpen, doorState, setDoorState, error, loading }
+  return { doorStates, openDoor, error, loading }
 }

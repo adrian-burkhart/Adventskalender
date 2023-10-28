@@ -1,20 +1,10 @@
 import { GetServerSidePropsContext } from "next"
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import Layout from "@/components/layout"
-import Calendar from "@/components/calendar-carousel"
+import Calendar from "@/components/calendar"
 import { memo } from "react"
 
 const Home = memo(() => {
-  // const {
-  //   updatePlayerScore,
-  //   loading: updateLoading,
-  //   error: updateError,
-  // } = useUpdatePlayerScore()
-
-  // const handleUpdateScore = (playerId: string, newScore: number) => {
-  //   updatePlayerScore(playerId, newScore)
-  // }
-
   return (
     <Layout>
       <main>
