@@ -19,7 +19,7 @@ const Home = memo(() => {
     <Layout>
       <main>
         <div className="mt-24 flex flex-col items-center justify-center gap-4">
-          <div className="text-2xl text-red-700">
+          <div className="text-2xl text-yellow-200">
             Adventskalender der Familie Haas
           </div>
           <Calendar />

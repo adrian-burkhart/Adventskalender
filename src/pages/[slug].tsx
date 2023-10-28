@@ -4,6 +4,8 @@ import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import Layout from "@/components/layout"
 import { memo } from "react"
 import { useYears } from "@/lib/hooks"
+import SoundButton from "@/components/sound-button"
+import Image from "next/image"
 
 const Page = memo(() => {
   const router = useRouter()
@@ -23,25 +25,51 @@ const Page = memo(() => {
   const questions = years
     ?.find((y) => y.year === year)
     ?.questions.find((q) => q.door_number === Number(doorNumber))
-
   return (
     <Layout>
       <main>
-        <p>year: {year}</p>
-        <p>number: {doorNumber}</p>
-        <p>question: {questions?.question}</p>
-        <p>answer: {questions?.answer}</p>
-        <p>
+        <div>year: {year}</div>
+        <div>number: {doorNumber}</div>
+        <div>question: {questions?.question}</div>
+        <div>answer: {questions?.answer}</div>
+        <div>
           answer options:{" "}
           {questions?.answer_options.map((option, i) => (
-            <p key={i}>{option}</p>
+            <div key={i}>{option}</div>
           ))}
-        </p>
-        <p>
-          {/* {questions && (
-            <Image src={questions.image} alt={""} width={160} height={160} />
-          )} */}
-        </p>
+        </div>
+        <div>
+          {questions?.image && (
+            <Image
+              src={`${questions.image}?w=500`}
+              alt="Bild für die Frage"
+              width={500}
+              height={500}
+              // blurDataURL="data:..." automatically provided
+              // placeholder="blur" // Optional blur-up while loading
+            />
+          )}
+          <div className="flex flex-col gap-2">
+            {questions?.audiofile_intro && (
+              <SoundButton
+                label={"Intro Musik"}
+                url={questions.audiofile_intro.file}
+              />
+            )}
+            {questions?.audiofile_question && (
+              <SoundButton
+                label={"Frage Musik"}
+                url={questions.audiofile_question.file}
+              />
+            )}
+            {questions?.audiofile_outro && (
+              <SoundButton
+                label={"Outro Musik"}
+                url={questions.audiofile_outro.file}
+              />
+            )}
+          </div>
+        </div>
       </main>
     </Layout>
   )

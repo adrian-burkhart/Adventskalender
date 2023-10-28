@@ -3,6 +3,7 @@ import Navbar from "./navbar"
 import { usePlayer, useYears } from "@/lib/hooks"
 import { useSelectedYear } from "@/lib/context"
 import { dateTimeFromIso } from "@/lib/dateTime"
+import Head from "next/head"
 
 const Layout = memo(({ children }: { children: ReactNode }) => {
   const { years, loading: yearsLoading, error: yearsError } = useYears()
@@ -26,6 +27,9 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
 
   return (
     <>
+      <Head>
+        <title>Adventskalender der Familie Haas</title>
+      </Head>
       <Navbar />
       {years && (
         <select
