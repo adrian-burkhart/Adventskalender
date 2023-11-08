@@ -3,8 +3,11 @@ import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import Layout from "@/components/layout"
 import Calendar from "@/components/calendar"
 import { memo } from "react"
+import { usePlayer } from "@/lib/hooks"
 
 const Home = memo(() => {
+  const { player } = usePlayer()
+
   return (
     <Layout>
       <main>
@@ -12,7 +15,7 @@ const Home = memo(() => {
           <div className="text-2xl text-yellow-200">
             Adventskalender der Familie Haas
           </div>
-          <Calendar />
+          {player && <Calendar player={player} />}
         </div>
       </main>
     </Layout>

@@ -7,7 +7,7 @@ import doorLocked from "../../public/images/door-locked.webp"
 import Image, { StaticImageData } from "next/image"
 // @ts-ignore
 import useSound from "use-sound"
-import { usePlayer, useDoors, DoorState, Year } from "@/lib/hooks"
+import { usePlayer, useDoors, DoorState, Year, Player } from "@/lib/hooks"
 
 function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
   if (doorState === "open") {
@@ -90,9 +90,8 @@ const CalendarDoor = memo(
   },
 )
 
-const Calendar = memo(() => {
+const Calendar = memo(({ player }: { player: Player }) => {
   const { selectedYear } = useSelectedYear()!
-  const { player } = usePlayer()
   const { doorStates, openDoor, loading, error } = useDoors(
     player,
     selectedYear,

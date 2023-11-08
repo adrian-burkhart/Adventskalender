@@ -200,7 +200,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
   useEffect(() => {
     const fetchDoorStates = async () => {
       if (player === null || year === null) {
-        console.error("Missing player id or year")
+        console.error("Missing player id or year", player, year)
         return
       }
 
@@ -245,6 +245,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     }
 
     fetchDoorStates()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player, year])
 
   const openDoor = async (doorNumber: number) => {
