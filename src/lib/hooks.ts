@@ -269,7 +269,13 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     const isAlreadyOpened = existingDoors.some(
       (door) => door.year === year.year && door.door_number === doorNumber,
     )
-
+    console.log(
+      "isAlreadyOpened",
+      isAlreadyOpened,
+      existingDoors,
+      year.year,
+      doorNumber,
+    )
     if (isAlreadyOpened) {
       console.log("Door is already opened")
       return
@@ -281,7 +287,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     ]
 
     setLoading(true)
-
+    console.log("updatedDoors", updatedDoors)
     const { error } = await supabaseClient
       .from("players")
       .update({
