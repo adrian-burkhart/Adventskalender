@@ -1,3 +1,4 @@
+import Button from "@/components/button"
 import FeatureFlagItem from "@/components/feature-flag-item"
 import { FeatureFlag, useFeatureFlagMapResetter } from "@/lib/feature-flags"
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
@@ -12,12 +13,7 @@ export default function Flags() {
       {Object.values(FeatureFlag).map((flag) => {
         return <FeatureFlagItem key={flag} flag={flag as FeatureFlag} />
       })}
-      <button
-        className="mt-6 bg-red-500 px-2 py-1"
-        onClick={resetFeatureFlagMap}
-      >
-        {"Reset flags"}
-      </button>
+      <Button onClick={resetFeatureFlagMap}>{"Reset flags"}</Button>
     </div>
   )
 }

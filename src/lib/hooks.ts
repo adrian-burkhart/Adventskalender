@@ -24,7 +24,7 @@ export interface Player {
   created_at: string
   name: string
   scores: Score[]
-  doors_opened: { year: string; door_number: number }[]
+  doors_opened: { year: string; door_number: number; isAnswered?: boolean }[]
 }
 
 export const usePlayers = () => {
@@ -65,6 +65,7 @@ export const usePlayer = () => {
 
   useEffect(() => {
     const loadData = async () => {
+      console.log("Loading player data")
       setLoading(true)
       const { data, error } = await supabaseClient
         .from("players")
@@ -92,14 +93,34 @@ export const useUpdatePlayerScore = () => {
   const [error, setError] = useState<PostgrestError | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
 
-  const updatePlayerScore = async (playerId: string, newScore: number) => {
+  const updatePlayerScore = async (
+    player: Player,
+    year: string,
+    newScore: number,
+  ) => {
     setLoading(true)
+    const numericYear = Number(year)
 
+    const existingEntryIndex = player.scores.findIndex(
+      (score) => Number(score.year) === numericYear,
+    )
+
+    let updatedScores
+    if (existingEntryIndex >= 0) {
+      // Entry exists, update its score
+      updatedScores = [...player.scores]
+      updatedScores[existingEntryIndex].score += newScore
+    } else {
+      // Entry does not exist, add a new one
+      updatedScores = [...player.scores, { year: numericYear, score: newScore }]
+    }
+    console.log("Updated scores", updatedScores)
     const { data, error } = await supabaseClient
       .from("players")
-      .update({ score: newScore })
-      .eq("id", playerId)
+      .update({ scores: updatedScores })
+      .eq("id", player.id)
       .select()
+
     setLoading(false)
 
     if (error) {
@@ -126,10 +147,10 @@ export interface Question {
   question: string
   reward: number
   answer_options: string[]
-  audiofile_intro: AudioFile
-  audiofile_question: AudioFile
-  audiofile_outro: AudioFile
-  image: string
+  audiofile_intro?: AudioFile
+  audiofile_question?: AudioFile
+  audiofile_outro?: AudioFile
+  image?: string
 }
 
 export interface Year {
@@ -193,7 +214,7 @@ export const useYears = () => {
   return { years, loading, error }
 }
 
-export type DoorState = "closed" | "open" | "locked"
+export type DoorState = "closed" | "open" | "locked" | "answered"
 export interface Door {
   year: string
   door_number: number
@@ -217,6 +238,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
 
       setLoading(true)
 
+      console.log("Fetching door states")
       const { data, error } = await supabaseClient
         .from("players")
         .select("doors_opened")
@@ -244,12 +266,16 @@ export const useDoors = (player: Player | null, year: Year | null) => {
           return "locked"
         }
 
-        const doorOpened = doorsOpened.some(
+        const matchedDoor = doorsOpened.find(
           (door: Door) =>
             door.year === year.year && door.door_number === doorNumber,
         )
 
-        return doorOpened ? "open" : "closed"
+        if (matchedDoor?.isAnswered === true) {
+          return "answered"
+        }
+
+        return matchedDoor ? "open" : "closed"
       })
 
       setDoorStates(newDoorStates)
@@ -269,15 +295,8 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     const isAlreadyOpened = existingDoors.some(
       (door) => door.year === year.year && door.door_number === doorNumber,
     )
-    console.log(
-      "isAlreadyOpened",
-      isAlreadyOpened,
-      existingDoors,
-      year.year,
-      doorNumber,
-    )
-    if (isAlreadyOpened) {
-      console.log("Door is already opened")
+
+    if (isAlreadyOpened || doorStates[doorNumber] === "answered") {
       return
     }
 
@@ -287,7 +306,8 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     ]
 
     setLoading(true)
-    console.log("updatedDoors", updatedDoors)
+
+    console.log("Opening door", doorNumber)
     const { error } = await supabaseClient
       .from("players")
       .update({
@@ -303,9 +323,58 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     }
 
     const updatedDoorStates = [...doorStates]
-    updatedDoorStates[doorNumber - 1] = "open"
+    updatedDoorStates[doorNumber] = "open"
     setDoorStates(updatedDoorStates)
   }
 
-  return { doorStates, openDoor, error, loading }
+  const lockDoorAfterAnswer = async (doorNumber: number) => {
+    if (player === null || year === null) {
+      console.error("Missing player id or year")
+      return
+    }
+
+    let updatedDoors = player?.doors_opened || []
+
+    // Find index of the existing door object with the same year and doorNumber
+    const existingDoorIndex = updatedDoors.findIndex(
+      (door) => door.year === year.year && door.door_number === doorNumber,
+    )
+
+    if (existingDoorIndex !== -1) {
+      // Update the existing door object
+      updatedDoors[existingDoorIndex] = {
+        ...updatedDoors[existingDoorIndex],
+        isAnswered: true,
+      }
+    } else {
+      // Add a new door object if it doesn't exist
+      updatedDoors = [
+        ...updatedDoors,
+        { year: year.year, door_number: doorNumber, isAnswered: true },
+      ]
+    }
+
+    setLoading(true)
+
+    console.log("Locking door", doorNumber)
+    const { error } = await supabaseClient
+      .from("players")
+      .update({
+        doors_opened: updatedDoors,
+      })
+      .eq("id", player.id)
+
+    setLoading(false)
+
+    if (error) {
+      setError(error)
+      return
+    }
+
+    const updatedDoorStates = [...doorStates]
+    updatedDoorStates[doorNumber] = "answered"
+    setDoorStates(updatedDoorStates)
+  }
+
+  return { doorStates, openDoor, lockDoorAfterAnswer, error, loading }
 }

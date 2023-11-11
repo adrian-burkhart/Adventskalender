@@ -3,6 +3,7 @@ import { useSelectedYear } from "@/lib/context"
 import doorClosedOne from "../../public/images/door-closed-1.webp"
 import doorClosedTwo from "../../public/images/door-closed-2.webp"
 import doorOpen from "../../public/images/door-open.webp"
+import doorOpenAnswered from "../../public/images/door-open-answered.webp"
 import doorLocked from "../../public/images/door-locked.webp"
 import Image, { StaticImageData } from "next/image"
 // @ts-ignore
@@ -13,6 +14,10 @@ function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
   if (doorState === "open") {
     return doorOpen
   }
+  if (doorState === "answered") {
+    return doorOpenAnswered
+  }
+
   switch (variant) {
     case "closed-one":
       return doorClosedOne
@@ -73,10 +78,13 @@ const CalendarDoor = memo(
         return
       }
       playOpen()
-      setImageUrl(doorOpen)
+      if (doorState !== "answered") {
+        setImageUrl(doorOpen)
+      }
       setTimeout(() => {
-        openDoor()
-        window.location.href = route
+        openDoor().then(() => {
+          window.location.href = route
+        })
       }, 3000)
     }, [route, openDoor, doorState, variant, playLocked, playOpen])
 
@@ -120,16 +128,20 @@ const Calendar = memo(({ player }: { player: Player }) => {
     <div className="flex w-full flex-col gap-4">
       {doorStates.map((doorState, i) => {
         return (
-          <CalendarDoor
-            variant={i % 2 === 0 ? "closed-one" : "closed-two"}
-            key={i}
-            playOpen={playOpen}
-            selectedYear={selectedYear}
-            playLocked={playLocked}
-            doorNumber={i + 1}
-            openDoor={() => openDoor(i + 1)}
-            doorState={doorState}
-          />
+          <div key={i} className="relative flex gap-2">
+            <div className="absolute inset-0 left-48 top-44 text-2xl text-red-500">
+              {i + 1}
+            </div>
+            <CalendarDoor
+              variant={i % 2 === 0 ? "closed-one" : "closed-two"}
+              playOpen={playOpen}
+              selectedYear={selectedYear}
+              playLocked={playLocked}
+              doorNumber={i + 1}
+              openDoor={() => openDoor(i + 1)}
+              doorState={doorState}
+            />
+          </div>
         )
       })}
     </div>

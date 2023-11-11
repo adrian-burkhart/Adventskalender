@@ -24,7 +24,6 @@ const FeatureFlagItem = memo(({ flag }: FeatureFlagItemProps) => {
         onChange={() => {
           const newValue = !value
           setValue(newValue)
-          console.log(flag, newValue)
         }}
       />
       <label htmlFor={flag} className="ml-2">

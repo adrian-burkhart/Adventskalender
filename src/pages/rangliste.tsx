@@ -5,6 +5,7 @@ import Layout from "@/components/layout"
 import { useSelectedYear } from "@/lib/context"
 import { memo } from "react"
 import { dateTimeFromIso } from "@/lib/dateTime"
+import { reverse, sortBy } from "lodash"
 
 const Rangliste = memo(() => {
   const { players, error: fetchError, loading: fetchLoading } = usePlayers()
@@ -31,7 +32,18 @@ const Rangliste = memo(() => {
             <div className="text-2xl">Rangliste {selectedYear?.year}</div>
             <div className="flex flex-col items-center justify-center gap-4">
               {players &&
-                players.map((player, i) => {
+                reverse(
+                  sortBy(
+                    players,
+                    (p) =>
+                      p.scores.find((score) =>
+                        dateTimeFromIso(score.year).hasSame(
+                          dateTimeFromIso(selectedYear.year),
+                          "year",
+                        ),
+                      )?.score,
+                  ),
+                ).map((player, i) => {
                   const playerScore = player.scores.find((score) =>
                     dateTimeFromIso(score.year).hasSame(
                       dateTimeFromIso(selectedYear.year),
