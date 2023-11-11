@@ -6,7 +6,7 @@ import { dateTimeFromIso } from "@/lib/dateTime"
 import Head from "next/head"
 
 const Layout = memo(({ children }: { children: ReactNode }) => {
-  const { years, loading: yearsLoading, error: yearsError } = useYears()
+  const { years } = useYears()
 
   const { selectedYear, setSelectedYear } = useSelectedYear()!
   const { player } = usePlayer()

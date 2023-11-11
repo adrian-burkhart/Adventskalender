@@ -4,11 +4,21 @@ import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
 import Error from "next/error"
 import { createClient } from "next-sanity"
 import { DateTime } from "luxon"
+import { FeatureFlag, useFeatureFlag } from "./feature-flags"
 
 interface Score {
   year: string
   score: number
 }
+
+/* eslint-disable react-hooks/exhaustive-deps */
+export function useEffectOnce(fn: () => void) {
+  useEffect(() => {
+    fn()
+  }, [])
+}
+/* eslint-enable react-hooks/exhaustive-deps */
+
 export interface Player {
   id: string
   created_at: string
@@ -196,6 +206,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
   const [doorStates, setDoorStates] = useState<DoorState[]>(
     Array(24).fill("locked"),
   )
+  const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
   useEffect(() => {
     const fetchDoorStates = async () => {
@@ -229,7 +240,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
           day: doorNumber,
         })
 
-        if (doorDate > today) {
+        if (doorDate > today && !enabledTestMode) {
           return "locked"
         }
 
@@ -271,7 +282,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
 
     setLoading(true)
 
-    const { data, error } = await supabaseClient
+    const { error } = await supabaseClient
       .from("players")
       .update({
         doors_opened: updatedDoors,

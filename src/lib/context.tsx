@@ -5,10 +5,6 @@ import {
   useEffect,
   useState,
 } from "react"
-import { PostgrestError } from "@supabase/supabase-js"
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
-import Error from "next/error"
-import { createClient } from "next-sanity"
 import { dateNowUtc, dateTimeFromIso } from "./dateTime"
 import { last } from "lodash"
 import { Year, useYears } from "./hooks"

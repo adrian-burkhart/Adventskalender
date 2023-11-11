@@ -10,7 +10,6 @@ import Image from "next/image"
 const Page = memo(() => {
   const router = useRouter()
   const { years, loading, error } = useYears()
-
   if (loading) {
     return <div>Loading...</div>
   }
