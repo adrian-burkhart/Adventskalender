@@ -17,6 +17,7 @@ const FeatureFlagItem = memo(({ flag }: FeatureFlagItemProps) => {
   return (
     <div className="mb-2 flex">
       <input
+        checked={value}
         aria-describedby="feature-flag"
         id={flag}
         type="checkbox"
