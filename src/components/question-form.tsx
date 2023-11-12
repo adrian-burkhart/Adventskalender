@@ -9,13 +9,14 @@ import {
   useUpdatePlayerScore,
 } from "@/lib/hooks"
 import Button from "./button"
-import { find } from "lodash"
+import { find, shuffle } from "lodash"
 import { dateTimeFromIso } from "@/lib/dateTime"
 
 export enum QuestionFormStep {
   INTRO = "intro",
   QUESTION = "question",
   OUTRO = "outro",
+  ALREADY_ANSWERED = "already_answered",
 }
 
 const IntroStep = memo(
@@ -72,7 +73,7 @@ const QuestionStep = memo(
         <div>{question.question}</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col">
-            {question.answer_options.map((option, i) => (
+            {shuffle(question.answer_options).map((option, i) => (
               <div className="flex gap-2" key={i}>
                 <input
                   value={option}
@@ -147,19 +148,39 @@ const QuestionForm = memo(
     selectedYear: Year
   }) => {
     const storageKey = `currentFormStep-door-${doorNumber}-year-${selectedYear}`
-    const initialFormStep =
-      (localStorage.getItem(storageKey) as QuestionFormStep) ||
-      QuestionFormStep.INTRO
+
+    const hasQuestionBeenAnswered = () => {
+      return find(
+        player?.doors_opened,
+        (d) =>
+          selectedYear &&
+          dateTimeFromIso(d.year).hasSame(
+            dateTimeFromIso(selectedYear.year),
+            "year",
+          ) &&
+          d.door_number === doorNumber &&
+          d.isAnswered,
+      )
+    }
+
+    const initialFormStep = hasQuestionBeenAnswered()
+      ? QuestionFormStep.ALREADY_ANSWERED
+      : (localStorage.getItem(storageKey) as QuestionFormStep) ||
+        QuestionFormStep.INTRO
 
     const [formStep, setFormStep] = useState<QuestionFormStep>(initialFormStep)
     const [isCorrect, setIsCorrect] = useState<boolean>(false)
     const [selectedOption, setSelectedOption] = useState<string | null>(null)
 
     useEffect(() => {
-      if (formStep !== localStorage.getItem(storageKey)) {
+      if (
+        !hasQuestionBeenAnswered() &&
+        formStep !== localStorage.getItem(storageKey)
+      ) {
         localStorage.setItem(storageKey, formStep)
       }
-    }, [storageKey, formStep])
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [storageKey, formStep, player, selectedYear])
 
     useEffect(() => {
       const savedFormStep = localStorage.getItem(
@@ -169,18 +190,6 @@ const QuestionForm = memo(
         setFormStep(savedFormStep)
       }
     }, [])
-
-    const isAnswered = find(
-      player?.doors_opened,
-      (d) =>
-        selectedYear &&
-        dateTimeFromIso(d.year).hasSame(
-          dateTimeFromIso(selectedYear.year),
-          "year",
-        ) &&
-        d.door_number === doorNumber &&
-        d.isAnswered,
-    )
 
     const { lockDoorAfterAnswer } = useDoors(player, selectedYear)
 
@@ -205,22 +214,16 @@ const QuestionForm = memo(
       })
     }
 
-    if (
-      isAnswered &&
-      formStep ===
-        (QuestionFormStep.INTRO || formStep === QuestionFormStep.QUESTION)
-    ) {
-      return (
-        <div className="flex flex-col items-center justify-center gap-6">
-          <div>Du hast diese Frage bereits beantwortet.</div>
-          <Link className="flex items-center justify-center" href={"./"}>
-            <Button>Zurück zum Kalendar</Button>
-          </Link>
-        </div>
-      )
-    }
-
     switch (formStep) {
+      case QuestionFormStep.ALREADY_ANSWERED:
+        return (
+          <div className="flex flex-col items-center justify-center gap-6">
+            <div>Du hast diese Frage bereits beantwortet.</div>
+            <Link className="flex items-center justify-center" href={"./"}>
+              <Button>Zurück zum Kalendar</Button>
+            </Link>
+          </div>
+        )
       case QuestionFormStep.QUESTION:
         return (
           <QuestionStep
