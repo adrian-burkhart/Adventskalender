@@ -3,7 +3,7 @@ import { useSelectedYear } from "@/lib/context"
 import doorClosedOne from "../../public/images/door-closed-1.webp"
 import doorClosedTwo from "../../public/images/door-closed-2.webp"
 import doorOpen from "../../public/images/door-open.webp"
-import doorOpenAnswered from "../../public/images/door-open-answered.webp"
+import doorAnswered from "../../public/images/door-answered.webp"
 import doorLocked from "../../public/images/door-locked.webp"
 import Image, { StaticImageData } from "next/image"
 // @ts-ignore
@@ -15,7 +15,7 @@ function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
     return doorOpen
   }
   if (doorState === "answered") {
-    return doorOpenAnswered
+    return doorAnswered
   }
 
   switch (variant) {
