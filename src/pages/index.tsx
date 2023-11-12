@@ -4,6 +4,8 @@ import Layout from "@/components/layout"
 import Calendar from "@/components/calendar"
 import { memo } from "react"
 import { usePlayer } from "@/lib/hooks"
+import Image from "next/image"
+import title from "../../public/images/title.webp"
 
 const Home = memo(() => {
   const { player } = usePlayer()
@@ -13,7 +15,11 @@ const Home = memo(() => {
       <main>
         <div className="mt-24 flex flex-col items-center justify-center gap-4">
           <div className="text-2xl text-yellow-200">
-            Adventskalender der Familie Haas
+            <Image
+              alt="Adventskalender der Familie Haas"
+              src={title}
+              className="h-full w-full"
+            />
           </div>
           {player && <Calendar player={player} />}
         </div>

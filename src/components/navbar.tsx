@@ -1,7 +1,8 @@
 import { memo, useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import clsx from "clsx"
-import { TreeEvergreen } from "phosphor-react"
+import tree from "../../public/images/tree.webp"
+import star from "../../public/images/star.webp"
+import Image from "next/image"
 
 const Navbar = memo(() => {
   const [open, setOpen] = useState(false)
@@ -29,30 +30,31 @@ const Navbar = memo(() => {
     <div className="relative">
       <div
         ref={menuRef}
-        className="absolute inset-0 left-auto flex w-20 flex-col items-center justify-center pt-8"
+        className="absolute inset-0 left-auto flex h-max w-max flex-col items-center justify-center pt-8"
       >
         <div
-          className="flex h-8 w-16 items-center justify-center"
+          className="mx-10 flex items-center justify-center"
           onClick={() => setOpen(!open)}
         >
-          <TreeEvergreen
-            size={32}
-            className={clsx({
-              "text-yellow-200": !open,
-              "animate-spin-thrice text-yellow-700": open,
-            })}
-          />
+          <Image src={star} width={32} height={32} alt="menu" />
+          {open && (
+            <Image
+              className="absolute inset-0 -left-[2px] top-[50px] -z-10"
+              src={tree}
+              alt="menu"
+            />
+          )}
         </div>
         {open && (
           <div className="h-full">
-            <div className="flex flex-col items-center gap-2 bg-green-950 px-2 py-4">
+            <div className="flex flex-col items-center gap-2 bg-transparent px-2 py-5">
               {[
+                { text: "Profil", href: "/profile" },
                 { text: "Kalender", href: "/" },
                 { text: "Rangliste", href: "/rangliste" },
-                { text: "Profil", href: "/profile" },
               ].map((link) => (
                 <Link
-                  className="text-yellow-200 hover:text-red-700"
+                  className="text-xs text-yellow-200 hover:text-red-700"
                   href={link.href}
                   key={link.href}
                 >
