@@ -11,6 +11,9 @@ import {
 import Button from "./button"
 import { find, shuffle } from "lodash"
 import { dateTimeFromIso } from "@/lib/dateTime"
+import Countdown from "./countdown"
+
+const QUESTION_TIME = 60
 
 export enum QuestionFormStep {
   INTRO = "intro",
@@ -52,12 +55,14 @@ const IntroStep = memo(
 const QuestionStep = memo(
   ({
     question,
+    isSubmitted,
     handleSubmit,
     setSelectedOption,
     selectedOption,
   }: {
+    isSubmitted: boolean
     setSelectedOption: Dispatch<SetStateAction<string | null>>
-    handleSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+    handleSubmit: (e?: React.FormEvent<HTMLFormElement>) => void
     question: Question
     selectedOption: string | null
   }) => {
@@ -70,6 +75,11 @@ const QuestionStep = memo(
             url={question.audiofile_question?.file}
           />
         )}
+        <Countdown
+          time={QUESTION_TIME}
+          isSubmitted={isSubmitted}
+          onComplete={() => handleSubmit()}
+        />
         <div>{question.question}</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col">
@@ -171,6 +181,7 @@ const QuestionForm = memo(
     const [formStep, setFormStep] = useState<QuestionFormStep>(initialFormStep)
     const [isCorrect, setIsCorrect] = useState<boolean>(false)
     const [selectedOption, setSelectedOption] = useState<string | null>(null)
+    const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
 
     useEffect(() => {
       if (
@@ -195,8 +206,11 @@ const QuestionForm = memo(
 
     const { updatePlayerScore } = useUpdatePlayerScore()
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-      e.preventDefault()
+    const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
+      if (e) {
+        e.preventDefault()
+      }
+      setIsSubmitted(true)
       lockDoorAfterAnswer(doorNumber).then(() => {
         const answerIsCorrect = selectedOption === question.answer
         setIsCorrect(answerIsCorrect)
@@ -230,6 +244,7 @@ const QuestionForm = memo(
             setSelectedOption={setSelectedOption}
             handleSubmit={handleSubmit}
             question={question}
+            isSubmitted={isSubmitted}
             selectedOption={selectedOption}
           />
         )
