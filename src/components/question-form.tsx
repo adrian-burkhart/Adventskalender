@@ -6,6 +6,7 @@ import {
   Question,
   Year,
   useDoors,
+  usePlayer,
   useUpdatePlayerScore,
 } from "@/lib/hooks"
 import Button from "./button"
@@ -30,22 +31,15 @@ const IntroStep = memo(
     question: Question
     setFormStep: Dispatch<SetStateAction<QuestionFormStep>>
   }) => {
-    const handleOnEnded = () => {
-      setFormStep(QuestionFormStep.QUESTION)
-    }
-
     return (
       <div className="mt-24 flex flex-col items-center justify-between gap-6">
         {question.audiofile_intro ? (
-          <AudioPlayer
-            onEnded={handleOnEnded}
-            url={question.audiofile_intro.file}
-          />
+          <AudioPlayer url={question.audiofile_intro.file} />
         ) : (
           <div>Ups, hier fehlt noch was.</div>
         )}
         <Button onClick={() => setFormStep(QuestionFormStep.QUESTION)}>
-          Überspringen
+          Bereit?
         </Button>
       </div>
     )
@@ -117,7 +111,25 @@ const QuestionStep = memo(
 )
 
 const OutroStep = memo(
-  ({ question, isCorrect }: { question: Question; isCorrect: boolean }) => {
+  ({
+    question,
+    selectedYear,
+    isCorrect,
+  }: {
+    selectedYear: Year
+    question: Question
+    isCorrect: boolean
+  }) => {
+    const { player } = usePlayer()
+
+    const currentScore = selectedYear
+      ? player?.scores.find((score) =>
+          dateTimeFromIso(score.year).hasSame(
+            dateTimeFromIso(selectedYear.year),
+            "year",
+          ),
+        )
+      : null
     return (
       <div className="flex flex-col gap-10">
         {question.audiofile_outro && (
@@ -136,8 +148,17 @@ const OutroStep = memo(
           </div>
         )}
         <div>
+          {currentScore && (
+            <div>Deine Punktzahl ist jetzt: {currentScore.score}</div>
+          )}
           <Link className="flex items-center justify-center" href={"./"}>
             <Button>Zurück zum Kalendar</Button>
+          </Link>
+          <Link
+            className="flex items-center justify-center"
+            href={"./rangliste"}
+          >
+            <Button>Zur Rangliste</Button>
           </Link>
         </div>
       </div>
@@ -249,7 +270,13 @@ const QuestionForm = memo(
           />
         )
       case QuestionFormStep.OUTRO:
-        return <OutroStep isCorrect={isCorrect} question={question} />
+        return (
+          <OutroStep
+            selectedYear={selectedYear}
+            isCorrect={isCorrect}
+            question={question}
+          />
+        )
       case QuestionFormStep.INTRO:
       default:
         return <IntroStep setFormStep={setFormStep} question={question} />
