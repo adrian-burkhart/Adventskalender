@@ -10,9 +10,10 @@ import {
   useUpdatePlayerScore,
 } from "@/lib/hooks"
 import Button from "./button"
-import { find, shuffle } from "lodash"
+import { find } from "lodash"
 import { dateTimeFromIso } from "@/lib/dateTime"
 import Countdown from "./countdown"
+import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 
 const QUESTION_TIME = 60
 
@@ -77,7 +78,7 @@ const QuestionStep = memo(
         <div>{question.question}</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col">
-            {shuffle(question.answer_options).map((option, i) => (
+            {question.answer_options.map((option, i) => (
               <div className="flex gap-2" key={i}>
                 <input
                   value={option}
@@ -179,6 +180,7 @@ const QuestionForm = memo(
     selectedYear: Year
   }) => {
     const storageKey = `currentFormStep-door-${doorNumber}-year-${selectedYear}`
+    const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
     const hasQuestionBeenAnswered = () => {
       return find(
@@ -194,10 +196,11 @@ const QuestionForm = memo(
       )
     }
 
-    const initialFormStep = hasQuestionBeenAnswered()
-      ? QuestionFormStep.ALREADY_ANSWERED
-      : (localStorage.getItem(storageKey) as QuestionFormStep) ||
-        QuestionFormStep.INTRO
+    const initialFormStep =
+      hasQuestionBeenAnswered() && !enabledTestMode
+        ? QuestionFormStep.ALREADY_ANSWERED
+        : (localStorage.getItem(storageKey) as QuestionFormStep) ||
+          QuestionFormStep.INTRO
 
     const [formStep, setFormStep] = useState<QuestionFormStep>(initialFormStep)
     const [isCorrect, setIsCorrect] = useState<boolean>(false)
