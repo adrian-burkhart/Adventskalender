@@ -14,6 +14,7 @@ import { find } from "lodash"
 import { dateTimeFromIso } from "@/lib/dateTime"
 import Countdown from "./countdown"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
+import ReadyButton from "./ready-button"
 
 const QUESTION_TIME = 60
 
@@ -39,9 +40,7 @@ const IntroStep = memo(
         ) : (
           <div>Ups, hier fehlt noch was.</div>
         )}
-        <Button onClick={() => setFormStep(QuestionFormStep.QUESTION)}>
-          Bereit?
-        </Button>
+        <ReadyButton onClick={() => setFormStep(QuestionFormStep.QUESTION)} />
       </div>
     )
   },
@@ -196,13 +195,14 @@ const QuestionForm = memo(
       )
     }
 
-    const initialFormStep =
-      hasQuestionBeenAnswered() && !enabledTestMode
-        ? QuestionFormStep.ALREADY_ANSWERED
-        : (localStorage.getItem(storageKey) as QuestionFormStep) ||
-          QuestionFormStep.INTRO
+    const initialFormStep = hasQuestionBeenAnswered()
+      ? QuestionFormStep.ALREADY_ANSWERED
+      : (localStorage.getItem(storageKey) as QuestionFormStep) ||
+        QuestionFormStep.INTRO
 
-    const [formStep, setFormStep] = useState<QuestionFormStep>(initialFormStep)
+    const [formStep, setFormStep] = useState<QuestionFormStep>(
+      enabledTestMode ? QuestionFormStep.INTRO : initialFormStep,
+    )
     const [isCorrect, setIsCorrect] = useState<boolean>(false)
     const [selectedOption, setSelectedOption] = useState<string | null>(null)
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
@@ -210,7 +210,8 @@ const QuestionForm = memo(
     useEffect(() => {
       if (
         !hasQuestionBeenAnswered() &&
-        formStep !== localStorage.getItem(storageKey)
+        formStep !== localStorage.getItem(storageKey) &&
+        !enabledTestMode
       ) {
         localStorage.setItem(storageKey, formStep)
       }
@@ -221,10 +222,10 @@ const QuestionForm = memo(
       const savedFormStep = localStorage.getItem(
         "currentFormStep",
       ) as QuestionFormStep | null
-      if (savedFormStep) {
+      if (savedFormStep && !enabledTestMode) {
         setFormStep(savedFormStep)
       }
-    }, [])
+    }, [enabledTestMode])
 
     const { lockDoorAfterAnswer } = useDoors(player, selectedYear)
 

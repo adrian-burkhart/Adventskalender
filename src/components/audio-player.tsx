@@ -1,7 +1,10 @@
 // @ts-ignore
 import { memo, useRef, useState } from "react"
-import { ArrowCounterClockwise, Pause, Play } from "phosphor-react"
+import { ArrowCounterClockwise } from "phosphor-react"
 import ReactAudioPlayer from "react-audio-player"
+import pauseButton from "../../public/images/pause-button.webp"
+import playButton from "../../public/images/play-button.webp"
+import Image from "next/image"
 
 export const PlayPauseButton = memo(
   ({
@@ -20,10 +23,10 @@ export const PlayPauseButton = memo(
     if (isPlaying) {
       return (
         <button onClick={pauseAudio}>
-          <Pause
-            weight="fill"
-            size={smallButton ? 24 : 128}
-            className="text-yellow-200"
+          <Image
+            src={pauseButton}
+            alt="Pause button"
+            width={smallButton ? 28 : 300}
           />
         </button>
       )
@@ -43,10 +46,10 @@ export const PlayPauseButton = memo(
 
     return (
       <button onClick={playAudio}>
-        <Play
-          weight="fill"
-          size={smallButton ? 24 : 128}
-          className="text-yellow-200"
+        <Image
+          src={playButton}
+          alt="Play button"
+          width={smallButton ? 24 : 256}
         />
       </button>
     )
