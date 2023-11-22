@@ -4,6 +4,8 @@ import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import { GetServerSidePropsContext } from "next"
 import { useEffect } from "react"
+import welcomeImage from "../../public/images/welcome.webp"
+import Image from "next/image"
 
 const LoginPage = () => {
   const supabaseClient = useSupabaseClient()
@@ -87,6 +89,7 @@ const LoginPage = () => {
             },
           }}
         />
+        <Image src={welcomeImage} alt="" />
       </div>
     )
   }

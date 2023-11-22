@@ -9,14 +9,17 @@ import {
   usePlayer,
   useUpdatePlayerScore,
 } from "@/lib/hooks"
+import giftGif from "../../public/images/gift.gif"
+import solutionImage from "../../public/images/solution.webp"
 import Button from "./button"
 import { find } from "lodash"
 import { dateTimeFromIso } from "@/lib/dateTime"
 import Countdown from "./countdown"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import ReadyButton from "./ready-button"
+import Image from "next/image"
 
-const QUESTION_TIME = 60
+const QUESTION_TIME = 30
 
 export enum QuestionFormStep {
   INTRO = "intro",
@@ -96,15 +99,6 @@ const QuestionStep = memo(
             </Button>
           </div>
         </form>
-
-        {/* {question.image && (
-          <Image
-            src={`${question.image}?w=500`}
-            alt="Bild für die Frage"
-            width={500}
-            height={500}
-          />
-        )} */}
       </div>
     )
   },
@@ -121,6 +115,13 @@ const OutroStep = memo(
     isCorrect: boolean
   }) => {
     const { player } = usePlayer()
+    const [hasGiftOpened, setHasGiftOpened] = useState<boolean>(false)
+
+    useEffect(() => {
+      setTimeout(() => {
+        setHasGiftOpened(true)
+      }, 7000)
+    }, [isCorrect])
 
     const currentScore = selectedYear
       ? player?.scores.find((score) =>
@@ -130,8 +131,9 @@ const OutroStep = memo(
           ),
         )
       : null
+
     return (
-      <div className="flex flex-col gap-10">
+      <div className="flex flex-col gap-10 text-center">
         {question.audiofile_outro && (
           <AudioPlayer
             smallButton
@@ -139,28 +141,40 @@ const OutroStep = memo(
             autoPlay
           />
         )}
-        {isCorrect ? (
-          <div>Das war korrekt! Du bekommst dafür 3 Punkte.</div>
+        {!hasGiftOpened ? (
+          <Image src={giftGif} width={400} alt="" />
         ) : (
-          <div className="flex flex-col gap-2">
-            <div>Das war leider falsch! Du bekommst dafür keine Punkte.</div>
-            <div>Die richtige Antwort wäre gewesen: {question.answer}</div>
+          <div className="flex flex-col gap-10">
+            <Image src={solutionImage} width={400} alt="" />
+
+            {isCorrect ? (
+              <div>
+                Das war korrekt! Du bekommst dafür {question.reward} Punkte.
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
+                <div>
+                  Das war leider falsch! Du bekommst dafür keine Punkte.
+                </div>
+                <div>Die richtige Antwort lautet: {question.answer}</div>
+              </div>
+            )}
+            <div>
+              {currentScore && (
+                <div>Deine Punktzahl ist jetzt: {currentScore.score}</div>
+              )}
+              <Link className="flex items-center justify-center" href={"./"}>
+                <Button>Zurück zum Kalendar</Button>
+              </Link>
+              <Link
+                className="flex items-center justify-center"
+                href={"./rangliste"}
+              >
+                <Button>Zur Rangliste</Button>
+              </Link>
+            </div>
           </div>
         )}
-        <div>
-          {currentScore && (
-            <div>Deine Punktzahl ist jetzt: {currentScore.score}</div>
-          )}
-          <Link className="flex items-center justify-center" href={"./"}>
-            <Button>Zurück zum Kalendar</Button>
-          </Link>
-          <Link
-            className="flex items-center justify-center"
-            href={"./rangliste"}
-          >
-            <Button>Zur Rangliste</Button>
-          </Link>
-        </div>
       </div>
     )
   },
@@ -178,7 +192,7 @@ const QuestionForm = memo(
     question: Question
     selectedYear: Year
   }) => {
-    const storageKey = `currentFormStep-door-${doorNumber}-year-${selectedYear}`
+    const storageKey = `currentFormStep-door-${doorNumber}-year-${selectedYear.year}`
     const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
     const hasQuestionBeenAnswered = () => {

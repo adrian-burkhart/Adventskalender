@@ -1,25 +1,25 @@
-import { useYears, usePlayers } from "@/lib/hooks"
+import { usePlayers } from "@/lib/hooks"
 import { GetServerSidePropsContext } from "next"
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import Layout from "@/components/layout"
 import { useSelectedYear } from "@/lib/context"
+import ranglisteImage from "../../public/images/rangliste.webp"
 import { memo } from "react"
 import { dateTimeFromIso } from "@/lib/dateTime"
 import { reverse, sortBy } from "lodash"
+import Image from "next/image"
 
 const Rangliste = memo(() => {
   const { players, error: fetchError, loading: fetchLoading } = usePlayers()
 
-  const { years, loading: yearsLoading, error: yearsError } = useYears()
+  const { selectedYear } = useSelectedYear()!
 
-  const { selectedYear, setSelectedYear } = useSelectedYear()!
-
-  if (fetchLoading || yearsLoading) {
+  if (fetchLoading) {
     return <div>Loading...</div>
   }
 
-  if (fetchError || yearsError) {
-    return <div>{yearsError ? "Error" : `Error: ${fetchError!.message}`}</div>
+  if (fetchError) {
+    return <div>{`Error: ${fetchError!.message}`}</div>
   }
 
   return (
@@ -28,8 +28,9 @@ const Rangliste = memo(() => {
         {selectedYear === null ? (
           <div className="text-lg">Rangliste</div>
         ) : (
-          <div className="flex flex-col gap-10">
-            <div className="text-2xl">Rangliste {selectedYear?.year}</div>
+          <div className="flex flex-col items-center gap-10">
+            <Image src={ranglisteImage} alt="" />
+            <div className="text-2xl">{selectedYear?.year}</div>
             <div className="flex flex-col items-center justify-center gap-4">
               {players &&
                 reverse(

@@ -44,7 +44,7 @@ const Door = memo(({ delayedNavigation, imageUrl, doorNumber }: DoorProps) => {
     <div onClick={delayedNavigation} className="relative flex gap-2">
       <div
         className={clsx(
-          "absolute inset-0  top-[32%] text-center text-xl text-red-500 md:top-[40%] md:text-5xl",
+          "absolute inset-0 top-[40%] text-center text-2xl text-red-500 md:top-[40%] md:text-5xl",
           myFont.className,
         )}
       >
@@ -139,7 +139,7 @@ const Calendar = memo(({ player }: { player: Player }) => {
   }
 
   return (
-    <div className="grid w-full grid-cols-3 items-center gap-4">
+    <div className="grid w-full grid-cols-2 items-center gap-4">
       {doorStates.map((doorState, i) => {
         return (
           <CalendarDoor

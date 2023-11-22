@@ -21,14 +21,14 @@ const Home = memo(() => {
     const interval = setInterval(() => {
       const duration = Duration.fromMillis(
         calendarStarts.diffNow().milliseconds,
-      ).shiftTo("months", "weeks", "days", "hours", "minutes")
+      ).shiftTo("days", "hours", "minutes")
       setCountdown(duration)
     }, 1000)
 
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear?.year])
-
+  console.log("countdown", countdown)
   return (
     <Layout>
       <main>
@@ -40,7 +40,7 @@ const Home = memo(() => {
               className="h-full w-full"
             />
           </div>
-          <div className="flex flex-col items-center justify-center gap-2 text-center">
+          <div className="mb-4 flex flex-col items-center justify-center gap-2 text-center">
             <div>Schön, dass du schon hier bist!</div>
             <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
             <div>

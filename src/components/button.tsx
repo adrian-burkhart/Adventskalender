@@ -1,6 +1,6 @@
 import clsx from "clsx"
 import { ButtonHTMLAttributes, DetailedHTMLProps, memo } from "react"
-import textButton from "../../public/images/text-button.webp"
+
 interface ButtonProps
   extends Omit<
     DetailedHTMLProps<
