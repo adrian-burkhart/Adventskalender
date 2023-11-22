@@ -2,13 +2,32 @@ import { GetServerSidePropsContext } from "next"
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import Layout from "@/components/layout"
 import Calendar from "@/components/calendar"
-import { memo } from "react"
+import { memo, useEffect, useState } from "react"
 import { usePlayer } from "@/lib/hooks"
 import Image from "next/image"
 import title from "../../public/images/title.webp"
+import { useSelectedYear } from "@/lib/context"
+import { DateTime, Duration } from "luxon"
 
 const Home = memo(() => {
   const { player } = usePlayer()
+  const { selectedYear } = useSelectedYear()!
+  const [countdown, setCountdown] = useState<Duration | null>(null)
+  const calendarStarts = DateTime.fromISO(
+    `${selectedYear?.year ?? "2023"}-12-01T00:00:00.000Z`,
+  )
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const duration = Duration.fromMillis(
+        calendarStarts.diffNow().milliseconds,
+      ).shiftTo("months", "weeks", "days", "hours", "minutes")
+      setCountdown(duration)
+    }, 1000)
+
+    return () => clearInterval(interval)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedYear?.year])
 
   return (
     <Layout>
@@ -20,6 +39,18 @@ const Home = memo(() => {
               src={title}
               className="h-full w-full"
             />
+          </div>
+          <div className="flex flex-col items-center justify-center gap-2 text-center">
+            <div>Schön, dass du schon hier bist!</div>
+            <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
+            <div>
+              Bis dahin sind es noch:{" "}
+              {countdown
+                ? `${countdown.days} Tage, ${
+                    countdown.hours
+                  } Stunden und ${Math.round(countdown.minutes)} Minuten`
+                : ""}
+            </div>
           </div>
           {player && <Calendar player={player} />}
         </div>

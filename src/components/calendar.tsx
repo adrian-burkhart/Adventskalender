@@ -9,6 +9,8 @@ import Image, { StaticImageData } from "next/image"
 // @ts-ignore
 import useSound from "use-sound"
 import { useDoors, DoorState, Year, Player } from "@/lib/hooks"
+import localFont from "next/font/local"
+import clsx from "clsx"
 
 function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
   if (doorState === "open") {
@@ -26,6 +28,11 @@ function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
   }
 }
 
+const myFont = localFont({
+  src: "../../public/Cochin Bold Italic.otf",
+  display: "swap",
+})
+
 interface DoorProps {
   delayedNavigation: () => void
   imageUrl: StaticImageData
@@ -34,11 +41,18 @@ interface DoorProps {
 
 const Door = memo(({ delayedNavigation, imageUrl, doorNumber }: DoorProps) => {
   return (
-    <div
-      className="flex items-center justify-center shadow-md"
-      onClick={delayedNavigation}
-    >
-      <Image src={imageUrl} alt={`Tür Nummer ${doorNumber}`} />
+    <div onClick={delayedNavigation} className="relative flex gap-2">
+      <div
+        className={clsx(
+          "absolute inset-0  top-[32%] text-center text-xl text-red-500 md:top-[40%] md:text-5xl",
+          myFont.className,
+        )}
+      >
+        {doorNumber}
+      </div>
+      <div className="flex items-center justify-center shadow-md">
+        <Image src={imageUrl} alt={`Tür Nummer ${doorNumber}`} />
+      </div>
     </div>
   )
 })
@@ -125,23 +139,19 @@ const Calendar = memo(({ player }: { player: Player }) => {
   }
 
   return (
-    <div className="flex w-full flex-col items-center gap-4">
+    <div className="grid w-full grid-cols-3 items-center gap-4">
       {doorStates.map((doorState, i) => {
         return (
-          <div key={i} className="relative flex gap-2">
-            <div className="absolute inset-0 left-48 top-44 text-2xl text-red-500">
-              {i + 1}
-            </div>
-            <CalendarDoor
-              variant={i % 2 === 0 ? "closed-one" : "closed-two"}
-              playOpen={playOpen}
-              selectedYear={selectedYear}
-              playLocked={playLocked}
-              doorNumber={i + 1}
-              openDoor={() => openDoor(i + 1)}
-              doorState={doorState}
-            />
-          </div>
+          <CalendarDoor
+            key={i}
+            variant={i % 2 === 0 ? "closed-one" : "closed-two"}
+            playOpen={playOpen}
+            selectedYear={selectedYear}
+            playLocked={playLocked}
+            doorNumber={i + 1}
+            openDoor={() => openDoor(i + 1)}
+            doorState={doorState}
+          />
         )
       })}
     </div>
