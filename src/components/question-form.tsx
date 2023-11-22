@@ -37,7 +37,7 @@ const IntroStep = memo(
     setFormStep: Dispatch<SetStateAction<QuestionFormStep>>
   }) => {
     return (
-      <div className="mt-24 flex flex-col items-center justify-between gap-6">
+      <div className="mt-12 flex flex-col items-center justify-between gap-6">
         {question.audiofile_intro ? (
           <AudioPlayer url={question.audiofile_intro.file} />
         ) : (

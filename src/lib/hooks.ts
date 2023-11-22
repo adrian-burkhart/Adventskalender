@@ -87,6 +87,34 @@ export const usePlayer = () => {
 
   return { player: data, loading, error }
 }
+export const useUpdatePlayerName = () => {
+  const supabaseClient = useSupabaseClient()
+  const [error, setError] = useState<PostgrestError | null>(null)
+  const [loading, setLoading] = useState<boolean>(false)
+
+  const updatePlayerName = async (player: Player, newName: string) => {
+    setLoading(true)
+
+    const { data, error } = await supabaseClient
+      .from("players")
+      .update({ name: newName })
+      .eq("id", player.id)
+      .select()
+
+    setLoading(false)
+
+    if (error) {
+      setError(error)
+      return
+    }
+
+    if (data) {
+      console.log("Updated")
+    }
+  }
+
+  return { updatePlayerName, error, loading }
+}
 
 export const useUpdatePlayerScore = () => {
   const supabaseClient = useSupabaseClient()
