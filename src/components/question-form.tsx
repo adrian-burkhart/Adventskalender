@@ -144,8 +144,8 @@ const OutroStep = memo(
         {!hasGiftOpened ? (
           <Image src={giftGif} width={400} alt="" />
         ) : (
-          <div className="flex flex-col gap-10">
-            <Image src={solutionImage} width={400} alt="" />
+          <div className="flex flex-col items-center gap-10">
+            <Image src={solutionImage} width={150} alt="" />
 
             {isCorrect ? (
               <div>

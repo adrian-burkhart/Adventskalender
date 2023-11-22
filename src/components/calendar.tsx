@@ -119,7 +119,7 @@ const Calendar = memo(({ player }: { player: Player }) => {
     selectedYear,
   )
 
-  const [playOpen] = useSound("/sounds/creaking-door.mp3")
+  const [playOpen] = useSound("/sounds/opening-door.mp3")
   const [playLocked] = useSound("/sounds/locked-door.mp3")
 
   if (loading) {
