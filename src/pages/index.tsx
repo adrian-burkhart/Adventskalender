@@ -17,18 +17,26 @@ const Home = memo(() => {
     `${selectedYear?.year ?? "2023"}-12-01T00:00:00.000Z`,
   )
 
+  const calendarHasStarted = calendarStarts.diffNow().milliseconds < 0
+
+  const updateCountdown = () => {
+    const duration = Duration.fromMillis(
+      calendarStarts.diffNow().milliseconds,
+    ).shiftTo("days", "hours", "minutes")
+    setCountdown(duration)
+  }
+
   useEffect(() => {
+    updateCountdown()
+
     const interval = setInterval(() => {
-      const duration = Duration.fromMillis(
-        calendarStarts.diffNow().milliseconds,
-      ).shiftTo("days", "hours", "minutes")
-      setCountdown(duration)
-    }, 1000)
+      updateCountdown()
+    }, 60000)
 
     return () => clearInterval(interval)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear?.year])
-  console.log("countdown", countdown)
+
   return (
     <Layout>
       <main>
@@ -41,16 +49,21 @@ const Home = memo(() => {
             />
           </div>
           <div className="mb-4 flex flex-col items-center justify-center gap-2 text-center">
-            <div>Schön, dass du schon hier bist!</div>
-            <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
-            <div>
-              Bis dahin sind es noch:{" "}
-              {countdown
-                ? `${countdown.days} Tage, ${
-                    countdown.hours
-                  } Stunden und ${Math.round(countdown.minutes)} Minuten`
-                : ""}
-            </div>
+            {player && player.name && <div>Hallo {player.name}!</div>}
+            {!calendarHasStarted && (
+              <div className="flex flex-col items-center justify-center gap-2 text-center">
+                <div>Schön, dass du schon hier bist!</div>
+                <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
+                <div>
+                  Bis dahin sind es noch:{" "}
+                  {countdown
+                    ? `${countdown.days} Tage, ${
+                        countdown.hours
+                      } Stunden und ${Math.round(countdown.minutes)} Minuten`
+                    : ""}
+                </div>
+              </div>
+            )}
           </div>
           {player && <Calendar player={player} />}
         </div>

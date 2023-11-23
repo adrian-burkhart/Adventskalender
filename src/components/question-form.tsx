@@ -11,6 +11,7 @@ import {
 } from "@/lib/hooks"
 import giftGif from "../../public/images/gift.gif"
 import solutionImage from "../../public/images/solution.webp"
+import thinkingImage from "../../public/images/thinking.webp"
 import Button from "./button"
 import { find } from "lodash"
 import { dateTimeFromIso } from "@/lib/dateTime"
@@ -77,7 +78,7 @@ const QuestionStep = memo(
           isSubmitted={isSubmitted}
           onComplete={() => handleSubmit()}
         />
-        <div>{question.question}</div>
+        <div className="text-center">{question.question}</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col">
             {question.answer_options.map((option, i) => (
@@ -99,6 +100,7 @@ const QuestionStep = memo(
             </Button>
           </div>
         </form>
+        <Image src={thinkingImage} width={200} alt="" />
       </div>
     )
   },
@@ -145,7 +147,7 @@ const OutroStep = memo(
           <Image src={giftGif} width={400} alt="" />
         ) : (
           <div className="flex flex-col items-center gap-10">
-            <Image src={solutionImage} width={150} alt="" />
+            <Image src={solutionImage} alt="" />
 
             {isCorrect ? (
               <div>

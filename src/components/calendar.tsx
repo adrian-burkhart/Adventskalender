@@ -62,6 +62,7 @@ type DoorVariant = "closed-one" | "closed-two"
 const CalendarDoor = memo(
   ({
     playOpen,
+    playChristmas,
     playLocked,
     variant,
     openDoor,
@@ -71,6 +72,7 @@ const CalendarDoor = memo(
   }: {
     playLocked: () => void
     playOpen: () => void
+    playChristmas: () => void
     openDoor: () => Promise<void>
     doorState: DoorState
     selectedYear: Year
@@ -92,6 +94,10 @@ const CalendarDoor = memo(
         return
       }
       playOpen()
+      if (doorNumber === 24) {
+        playChristmas()
+      }
+
       if (doorState !== "answered") {
         setImageUrl(doorOpen)
       }
@@ -99,8 +105,17 @@ const CalendarDoor = memo(
         openDoor().then(() => {
           window.location.href = route
         })
-      }, 3000)
-    }, [route, openDoor, doorState, variant, playLocked, playOpen])
+      }, 6000)
+    }, [
+      route,
+      openDoor,
+      playChristmas,
+      doorState,
+      doorNumber,
+      variant,
+      playLocked,
+      playOpen,
+    ])
 
     return (
       <Door
@@ -121,6 +136,7 @@ const Calendar = memo(({ player }: { player: Player }) => {
 
   const [playOpen] = useSound("/sounds/opening-door.mp3")
   const [playLocked] = useSound("/sounds/locked-door.mp3")
+  const [playChristmas] = useSound("/sounds/christmas.mp3")
 
   if (loading) {
     return <div>Loading...</div>
@@ -144,10 +160,11 @@ const Calendar = memo(({ player }: { player: Player }) => {
         return (
           <CalendarDoor
             key={i}
-            variant={i % 2 === 0 ? "closed-one" : "closed-two"}
+            variant={(i + 1) % 4 < 2 ? "closed-one" : "closed-two"}
             playOpen={playOpen}
             selectedYear={selectedYear}
             playLocked={playLocked}
+            playChristmas={playChristmas}
             doorNumber={i + 1}
             openDoor={() => openDoor(i + 1)}
             doorState={doorState}
