@@ -29,6 +29,11 @@ const LoginPage = () => {
             Bis dahin kannst kannst du dich aber sehr gerne schon einmal hier
             registrieren.
           </div>
+          <div className="text-red-500">
+            {
+              "Klicke zum Registrieren bitte unten auf 'Du hast keinen Account?'"
+            }
+          </div>
         </div>
         <Auth
           redirectTo="/"
