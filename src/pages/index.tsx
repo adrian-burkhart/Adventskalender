@@ -10,7 +10,7 @@ import { useSelectedYear } from "@/lib/context"
 import { DateTime, Duration } from "luxon"
 
 const Home = memo(() => {
-  const { player } = usePlayer()
+  const { player, loading: isPlayerLoading } = usePlayer()
   const { selectedYear } = useSelectedYear()!
   const [countdown, setCountdown] = useState<Duration | null>(null)
   const calendarStarts = DateTime.fromISO(
@@ -37,6 +37,10 @@ const Home = memo(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYear?.year])
 
+  if (isPlayerLoading) {
+    return <div>Loading...</div>
+  }
+
   return (
     <Layout>
       <main>
@@ -45,6 +49,7 @@ const Home = memo(() => {
             <Image
               alt="Adventskalender der Familie Haas"
               src={title}
+              priority
               className="h-full w-full"
             />
           </div>

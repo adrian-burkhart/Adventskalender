@@ -65,7 +65,6 @@ export const usePlayer = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      console.log("Loading player data")
       setLoading(true)
       const { data, error } = await supabaseClient
         .from("players")
@@ -107,10 +106,6 @@ export const useUpdatePlayerName = () => {
       setError(error)
       return
     }
-
-    if (data) {
-      console.log("Updated")
-    }
   }
 
   return { updatePlayerName, error, loading }
@@ -142,8 +137,7 @@ export const useUpdatePlayerScore = () => {
       // Entry does not exist, add a new one
       updatedScores = [...player.scores, { year: numericYear, score: newScore }]
     }
-    console.log("Updated scores", updatedScores)
-    const { data, error } = await supabaseClient
+    const { error } = await supabaseClient
       .from("players")
       .update({ scores: updatedScores })
       .eq("id", player.id)
@@ -154,10 +148,6 @@ export const useUpdatePlayerScore = () => {
     if (error) {
       setError(error)
       return
-    }
-
-    if (data) {
-      console.log("Updated")
     }
   }
 
@@ -258,21 +248,17 @@ export const useDoors = (player: Player | null, year: Year | null) => {
   const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
   useEffect(() => {
+    setLoading(true)
     const fetchDoorStates = async () => {
       if (player === null || year === null) {
         console.error("Missing player id or year", player, year)
         return
       }
 
-      setLoading(true)
-
-      console.log("Fetching door states")
       const { data, error } = await supabaseClient
         .from("players")
         .select("doors_opened")
         .eq("id", player.id)
-
-      setLoading(false)
 
       if (error) {
         setError(error)
@@ -309,6 +295,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
       setDoorStates(newDoorStates)
     }
 
+    setLoading(false)
     fetchDoorStates()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player, year])
@@ -335,7 +322,6 @@ export const useDoors = (player: Player | null, year: Year | null) => {
 
     setLoading(true)
 
-    console.log("Opening door", doorNumber)
     const { error } = await supabaseClient
       .from("players")
       .update({
@@ -384,7 +370,6 @@ export const useDoors = (player: Player | null, year: Year | null) => {
 
     setLoading(true)
 
-    console.log("Locking door", doorNumber)
     const { error } = await supabaseClient
       .from("players")
       .update({
