@@ -65,11 +65,13 @@ const CalendarDoor = memo(
     playChristmas,
     playLocked,
     variant,
+    playUpsi,
     openDoor,
     doorState,
     doorNumber,
     selectedYear,
   }: {
+    playUpsi: () => void
     playLocked: () => void
     playOpen: () => void
     playChristmas: () => void
@@ -88,9 +90,10 @@ const CalendarDoor = memo(
       if (doorState === "locked") {
         setImageUrl(doorLocked)
         playLocked()
+        playUpsi()
         setTimeout(() => {
           setImageUrl(mapDoorStateToImageUrl(doorState, variant))
-        }, 3000)
+        }, 4000)
         return
       }
       playOpen()
@@ -111,6 +114,7 @@ const CalendarDoor = memo(
       openDoor,
       playChristmas,
       doorState,
+      playUpsi,
       doorNumber,
       variant,
       playLocked,
@@ -137,6 +141,7 @@ const Calendar = memo(({ player }: { player: Player }) => {
   const [playOpen] = useSound("/sounds/opening-door.mp3")
   const [playLocked] = useSound("/sounds/locked-door.mp3")
   const [playChristmas] = useSound("/sounds/christmas.mp3")
+  const [playUpsi] = useSound("/sounds/upsi.mp3")
 
   if (loading) {
     return <div>Loading...</div>
@@ -166,6 +171,7 @@ const Calendar = memo(({ player }: { player: Player }) => {
             playLocked={playLocked}
             playChristmas={playChristmas}
             doorNumber={i + 1}
+            playUpsi={playUpsi}
             openDoor={() => openDoor(i + 1)}
             doorState={doorState}
           />
