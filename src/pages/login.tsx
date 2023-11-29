@@ -48,8 +48,7 @@ const LoginPage = () => {
                 password_input_placeholder: "Dein Passwort",
                 button_label: "Einloggen",
                 loading_button_label: "Wird eingeloggt...",
-                link_text:
-                  "Du hast schon einen Account? Dann kannst du dich hier einloggen.",
+                link_text: "ZUM LOGIN",
               },
               sign_up: {
                 email_label: "Deine E-Mail-Adresse",
@@ -58,8 +57,7 @@ const LoginPage = () => {
                 password_input_placeholder: "Dein Passwort",
                 button_label: "Registrieren",
                 loading_button_label: "Wird registriert...",
-                link_text:
-                  "Du hast keinen Account? Dann kannst du dich hier registrieren.",
+                link_text: "ZUR REGISTRIERUNG",
                 confirmation_text:
                   "Du bekommst eine E-Mail mit einem Bestätigungslink.",
               },
@@ -82,6 +80,7 @@ const LoginPage = () => {
               },
             },
           }}
+          theme="dark"
           appearance={{
             theme: ThemeSupa,
             variables: {
