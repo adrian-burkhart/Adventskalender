@@ -39,11 +39,6 @@ const LoginPage = () => {
               "Melde dich gerne bei uns, wenn du Probleme beim registrieren hast."
             }
           </div>
-          <div>
-            {
-              "Wenn beim registrieren der Fehler 'Email rate limit exceeded' kommt, versuche es in einer Stunde bitte noch einmal."
-            }
-          </div>
         </div>
         <Auth
           redirectTo="/"
