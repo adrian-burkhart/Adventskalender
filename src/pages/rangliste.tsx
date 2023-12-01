@@ -33,18 +33,18 @@ const Rangliste = memo(() => {
             <div className="text-2xl">{selectedYear?.year}</div>
             <div className="flex flex-col items-center justify-center gap-4">
               {players &&
-                reverse(
-                  sortBy(
-                    players,
-                    (p) =>
+                sortBy(players, [
+                  (p) =>
+                    -(
                       p.scores.find((score) =>
                         dateTimeFromIso(score.year).hasSame(
                           dateTimeFromIso(selectedYear.year),
                           "year",
                         ),
-                      )?.score,
-                  ),
-                ).map((player, i) => {
+                      )?.score ?? 0
+                    ),
+                  (p) => p.name.toLowerCase(),
+                ]).map((player, i) => {
                   const playerScore = player.scores.find((score) =>
                     dateTimeFromIso(score.year).hasSame(
                       dateTimeFromIso(selectedYear.year),
