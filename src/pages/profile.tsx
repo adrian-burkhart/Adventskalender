@@ -1,9 +1,9 @@
 import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import { GetServerSidePropsContext } from "next"
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { usePlayer, useUpdatePlayerName } from "@/lib/hooks"
 import Layout from "@/components/layout"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import Button from "@/components/button"
 
 interface User {
@@ -15,7 +15,8 @@ interface User {
 export default function Profile({ user }: { user: User }) {
   const supabaseClient = useSupabaseClient()
   const { player } = usePlayer()
-  const { updatePlayerName } = useUpdatePlayerName()
+  const { updatePlayerName, loading, error, updateSuccess } =
+    useUpdatePlayerName()
   const [newName, setNewName] = useState(player?.name ?? "")
 
   const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
@@ -29,8 +30,15 @@ export default function Profile({ user }: { user: User }) {
 
     updatePlayerName(player, newName)
   }
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewName(e.target.value)
+  }
+
+  const handleLogout = () => {
+    supabaseClient.auth.signOut().then(() => {
+      window.location.reload()
+    })
   }
 
   return (
@@ -40,8 +48,6 @@ export default function Profile({ user }: { user: User }) {
           <div className="mb-6 text-lg">Profil</div>
           {player && (
             <div className="flex flex-col gap-6">
-              <div>Hallo {player.name ?? user.email}</div>
-
               <div className="flex flex-col gap-1">
                 <div>Hier kannst du deinen Namen ändern:</div>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-1">
@@ -53,8 +59,21 @@ export default function Profile({ user }: { user: User }) {
                     className="rounded-md border border-yellow-200 bg-transparent p-2 text-sm text-yellow-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-500"
                     type="text"
                   />
-                  <Button type="submit">Namen ändern</Button>
+                  <Button type="submit">
+                    {loading ? "Loading..." : "Namen ändern"}
+                  </Button>
                 </form>
+                {updateSuccess && !error && (
+                  <div className="text-green-500">
+                    Das hat geklappt! Dein Name wurde geändert!
+                  </div>
+                )}
+                {error && (
+                  <div className="text-red-500">
+                    Das hat leider nicht geklappt. Bitte versuche es später noch
+                    einmal.
+                  </div>
+                )}
               </div>
 
               <div className="mt-4">Historie deiner Punkte:</div>
@@ -68,9 +87,7 @@ export default function Profile({ user }: { user: User }) {
             </div>
           )}
 
-          <Button onClick={() => supabaseClient.auth.signOut()}>
-            Ausloggen
-          </Button>
+          <Button onClick={handleLogout}>Ausloggen</Button>
         </div>
       </main>
     </Layout>

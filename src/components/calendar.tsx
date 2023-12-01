@@ -92,6 +92,9 @@ const CalendarDoor = memo(
     }, [doorState, variant])
 
     const delayedNavigation = useCallback(() => {
+      if (doorState === "answered") {
+        return
+      }
       if (doorState === "locked") {
         setImageUrl(doorLocked)
         playLocked()
@@ -106,9 +109,7 @@ const CalendarDoor = memo(
         playChristmas()
       }
 
-      if (doorState !== "answered") {
-        setImageUrl(doorOpen)
-      }
+      setImageUrl(doorOpen)
       setTimeout(() => {
         openDoor().then(() => {
           window.location.href = route
