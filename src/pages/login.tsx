@@ -20,11 +20,6 @@ const LoginPage = () => {
   if (!user) {
     return (
       <div className="flex flex-col items-center">
-        <div className="mt-12 flex flex-col items-center justify-center gap-2 text-center">
-          <div className="text-red-500">
-            {"Klicke zum Registrieren bitte unten auf 'ZUR REGISTRIERUNG'"}
-          </div>
-        </div>
         <Auth
           redirectTo="/"
           supabaseClient={supabaseClient}
