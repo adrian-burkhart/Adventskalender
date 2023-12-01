@@ -4,6 +4,7 @@ import { usePlayer, useYears } from "@/lib/hooks"
 import { useSelectedYear } from "@/lib/context"
 import { dateTimeFromIso } from "@/lib/dateTime"
 import Head from "next/head"
+import Footer from "./footer"
 
 const Layout = memo(({ children }: { children: ReactNode }) => {
   const { years } = useYears()
@@ -44,6 +45,7 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
       <main className="flex flex-col items-center justify-center pt-16">
         {children}
       </main>
+      <Footer />
     </>
   )
 })

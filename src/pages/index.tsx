@@ -67,6 +67,7 @@ const Home = memo(() => {
                 </div>
               </div>
             )} */}
+            <div>Viel Spaß und Erfolg beim Beantworten der Fragen!</div>
           </div>
           {player && <Calendar player={player} />}
         </div>
