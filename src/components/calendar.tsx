@@ -165,6 +165,8 @@ const Calendar = memo(({ player }: { player: Player }) => {
     return <div>Keine Fragen für dieses Jahr</div>
   }
 
+  console.log(doorStates)
+
   return (
     <div className="grid w-full grid-cols-2 items-center gap-4">
       {doorStates.map((doorState, i) => {

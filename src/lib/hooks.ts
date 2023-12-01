@@ -340,7 +340,9 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     }
 
     const updatedDoorStates = [...doorStates]
-    updatedDoorStates[doorNumber] = "open"
+    console.log("updatedDoorStates", updatedDoorStates)
+    console.log("doorNumber", doorNumber)
+    updatedDoorStates[doorNumber - 1] = "open"
     setDoorStates(updatedDoorStates)
   }
 
