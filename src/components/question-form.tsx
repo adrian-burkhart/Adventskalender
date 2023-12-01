@@ -11,6 +11,7 @@ import {
 } from "@/lib/hooks"
 import giftGif from "../../public/images/gift.gif"
 import solutionImage from "../../public/images/solution.webp"
+import shrugImage from "../../public/images/shrug.webp"
 import thinkingImage from "../../public/images/thinking.webp"
 import Button from "./button"
 import { find } from "lodash"
@@ -147,7 +148,11 @@ const OutroStep = memo(
           <Image src={giftGif} width={400} alt="" />
         ) : (
           <div className="flex flex-col items-center gap-10">
-            <Image src={solutionImage} alt="" />
+            {isCorrect ? (
+              <Image src={solutionImage} alt="" />
+            ) : (
+              <Image src={shrugImage} alt="" />
+            )}
 
             {isCorrect ? (
               <div>
