@@ -21,23 +21,8 @@ const LoginPage = () => {
     return (
       <div className="flex flex-col items-center">
         <div className="mt-12 flex flex-col items-center justify-center gap-2 text-center">
-          <div className="text-xl">Schön, dass du schon hier bist!</div>
-          <div>
-            Die erste Tür wirst du ab dem <b>1. Dezember</b> öffnen können.
-          </div>
-          <div>
-            Bis dahin kannst kannst du dich aber sehr gerne schon einmal hier
-            registrieren.
-          </div>
           <div className="text-red-500">
-            {
-              "Klicke zum Registrieren bitte unten auf 'Du hast keinen Account?'"
-            }
-          </div>
-          <div>
-            {
-              "Melde dich gerne bei uns, wenn du Probleme beim registrieren hast."
-            }
+            {"Klicke zum Registrieren bitte unten auf 'ZUR REGISTRIERUNG'"}
           </div>
         </div>
         <Auth
@@ -98,6 +83,9 @@ const LoginPage = () => {
             },
           }}
         />
+        <div className="mb-6">
+          {"Melde dich gerne bei uns, wenn du Probleme beim registrieren hast."}
+        </div>
         <Image src={welcomeImage} alt="" />
       </div>
     )
