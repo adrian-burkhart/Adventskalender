@@ -251,6 +251,10 @@ const QuestionForm = memo(
       if (e) {
         e.preventDefault()
       }
+      if (isSubmitted) {
+        return
+      }
+
       setIsSubmitted(true)
       lockDoorAfterAnswer(doorNumber).then(() => {
         const answerIsCorrect = selectedOption === question.answer
@@ -263,7 +267,6 @@ const QuestionForm = memo(
             },
           )
         } else {
-          // If no updatePlayerScore call is made, go directly to OUTRO
           setFormStep(QuestionFormStep.OUTRO)
         }
       })
