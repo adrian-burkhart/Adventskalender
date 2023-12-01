@@ -1,4 +1,4 @@
-import { memo, useState, useCallback } from "react"
+import { memo, useState, useCallback, useEffect } from "react"
 import { useSelectedYear } from "@/lib/context"
 import doorClosedOne from "../../public/images/door-closed-1.webp"
 import doorClosedTwo from "../../public/images/door-closed-2.webp"
@@ -82,9 +82,14 @@ const CalendarDoor = memo(
     doorNumber: number
   }) => {
     const route = selectedYear ? `/${selectedYear.year}${doorNumber}` : ""
+
     const [imageUrl, setImageUrl] = useState(
       mapDoorStateToImageUrl(doorState, variant),
     )
+
+    useEffect(() => {
+      setImageUrl(mapDoorStateToImageUrl(doorState, variant))
+    }, [doorState, variant])
 
     const delayedNavigation = useCallback(() => {
       if (doorState === "locked") {
