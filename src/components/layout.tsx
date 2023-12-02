@@ -41,7 +41,7 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
           {years?.map((year) => <option key={year.year}>{year.year}</option>)}
         </select>
       )}
-      {currentScore && <div>Aktuelle Punkte: {currentScore.score}</div>}
+      {currentScore && <div>Deine Punkte: {currentScore.score}</div>}
       <main className="flex flex-col items-center justify-center pt-16">
         {children}
       </main>

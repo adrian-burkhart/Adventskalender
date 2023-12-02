@@ -53,6 +53,11 @@ const Home = memo(() => {
           </div>
           <div className="mb-4 flex flex-col items-center justify-center gap-2 text-center">
             {player && player.name && <div>Hallo {player.name}!</div>}
+            <div>
+              <b>Übrigens</b>: Wenn du es mal nicht geschafft hast, ein Türchen
+              zu öffnen, ist das kein Problem. <br />
+              Du kannst die Türchen auch noch an einem anderen Tag nachholen.
+            </div>
             {/* {!calendarHasStarted && (
               <div className="flex flex-col items-center justify-center gap-2 text-center">
                 <div>Schön, dass du schon hier bist!</div>
@@ -67,7 +72,6 @@ const Home = memo(() => {
                 </div>
               </div>
             )} */}
-            <div>Viel Spaß und Erfolg beim Beantworten der Fragen!</div>
           </div>
           {player && <Calendar player={player} />}
         </div>
