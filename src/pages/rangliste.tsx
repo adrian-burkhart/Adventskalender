@@ -53,6 +53,7 @@ const Rangliste = memo(() => {
           ),
         )?.score ?? 0
       ),
+    (p) => p.doors_opened && -p.doors_opened.length,
     (p) => p.name.toLowerCase(),
   ])
 
