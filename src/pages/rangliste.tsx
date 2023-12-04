@@ -79,7 +79,7 @@ const Rangliste = memo(() => {
 
                 return (
                   <div key={i} className="flex gap-4">
-                    <div className="text-xl">{i + 1}.</div>
+                    <div className="w-6 text-xl">{i + 1}.</div>
                     <div
                       className="flex w-64 flex-col rounded-md bg-black bg-opacity-40 px-2 py-1 shadow-md"
                       key={player.id}
