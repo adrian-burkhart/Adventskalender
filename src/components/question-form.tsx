@@ -5,6 +5,7 @@ import {
   Player,
   Question,
   Year,
+  hasQuestionBeenAnswered,
   useDoors,
   usePlayer,
   useUpdatePlayerScore,
@@ -14,7 +15,6 @@ import solutionImage from "../../public/images/solution.webp"
 import shrugImage from "../../public/images/shrug.webp"
 import thinkingImage from "../../public/images/thinking.webp"
 import Button from "./button"
-import { find } from "lodash"
 import { dateTimeFromIso } from "@/lib/dateTime"
 import Countdown from "./countdown"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
@@ -202,21 +202,11 @@ const QuestionForm = memo(
     const storageKey = `currentFormStep-door-${doorNumber}-year-${selectedYear.year}`
     const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
-    const hasQuestionBeenAnswered = () => {
-      return find(
-        player?.doors_opened,
-        (d) =>
-          selectedYear &&
-          dateTimeFromIso(d.year).hasSame(
-            dateTimeFromIso(selectedYear.year),
-            "year",
-          ) &&
-          d.door_number === doorNumber &&
-          d.isAnswered,
-      )
-    }
-
-    const initialFormStep = hasQuestionBeenAnswered()
+    const initialFormStep = hasQuestionBeenAnswered(
+      player,
+      selectedYear.year,
+      doorNumber,
+    )
       ? QuestionFormStep.ALREADY_ANSWERED
       : (localStorage.getItem(storageKey) as QuestionFormStep) ||
         QuestionFormStep.INTRO
@@ -230,7 +220,7 @@ const QuestionForm = memo(
 
     useEffect(() => {
       if (
-        !hasQuestionBeenAnswered() &&
+        !hasQuestionBeenAnswered(player, selectedYear.year, doorNumber) &&
         formStep !== localStorage.getItem(storageKey) &&
         !enabledTestMode
       ) {
@@ -266,11 +256,14 @@ const QuestionForm = memo(
         setIsCorrect(answerIsCorrect)
 
         if (player?.id && answerIsCorrect) {
-          updatePlayerScore(player, selectedYear.year, question.reward).then(
-            () => {
-              setFormStep(QuestionFormStep.OUTRO)
-            },
-          )
+          updatePlayerScore(
+            player,
+            selectedYear.year,
+            question.reward,
+            doorNumber,
+          ).then(() => {
+            setFormStep(QuestionFormStep.OUTRO)
+          })
         } else {
           setFormStep(QuestionFormStep.OUTRO)
         }

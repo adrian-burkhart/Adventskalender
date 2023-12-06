@@ -5,6 +5,8 @@ import Error from "next/error"
 import { createClient } from "next-sanity"
 import { DateTime } from "luxon"
 import { FeatureFlag, useFeatureFlag } from "./feature-flags"
+import { find } from "lodash"
+import { dateTimeFromIso } from "./dateTime"
 
 interface Score {
   year: string
@@ -114,6 +116,20 @@ export const useUpdatePlayerName = () => {
   return { updatePlayerName, error, loading, updateSuccess }
 }
 
+export const hasQuestionBeenAnswered = (
+  player: Player,
+  year: string,
+  doorNumber: number,
+) => {
+  return !!find(
+    player?.doors_opened,
+    (d) =>
+      dateTimeFromIso(d.year).hasSame(dateTimeFromIso(year), "year") &&
+      d.door_number === doorNumber &&
+      d.isAnswered,
+  )
+}
+
 export const useUpdatePlayerScore = () => {
   const supabaseClient = useSupabaseClient()
   const [error, setError] = useState<PostgrestError | null>(null)
@@ -123,8 +139,16 @@ export const useUpdatePlayerScore = () => {
     player: Player,
     year: string,
     newScore: number,
+    doorNumber: number,
   ) => {
     setLoading(true)
+
+    if (hasQuestionBeenAnswered(player, year, doorNumber)) {
+      console.log("Question has already been answered, not updating score")
+      setLoading(false)
+      return
+    }
+
     const numericYear = Number(year)
 
     const existingEntryIndex = player.scores.findIndex(
