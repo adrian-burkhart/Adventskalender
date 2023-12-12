@@ -5,7 +5,6 @@ import {
   Player,
   Question,
   Year,
-  hasQuestionBeenAnswered,
   useDoors,
   usePlayer,
   useUpdatePlayerScore,
@@ -20,6 +19,7 @@ import Countdown from "./countdown"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import ReadyButton from "./ready-button"
 import Image from "next/image"
+import { find } from "lodash"
 
 const QUESTION_TIME = 30
 
@@ -171,7 +171,7 @@ const OutroStep = memo(
                 <div>Deine Punktzahl ist jetzt: {currentScore.score}</div>
               )}
               <Link className="flex items-center justify-center" href={"./"}>
-                <Button>Zurück zum Kalendar</Button>
+                <Button>Zurück zum Kalender</Button>
               </Link>
               <Link
                 className="flex items-center justify-center"
@@ -186,6 +186,21 @@ const OutroStep = memo(
     )
   },
 )
+
+const hasQuestionBeenAnswered = (
+  player: Player,
+  year: string,
+  doorNumber: number,
+) => {
+  return !!find(
+    player?.doors_opened,
+    (d) =>
+      year &&
+      dateTimeFromIso(d.year).hasSame(dateTimeFromIso(year), "year") &&
+      d.door_number === doorNumber &&
+      d.isAnswered,
+  )
+}
 
 const QuestionForm = memo(
   ({
@@ -250,21 +265,19 @@ const QuestionForm = memo(
         return
       }
 
-      setIsSubmitted(true)
-      lockDoorAfterAnswer(doorNumber).then(() => {
+      lockDoorAfterAnswer(player, selectedYear.year, doorNumber).then(() => {
         const answerIsCorrect = selectedOption === question.answer
         setIsCorrect(answerIsCorrect)
 
         if (player?.id && answerIsCorrect) {
-          updatePlayerScore(
-            player,
-            selectedYear.year,
-            question.reward,
-            doorNumber,
-          ).then(() => {
-            setFormStep(QuestionFormStep.OUTRO)
-          })
+          updatePlayerScore(player, selectedYear.year, question.reward).then(
+            () => {
+              setIsSubmitted(true)
+              setFormStep(QuestionFormStep.OUTRO)
+            },
+          )
         } else {
+          setIsSubmitted(true)
           setFormStep(QuestionFormStep.OUTRO)
         }
       })
@@ -276,7 +289,7 @@ const QuestionForm = memo(
           <div className="flex flex-col items-center justify-center gap-6">
             <div>Du hast diese Frage bereits beantwortet.</div>
             <Link className="flex items-center justify-center" href={"./"}>
-              <Button>Zurück zum Kalendar</Button>
+              <Button>Zurück zum Kalender</Button>
             </Link>
           </div>
         )

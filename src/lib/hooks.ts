@@ -5,8 +5,6 @@ import Error from "next/error"
 import { createClient } from "next-sanity"
 import { DateTime } from "luxon"
 import { FeatureFlag, useFeatureFlag } from "./feature-flags"
-import { find } from "lodash"
-import { dateTimeFromIso } from "./dateTime"
 
 interface Score {
   year: string
@@ -116,20 +114,6 @@ export const useUpdatePlayerName = () => {
   return { updatePlayerName, error, loading, updateSuccess }
 }
 
-export const hasQuestionBeenAnswered = (
-  player: Player,
-  year: string,
-  doorNumber: number,
-) => {
-  return !!find(
-    player?.doors_opened,
-    (d) =>
-      dateTimeFromIso(d.year).hasSame(dateTimeFromIso(year), "year") &&
-      d.door_number === doorNumber &&
-      d.isAnswered,
-  )
-}
-
 export const useUpdatePlayerScore = () => {
   const supabaseClient = useSupabaseClient()
   const [error, setError] = useState<PostgrestError | null>(null)
@@ -139,15 +123,8 @@ export const useUpdatePlayerScore = () => {
     player: Player,
     year: string,
     newScore: number,
-    doorNumber: number,
   ) => {
     setLoading(true)
-
-    if (hasQuestionBeenAnswered(player, year, doorNumber)) {
-      console.log("Question has already been answered, not updating score")
-      setLoading(false)
-      return
-    }
 
     const numericYear = Number(year)
 
@@ -370,17 +347,23 @@ export const useDoors = (player: Player | null, year: Year | null) => {
     setDoorStates(updatedDoorStates)
   }
 
-  const lockDoorAfterAnswer = async (doorNumber: number) => {
+  const lockDoorAfterAnswer = async (
+    player: Player,
+    year: string,
+    doorNumber: number,
+  ) => {
     if (player === null || year === null) {
       console.error("Missing player id or year")
       return
     }
 
-    let updatedDoors = player?.doors_opened || []
+    setLoading(true)
+
+    let updatedDoors = player.doors_opened || []
 
     // Find index of the existing door object with the same year and doorNumber
     const existingDoorIndex = updatedDoors.findIndex(
-      (door) => door.year === year.year && door.door_number === doorNumber,
+      (door) => door.year === year && door.door_number === doorNumber,
     )
 
     if (existingDoorIndex !== -1) {
@@ -393,11 +376,9 @@ export const useDoors = (player: Player | null, year: Year | null) => {
       // Add a new door object if it doesn't exist
       updatedDoors = [
         ...updatedDoors,
-        { year: year.year, door_number: doorNumber, isAnswered: true },
+        { year: year, door_number: doorNumber, isAnswered: true },
       ]
     }
-
-    setLoading(true)
 
     const { error } = await supabaseClient
       .from("players")
