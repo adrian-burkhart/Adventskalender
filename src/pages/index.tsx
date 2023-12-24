@@ -52,21 +52,21 @@ const Home = memo(() => {
             />
           </div>
           <div className="mb-4 flex flex-col items-center justify-center gap-2 text-center">
-            {player && player.name && <div>Hallo {player.name}!</div>}
-            {/* {!calendarHasStarted && (
-              <div className="flex flex-col items-center justify-center gap-2 text-center">
-                <div>Schön, dass du schon hier bist!</div>
-                <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
-                <div>
-                  Bis dahin sind es noch:{" "}
-                  {countdown
-                    ? `${countdown.days} Tage, ${
-                        countdown.hours
-                      } Stunden und ${Math.round(countdown.minutes)} Minuten`
-                    : ""}
-                </div>
+            {player && player.name && (
+              <div>Frohe Weihnachten, {player.name}!</div>
+            )}
+            <div className="flex flex-col items-center justify-center gap-2 text-center">
+              <div>
+                Wir hoffen, du hattest viel Spaß mit diesem Adventskalender. Wir
+                wünschen dir ein schönes Fest.
               </div>
-            )} */}
+              <div>
+                Wir würden uns sehr freuen, wenn du nächstes Jahr wieder dabei
+                bist.
+              </div>
+              <br />
+              <div>Jacky, Marcel und Adrian</div>
+            </div>
           </div>
           {player && <Calendar player={player} />}
         </div>
