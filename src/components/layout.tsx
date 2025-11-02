@@ -9,7 +9,7 @@ import Footer from "./footer"
 const Layout = memo(({ children }: { children: ReactNode }) => {
   const { years } = useYears()
 
-  const { selectedYear, setSelectedYear } = useSelectedYear()!
+  const { selectedYear, setSelectedYear } = useSelectedYear()
   const { player } = usePlayer()
 
   const currentScore = selectedYear

@@ -37,11 +37,20 @@ interface DoorProps {
   delayedNavigation: () => void
   imageUrl: StaticImageData
   doorNumber: number
+  doorState: DoorState
 }
 
-const Door = memo(({ delayedNavigation, imageUrl, doorNumber }: DoorProps) => {
+const Door = memo(({ delayedNavigation, imageUrl, doorNumber, doorState }: DoorProps) => {
+  const isAnswered = doorState === "answered"
+
   return (
-    <div onClick={delayedNavigation} className="relative flex gap-2">
+    <div
+      onClick={delayedNavigation}
+      className={clsx(
+        "relative flex gap-2 transition-transform duration-200",
+        !isAnswered && "cursor-pointer hover:scale-105"
+      )}
+    >
       <div
         className={clsx(
           "absolute inset-0 top-[40%] text-center text-2xl text-red-500 md:top-[40%] md:text-5xl",
@@ -132,13 +141,14 @@ const CalendarDoor = memo(
         delayedNavigation={delayedNavigation}
         doorNumber={doorNumber}
         imageUrl={imageUrl}
+        doorState={doorState}
       />
     )
   },
 )
 
 const Calendar = memo(({ player }: { player: Player }) => {
-  const { selectedYear } = useSelectedYear()!
+  const {selectedYear}  = useSelectedYear()
   const { doorStates, openDoor, loading, error } = useDoors(
     player,
     selectedYear,

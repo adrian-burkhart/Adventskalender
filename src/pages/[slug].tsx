@@ -10,7 +10,7 @@ import { useSelectedYear } from "@/lib/context"
 const Page = memo(() => {
   const router = useRouter()
   const { player, loading: playerLoading, error: playerError } = usePlayer()
-  const { selectedYear } = useSelectedYear()!
+  const  {selectedYear}  = useSelectedYear()
 
   const { years, loading, error } = useYears()
   if (loading || playerLoading) {

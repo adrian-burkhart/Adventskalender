@@ -134,13 +134,12 @@ export const useUpdatePlayerScore = () => {
 
     let updatedScores
     if (existingEntryIndex >= 0) {
-      // Entry exists, update its score
       updatedScores = [...player.scores]
       updatedScores[existingEntryIndex].score += newScore
     } else {
-      // Entry does not exist, add a new one
       updatedScores = [...player.scores, { year: numericYear, score: newScore }]
     }
+    
     const { error } = await supabaseClient
       .from("players")
       .update({ scores: updatedScores })
@@ -242,7 +241,7 @@ export interface Door {
   door_number: number
 }
 
-export const useDoors = (player: Player | null, year: Year | null) => {
+export const useDoors = (player: Player | null, year: Year | null ) => {
   const supabaseClient = useSupabaseClient()
   const [error, setError] = useState<PostgrestError | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
@@ -254,7 +253,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
   useEffect(() => {
     setLoading(true)
     const fetchDoorStates = async () => {
-      if (player === null || year === null) {
+      if (!player  || !year) {
         console.error("Missing player id or year", player, year)
         return
       }
@@ -305,7 +304,7 @@ export const useDoors = (player: Player | null, year: Year | null) => {
   }, [player, year])
 
   const openDoor = async (doorNumber: number) => {
-    if (player === null || year === null) {
+    if (!player || !year) {
       console.error("Missing player id or year")
       return
     }

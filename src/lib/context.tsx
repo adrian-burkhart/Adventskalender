@@ -35,7 +35,11 @@ const YearContext = createContext<{
 } | null>(null)
 
 export const useSelectedYear = () => {
-  return useContext(YearContext)
+  const context = useContext(YearContext)
+  if (!context) {
+    throw new Error("useSelectedYear must be used within a YearProvider")
+  }
+  return context
 }
 
 export const YearProvider = ({ children }: { children: ReactNode }) => {
