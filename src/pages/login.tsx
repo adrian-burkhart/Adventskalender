@@ -21,7 +21,7 @@ const LoginPage = () => {
     return (
       <div className="flex flex-col items-center">
         <Auth
-          redirectTo="/login"
+          redirectTo="/"
           supabaseClient={supabaseClient}
           providers={[]}
           localization={{
