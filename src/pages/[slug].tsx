@@ -1,6 +1,6 @@
 import { useRouter } from "next/router"
 import { GetServerSidePropsContext } from "next"
-import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/utils/supabase/server"
 import Layout from "@/components/layout"
 import { memo } from "react"
 import { usePlayer, useYears } from "@/lib/hooks"
@@ -49,7 +49,7 @@ const Page = memo(() => {
 export default Page
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createPagesServerClient(ctx)
+  const supabase = createClient(ctx)
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -64,7 +64,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   return {
     props: {
-      initialSession: session,
       user: session.user,
     },
   }

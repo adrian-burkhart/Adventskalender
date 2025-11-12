@@ -1,7 +1,7 @@
 import Button from "@/components/button"
 import FeatureFlagItem from "@/components/feature-flag-item"
 import { FeatureFlag, useFeatureFlagMapResetter } from "@/lib/feature-flags"
-import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/utils/supabase/server"
 import { GetServerSidePropsContext } from "next"
 
 export default function Flags() {
@@ -19,7 +19,7 @@ export default function Flags() {
 }
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createPagesServerClient(ctx)
+  const supabase = createClient(ctx)
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -34,7 +34,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   return {
     props: {
-      initialSession: session,
       user: session.user,
     },
   }

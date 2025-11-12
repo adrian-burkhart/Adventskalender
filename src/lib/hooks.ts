@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { PostgrestError } from "@supabase/supabase-js"
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
+import { useUser, useSupabaseClient } from "@/lib/auth-context"
 import Error from "next/error"
 import { createClient } from "next-sanity"
 import { DateTime } from "luxon"

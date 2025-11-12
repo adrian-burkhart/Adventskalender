@@ -1,21 +1,37 @@
 import { Auth } from "@supabase/auth-ui-react"
 import { ThemeSupa } from "@supabase/auth-ui-shared"
-import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react"
-import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
 import { GetServerSidePropsContext } from "next"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import welcomeImage from "../../public/images/welcome.webp"
 import Image from "next/image"
+import { createClient } from "@/utils/supabase/client"
+import { createClient as createServerClient } from "@/utils/supabase/server"
+import { User } from "@supabase/supabase-js"
 
 const LoginPage = () => {
-  const supabaseClient = useSupabaseClient()
-  const user = useUser()
+  const [supabaseClient] = useState(() => createClient())
+  const [user, setUser] = useState<User | null>(null)
 
   useEffect(() => {
-    if (user) {
-      window.location.href = "/"
+    const checkUser = async () => {
+      const { data: { user } } = await supabaseClient.auth.getUser()
+      setUser(user)
+      if (user) {
+        window.location.href = "/"
+      }
     }
-  })
+    checkUser()
+
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        window.location.href = "/"
+      }
+    })
+
+    return () => {
+      authListener.subscription.unsubscribe()
+    }
+  }, [supabaseClient])
 
   if (!user) {
     return (
@@ -90,7 +106,7 @@ const LoginPage = () => {
 export default LoginPage
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createPagesServerClient(ctx)
+  const supabase = createServerClient(ctx)
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -104,8 +120,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     }
 
   return {
-    props: {
-      initialSession: session,
-    },
+    props: {},
   }
 }

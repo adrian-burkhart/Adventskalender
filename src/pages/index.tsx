@@ -1,5 +1,5 @@
 import { GetServerSidePropsContext } from "next"
-import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/utils/supabase/server"
 import Layout from "@/components/layout"
 import Calendar from "@/components/calendar"
 import { memo, useEffect, useState } from "react"
@@ -80,7 +80,7 @@ const Home = memo(() => {
 export default Home
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createPagesServerClient(ctx)
+  const supabase = createClient(ctx)
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -95,7 +95,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   return {
     props: {
-      initialSession: session,
       user: session.user,
     },
   }

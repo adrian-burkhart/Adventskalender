@@ -1,9 +1,9 @@
-import { createPagesServerClient } from "@supabase/auth-helpers-nextjs"
+import { createClient } from "@/utils/supabase/server"
+import { createClient as createBrowserClient } from "@/utils/supabase/client"
 import { GetServerSidePropsContext } from "next"
-import { useSupabaseClient } from "@supabase/auth-helpers-react"
 import { usePlayer, useUpdatePlayerName } from "@/lib/hooks"
 import Layout from "@/components/layout"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import Button from "@/components/button"
 
 interface User {
@@ -13,7 +13,7 @@ interface User {
 }
 
 export default function Profile({ user }: { user: User }) {
-  const supabaseClient = useSupabaseClient()
+  const [supabaseClient] = useState(() => createBrowserClient())
   const { player } = usePlayer()
   const { updatePlayerName, loading, error, updateSuccess } =
     useUpdatePlayerName()
@@ -95,7 +95,7 @@ export default function Profile({ user }: { user: User }) {
 }
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createPagesServerClient(ctx)
+  const supabase = createClient(ctx)
   const {
     data: { session },
   } = await supabase.auth.getSession()
@@ -110,7 +110,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   return {
     props: {
-      initialSession: session,
       user: session.user,
     },
   }
