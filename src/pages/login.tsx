@@ -7,23 +7,52 @@ import Image from "next/image"
 import { createClient } from "@/utils/supabase/client"
 import { createClient as createServerClient } from "@/utils/supabase/server"
 import { User } from "@supabase/supabase-js"
+import { useRouter } from "next/router"
 
 const LoginPage = () => {
   const [supabaseClient] = useState(() => createClient())
   const [user, setUser] = useState<User | null>(null)
+  const [view, setView] = useState<"sign_in" | "sign_up" | "forgotten_password" | "update_password" | "magic_link">("sign_in")
+  const router = useRouter()
 
   useEffect(() => {
+    // Check if there's a recovery token in the URL hash
+    const hashParams = new URLSearchParams(window.location.hash.substring(1))
+    const type = hashParams.get('type')
+    const errorDescription = hashParams.get('error_description')
+
+    // Check for recovery tokens in the URL
+    if (type === 'recovery' || window.location.hash.includes('type=recovery')) {
+      setView('update_password')
+      // Don't check for user or redirect when in recovery mode
+      return
+    }
+
+    // Check for expired token error
+    if (errorDescription?.includes('expired')) {
+      console.log('Recovery token expired, please request a new one')
+      // Stay on login page but show the forgotten password view
+      setView('forgotten_password')
+      return
+    }
+
     const checkUser = async () => {
       const { data: { user } } = await supabaseClient.auth.getUser()
       setUser(user)
-      if (user) {
+      if (user && type !== 'recovery') {
         window.location.href = "/"
       }
     }
     checkUser()
 
-    const { data: authListener } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      // Handle recovery events
+      if (event === 'PASSWORD_RECOVERY') {
+        setView('update_password')
+      } else if (event === 'USER_UPDATED' && session?.user) {
+        // Password successfully updated, redirect to home
+        window.location.href = "/"
+      } else if (event === 'SIGNED_IN' && session?.user) {
         window.location.href = "/"
       }
     })
@@ -37,7 +66,8 @@ const LoginPage = () => {
     return (
       <div className="flex flex-col items-center">
         <Auth
-          redirectTo="/"
+          view={view}
+          redirectTo={typeof window !== 'undefined' ? `${window.location.origin}/login` : '/login'}
           supabaseClient={supabaseClient}
           providers={[]}
           localization={{
