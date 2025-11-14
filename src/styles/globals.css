@@ -7,3 +7,16 @@ body {
   background-color: rgb(5 46 22);
   color: rgb(254 240 138);
 }
+
+.supabase-auth-ui_ui-input {
+  color: #ffffff !important;
+  caret-color: #ffffff;
+}
+
+.supabase-auth-ui_ui-input::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+a[href="#auth-forgot-password"] {
+  display: none !important;
+}
