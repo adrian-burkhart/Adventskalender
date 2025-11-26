@@ -86,7 +86,7 @@ const LoginPage = () => {
           }}
         />
         <div className="mb-6">
-          {"Melde dich gerne bei uns, wenn du Probleme beim registrieren hast."}
+          {"Achtung: Wir mussten alle Accounts von 2023 zurücksetzen. Wenn du schon 2023 mitgespielt hast, erstelle bitte einfach trotzdem einen neuen Account. Du kannst dafür gerne die selbe Email-Adresse benutzen. Melde dich gerne bei uns, wenn du Probleme beim registrieren hast."}
         </div>
         <Image src={welcomeImage} alt="" />
       </div>

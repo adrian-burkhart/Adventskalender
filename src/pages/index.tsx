@@ -11,7 +11,7 @@ import { useSelectedYear } from "@/lib/context"
 
 const Home = memo(() => {
   const { player, loading: isPlayerLoading } = usePlayer()
-  const {selectedYear }= useSelectedYear()
+  const { selectedYear } = useSelectedYear()
   const [countdown, setCountdown] = useState<Duration | null>(null)
   const calendarStarts = DateTime.fromISO(
     `${selectedYear?.year ?? "2025"}-12-01T00:00:00.000Z`,
@@ -54,7 +54,7 @@ const Home = memo(() => {
             />
           </div>
           <div className="mb-4 flex flex-col items-center justify-center gap-2 text-center">
-             {player && player.name && <div>Hallo {player.name}!</div>}
+            {player && player.name && <div>Hallo {player.name}!</div>}
             {!calendarHasStarted && (
               <div className="flex flex-col items-center justify-center gap-2 text-center">
                 <div>Schön, dass du schon hier bist!</div>
@@ -62,13 +62,15 @@ const Home = memo(() => {
                 <div>
                   Bis dahin sind es noch:{" "}
                   {countdown
-                    ? `${countdown.days} Tage, ${
-                        countdown.hours
-                      } Stunden und ${Math.round(countdown.minutes)} Minuten`
+                    ? `${countdown.days} Tage, ${countdown.hours
+                    } Stunden und ${Math.round(countdown.minutes)} Minuten`
                     : ""}
                 </div>
               </div>
-            )} 
+            )}
+            <div className="flex flex-col items-center justify-center gap-2 text-center">
+              <div>{"Wenn du rechts oben auf den Stern klickst, kannst du unter 'profil' deinen Namen für die Rangliste ändern."}</div>
+            </div>
           </div>
           {player && <Calendar player={player} />}
         </div>
