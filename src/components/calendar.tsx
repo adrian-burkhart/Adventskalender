@@ -11,6 +11,7 @@ import useSound from "use-sound"
 import { useDoors, DoorState, Year, Player } from "@/lib/hooks"
 import localFont from "next/font/local"
 import clsx from "clsx"
+import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 
 function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
   if (doorState === "open") {
@@ -100,11 +101,13 @@ const CalendarDoor = memo(
       setImageUrl(mapDoorStateToImageUrl(doorState, variant))
     }, [doorState, variant])
 
+    const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
+
     const delayedNavigation = useCallback(() => {
-      if (doorState === "answered") {
+      if ( !enabledTestMode && doorState === "answered") {
         return
       }
-      if (doorState === "locked") {
+      if ( !enabledTestMode && doorState === "locked") {
         setImageUrl(doorLocked)
         playLocked()
         playUpsi()
@@ -127,7 +130,7 @@ const CalendarDoor = memo(
     }, [
       route,
       openDoor,
-      playChristmas,
+      playChristmas,enabledTestMode,
       doorState,
       playUpsi,
       doorNumber,
@@ -174,8 +177,6 @@ const Calendar = memo(({ player }: { player: Player }) => {
   if (!selectedYear.questions) {
     return <div>Keine Fragen für dieses Jahr</div>
   }
-
-  console.log(doorStates)
 
   return (
     <div className="grid w-full grid-cols-2 items-center gap-4">

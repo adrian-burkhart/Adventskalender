@@ -14,7 +14,7 @@ const Home = memo(() => {
   const {selectedYear }= useSelectedYear()
   const [countdown, setCountdown] = useState<Duration | null>(null)
   const calendarStarts = DateTime.fromISO(
-    `${selectedYear?.year ?? "2023"}-12-01T00:00:00.000Z`,
+    `${selectedYear?.year ?? "2025"}-12-01T00:00:00.000Z`,
   )
 
   const calendarHasStarted = calendarStarts.diffNow().milliseconds < 0
