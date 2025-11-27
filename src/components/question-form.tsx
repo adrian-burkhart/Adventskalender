@@ -128,11 +128,11 @@ const OutroStep = memo(
 
     const currentScore = selectedYear
       ? player?.scores.find((score) =>
-          dateTimeFromIso(score.year).hasSame(
-            dateTimeFromIso(selectedYear.year),
-            "year",
-          ),
-        )
+        dateTimeFromIso(score.year).hasSame(
+          dateTimeFromIso(selectedYear.year),
+          "year",
+        ),
+      )
       : null
 
     return (
@@ -166,6 +166,12 @@ const OutroStep = memo(
                 <div>Die richtige Antwort lautet: {question.answer}</div>
               </div>
             )}
+            {!!question.image && <div>
+              <Image width="0"
+                height="0"
+                sizes="100vw"
+                className="w-auto h-64" src={question.image} alt="" />
+            </div>}
             <div>
               {currentScore && (
                 <div>Deine Punktzahl ist jetzt: {currentScore.score}</div>
@@ -224,7 +230,7 @@ const QuestionForm = memo(
     )
       ? QuestionFormStep.ALREADY_ANSWERED
       : (localStorage.getItem(storageKey) as QuestionFormStep) ||
-        QuestionFormStep.INTRO
+      QuestionFormStep.INTRO
 
     const [formStep, setFormStep] = useState<QuestionFormStep>(
       enabledTestMode ? QuestionFormStep.INTRO : initialFormStep,
