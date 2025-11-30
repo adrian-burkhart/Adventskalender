@@ -179,7 +179,7 @@ const Calendar = memo(({ player }: { player: Player }) => {
   }
 
   return (
-    <div className="flex max-w-7xl justify-center flex-wrap items-center gap-4">
+    <div className="grid grid-cols-2 items-center gap-4">
       {doorStates.map((doorState, i) => {
         return (
           <CalendarDoor

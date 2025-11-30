@@ -16,7 +16,7 @@ export default function Impressum() {
           </p>
 
           <h2 className="font-bold">Kontakt</h2>
-          <p>E-Mail: mail@adrian-burkhart.de</p>
+          <p>E-Mail: mail@adventskalender-haas.de</p>
         </div>
       </main>
     </Layout>

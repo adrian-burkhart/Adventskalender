@@ -1,9 +1,5 @@
 import { memo, useEffect, useRef, useState } from "react"
 import Link from "next/link"
-import tree from "../../public/images/tree.webp"
-import star from "../../public/images/star.webp"
-import Image from "next/image"
-import { GithubLogo } from "phosphor-react"
 
 const Footer = memo(() => {
   const [open, setOpen] = useState(false)

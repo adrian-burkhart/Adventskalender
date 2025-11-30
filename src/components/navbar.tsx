@@ -3,6 +3,7 @@ import Link from "next/link"
 import tree from "../../public/images/tree.webp"
 import star from "../../public/images/star.webp"
 import Image from "next/image"
+import clsx from "clsx"
 
 const Navbar = memo(() => {
   const [open, setOpen] = useState(false)
@@ -33,7 +34,7 @@ const Navbar = memo(() => {
         className="absolute inset-0 left-auto flex h-max w-max flex-col items-center justify-center pt-8"
       >
         <div
-          className="mx-10 flex items-center justify-center"
+          className={clsx("mx-10 flex cursor-pointer items-center justify-center", { "hover:animate-spin": !open })}
           onClick={() => setOpen(!open)}
         >
           <Image src={star} width={32} height={32} alt="menu" />
