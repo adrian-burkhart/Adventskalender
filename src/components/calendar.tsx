@@ -104,10 +104,10 @@ const CalendarDoor = memo(
     const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
     const delayedNavigation = useCallback(() => {
-      if ( !enabledTestMode && doorState === "answered") {
+      if (!enabledTestMode && doorState === "answered") {
         return
       }
-      if ( !enabledTestMode && doorState === "locked") {
+      if (!enabledTestMode && doorState === "locked") {
         setImageUrl(doorLocked)
         playLocked()
         playUpsi()
@@ -130,7 +130,7 @@ const CalendarDoor = memo(
     }, [
       route,
       openDoor,
-      playChristmas,enabledTestMode,
+      playChristmas, enabledTestMode,
       doorState,
       playUpsi,
       doorNumber,
@@ -151,7 +151,7 @@ const CalendarDoor = memo(
 )
 
 const Calendar = memo(({ player }: { player: Player }) => {
-  const {selectedYear}  = useSelectedYear()
+  const { selectedYear } = useSelectedYear()
   const { doorStates, openDoor, loading, error } = useDoors(
     player,
     selectedYear,
@@ -179,7 +179,7 @@ const Calendar = memo(({ player }: { player: Player }) => {
   }
 
   return (
-    <div className="grid w-full grid-cols-2 items-center gap-4">
+    <div className="flex max-w-7xl justify-center flex-wrap items-center gap-4">
       {doorStates.map((doorState, i) => {
         return (
           <CalendarDoor
