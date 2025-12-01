@@ -69,7 +69,7 @@ const Home = memo(() => {
               </div>
             )}
             <div className="flex flex-col items-center justify-center gap-2 text-center">
-              <div>{"Wenn du rechts oben auf den Stern klickst, kannst du unter 'Profil' deinen Namen für die Rangliste ändern."}</div>
+              <div>{"Achtung: Falls du den Kalender hier nicht siehst, versuche es bitte mal im Inkognito-Modus deines Browsers (oder lösche die Browserdaten für diese Seite."}</div>
             </div>
           </div>
           {player && <Calendar player={player} />}

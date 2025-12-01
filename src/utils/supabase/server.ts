@@ -20,12 +20,11 @@ export function createClient(
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) => {
+            // Respect the options provided by Supabase; do not force httpOnly so the
+            // browser client can read the session cookies.
             const cookieString = serialize(name, value, {
               ...options,
-              httpOnly: true,
-              secure: process.env.NODE_ENV === 'production',
-              sameSite: 'lax',
-              path: '/',
+              path: options?.path ?? '/',
             })
 
             const res = context.res as any

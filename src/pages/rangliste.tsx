@@ -13,8 +13,8 @@ import { TreeEvergreen } from "phosphor-react"
 const Rangliste = memo(() => {
   const { players, error: fetchError, loading: fetchLoading } = usePlayers()
 
-  const {selectedYear}= useSelectedYear()
-console.log(players)
+  const { selectedYear } = useSelectedYear()
+
   if (fetchLoading) {
     return <div>Loading...</div>
   }
@@ -77,7 +77,7 @@ console.log(players)
                   (d) => dateTimeFromIso(d.year).hasSame(
                     dateTimeFromIso(selectedYear.year),
                     "year",
-                  )&&d.isAnswered,
+                  ) && d.isAnswered,
                 ).length
 
                 return (
@@ -93,7 +93,7 @@ console.log(players)
                           <div className="text-green-700">
                             Türchen geöffnet: {doorsOpened}
                           </div>
-                          <div>Punkte: {playerScore ??0}</div>
+                          <div>Punkte: {playerScore ?? 0}</div>
                         </div>
                         {playerScore === highestScore && (
                           <div className="flex items-center justify-center px-2">
