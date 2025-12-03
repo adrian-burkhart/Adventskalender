@@ -68,9 +68,6 @@ const Home = memo(() => {
                 </div>
               </div>
             )}
-            <div className="flex flex-col items-center justify-center gap-2 text-center">
-              <div>{"Achtung: Falls du den Kalender hier nicht siehst, versuche es bitte mal im Inkognito-Modus deines Browsers (oder lösche die Browserdaten für diese Seite."}</div>
-            </div>
           </div>
           {player && <Calendar player={player} />}
         </div>
