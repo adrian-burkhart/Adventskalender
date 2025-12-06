@@ -134,8 +134,11 @@ export const useUpdatePlayerScore = () => {
 
     let updatedScores
     if (existingEntryIndex >= 0) {
-      updatedScores = [...player.scores]
-      updatedScores[existingEntryIndex].score += newScore
+      updatedScores = player.scores.map((score, index) =>
+        index === existingEntryIndex
+          ? { ...score, score: score.score + newScore }
+          : score,
+      )
     } else {
       updatedScores = [...player.scores, { year: numericYear, score: newScore }]
     }
@@ -251,10 +254,11 @@ export const useDoors = (player: Player | null, year: Year | null ) => {
   const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
   useEffect(() => {
-    setLoading(true)
     const fetchDoorStates = async () => {
+      setLoading(true)
       if (!player  || !year) {
         console.error("Missing player id or year", player, year)
+        setLoading(false)
         return
       }
 
@@ -265,6 +269,7 @@ export const useDoors = (player: Player | null, year: Year | null ) => {
 
       if (error) {
         setError(error)
+        setLoading(false)
         return
       }
 
@@ -296,9 +301,9 @@ export const useDoors = (player: Player | null, year: Year | null ) => {
       })
 
       setDoorStates(newDoorStates)
+      setLoading(false)
     }
 
-    setLoading(false)
     fetchDoorStates()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [player, year])
@@ -314,7 +319,7 @@ export const useDoors = (player: Player | null, year: Year | null ) => {
       (door) => door.year === year.year && door.door_number === doorNumber,
     )
 
-    if (isAlreadyOpened || doorStates[doorNumber] === "answered") {
+    if (isAlreadyOpened || doorStates[doorNumber - 1] === "answered") {
       return
     }
 
@@ -394,7 +399,7 @@ export const useDoors = (player: Player | null, year: Year | null ) => {
     }
 
     const updatedDoorStates = [...doorStates]
-    updatedDoorStates[doorNumber] = "answered"
+    updatedDoorStates[doorNumber - 1] = "answered"
     setDoorStates(updatedDoorStates)
   }
 

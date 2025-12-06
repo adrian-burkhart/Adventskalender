@@ -271,6 +271,8 @@ const QuestionForm = memo(
         return
       }
 
+      setIsSubmitted(true)
+
       lockDoorAfterAnswer(player, selectedYear.year, doorNumber).then(() => {
         const answerIsCorrect = selectedOption === question.answer
         setIsCorrect(answerIsCorrect)
@@ -278,12 +280,10 @@ const QuestionForm = memo(
         if (player?.id && answerIsCorrect) {
           updatePlayerScore(player, selectedYear.year, question.reward).then(
             () => {
-              setIsSubmitted(true)
               setFormStep(QuestionFormStep.OUTRO)
             },
           )
         } else {
-          setIsSubmitted(true)
           setFormStep(QuestionFormStep.OUTRO)
         }
       })
