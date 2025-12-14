@@ -81,7 +81,7 @@ const QuestionStep = memo(
         />
         <div className="text-center">{question.question}</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-2">
             {question.answer_options.map((option, i) => (
               <div className="flex gap-2" key={i}>
                 <input
