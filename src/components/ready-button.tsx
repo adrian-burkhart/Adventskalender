@@ -1,8 +1,9 @@
+"use client"
+
 import clsx from "clsx"
 import { memo } from "react"
 import readyButton from "../../public/images/ready-button.webp"
 import Image from "next/image"
-// @ts-ignore
 import useSound from "use-sound"
 
 interface ReadyButtonProps {

@@ -1,8 +1,8 @@
+"use client"
+
 import Button from "@/components/button"
 import FeatureFlagItem from "@/components/feature-flag-item"
 import { FeatureFlag, useFeatureFlagMapResetter } from "@/lib/feature-flags"
-import { createClient } from "@/utils/supabase/server"
-import { GetServerSidePropsContext } from "next"
 
 export default function Flags() {
   const resetFeatureFlagMap = useFeatureFlagMapResetter()
@@ -16,25 +16,4 @@ export default function Flags() {
       <Button onClick={resetFeatureFlagMap}>{"Reset flags"}</Button>
     </div>
   )
-}
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createClient(ctx)
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session)
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    }
-
-  return {
-    props: {
-      user: session.user,
-    },
-  }
 }

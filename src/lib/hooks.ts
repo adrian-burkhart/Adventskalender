@@ -1,8 +1,9 @@
+"use client"
+
 import { useEffect, useState } from "react"
 import { PostgrestError } from "@supabase/supabase-js"
 import { useUser, useSupabaseClient } from "@/lib/auth-context"
-import Error from "next/error"
-import { createClient } from "next-sanity"
+import { createClient } from "@sanity/client"
 import { DateTime } from "luxon"
 import { FeatureFlag, useFeatureFlag } from "./feature-flags"
 
@@ -189,50 +190,55 @@ const client = createClient({
   useCdn: false,
 })
 
+const YEARS_QUERY = `
+  *[_type == "year"]{
+    year,
+    "questions": questions[] -> {
+      answer,
+      question,
+      reward,
+      door_number,
+      answer_options,
+      "audiofile_intro": audiofile_intro-> {
+        name,
+        "file": audiofile.asset->url
+      },
+      "audiofile_question": audiofile_question-> {
+        name,
+        "file": audiofile.asset->url
+      },
+      "audiofile_outro": audiofile_outro-> {
+        name,
+        "file": audiofile.asset->url
+      },
+      "image": image.asset->url
+    }
+  }
+`
+
 export const useYears = () => {
   const [years, setYears] = useState<Year[] | null>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  const fetchData = async () => {
-    try {
-      setLoading(true)
-      const years = await client.fetch(`
-        *[_type == "year"]{
-          year,
-          "questions": questions[] -> {
-            answer,
-            question,
-            reward,
-            door_number,
-            answer_options,
-            "audiofile_intro": audiofile_intro-> {
-              name,
-              "file": audiofile.asset->url
-            },
-            "audiofile_question": audiofile_question-> {
-              name,
-              "file": audiofile.asset->url
-            },
-            "audiofile_outro": audiofile_outro-> {
-              name,
-              "file": audiofile.asset->url
-            },
-            "image": image.asset->url
-          }
-        }
-      `)
-
-      setYears(years)
-    } catch (e) {
-      setError(e as Error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   useEffect(() => {
-    fetchData()
+    let cancelled = false
+
+    client
+      .fetch<Year[]>(YEARS_QUERY)
+      .then((years) => {
+        if (!cancelled) setYears(years)
+      })
+      .catch((e: Error) => {
+        if (!cancelled) setError(e)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   return { years, loading, error }
@@ -345,8 +351,6 @@ export const useDoors = (player: Player | null, year: Year | null ) => {
     }
 
     const updatedDoorStates = [...doorStates]
-    console.log("updatedDoorStates", updatedDoorStates)
-    console.log("doorNumber", doorNumber)
     updatedDoorStates[doorNumber - 1] = "open"
     setDoorStates(updatedDoorStates)
   }

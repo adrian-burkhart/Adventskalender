@@ -1,7 +1,7 @@
-// @ts-ignore
+"use client"
+
 import { memo, useRef, useState } from "react"
-import { ArrowCounterClockwise } from "phosphor-react"
-import ReactAudioPlayer from "react-audio-player"
+import { ArrowCounterClockwise } from "@phosphor-icons/react"
 import pauseButton from "../../public/images/pause-button.webp"
 import playButton from "../../public/images/play-button.webp"
 import Image from "next/image"
@@ -72,20 +72,20 @@ const AudioPlayer = memo(
     url: string
     hideButton?: boolean
   }) => {
-    const audioPlayerRef = useRef<ReactAudioPlayer>(null)
+    const audioRef = useRef<HTMLAudioElement>(null)
     const [isPlaying, setIsPlaying] = useState(autoPlay)
     const [hasAlreadyPlayed, setHasAlreadyPlayed] = useState(false)
 
     const playAudio = () => {
-      if (audioPlayerRef.current) {
-        audioPlayerRef.current.audioEl.current?.play()
+      if (audioRef.current) {
+        audioRef.current.play()
         setIsPlaying(true)
       }
     }
 
     const pauseAudio = () => {
-      if (audioPlayerRef.current) {
-        audioPlayerRef.current.audioEl.current?.pause()
+      if (audioRef.current) {
+        audioRef.current.pause()
         setIsPlaying(false)
       }
     }
@@ -101,11 +101,11 @@ const AudioPlayer = memo(
     return (
       <div className="flex items-center justify-center">
         {label && <div>{label}</div>}
-        <ReactAudioPlayer
+        <audio
           autoPlay={autoPlay}
           onEnded={handleEnded}
           src={url}
-          ref={audioPlayerRef}
+          ref={audioRef}
         />
         {!hideButton && (
           <PlayPauseButton

@@ -1,9 +1,10 @@
+"use client"
+
 import { ReactNode, memo } from "react"
 import Navbar from "./navbar"
 import { usePlayer, useYears } from "@/lib/hooks"
 import { useSelectedYear } from "@/lib/context"
 import { dateTimeFromIso } from "@/lib/dateTime"
-import Head from "next/head"
 import Footer from "./footer"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 
@@ -30,9 +31,6 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
 
   return (
     <>
-      <Head>
-        <title>Adventskalender der Familie Haas</title>
-      </Head>
       <Navbar />
       {enabledTestMode && years && (
         <select

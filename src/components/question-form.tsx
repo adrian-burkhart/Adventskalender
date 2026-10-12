@@ -1,3 +1,5 @@
+"use client"
+
 import { Dispatch, SetStateAction, memo, useEffect, useState } from "react"
 import Link from "next/link"
 import AudioPlayer from "./audio-player"
@@ -121,9 +123,10 @@ const OutroStep = memo(
     const [hasGiftOpened, setHasGiftOpened] = useState<boolean>(false)
 
     useEffect(() => {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         setHasGiftOpened(true)
       }, 7000)
+      return () => clearTimeout(timer)
     }, [isCorrect])
 
     const currentScore = selectedYear
@@ -176,12 +179,12 @@ const OutroStep = memo(
               {currentScore && (
                 <div>Deine Punktzahl ist jetzt: {currentScore.score}</div>
               )}
-              <Link className="flex items-center justify-center" href={"./"}>
+              <Link className="flex items-center justify-center" href="/">
                 <Button>Zurück zum Kalender</Button>
               </Link>
               <Link
                 className="flex items-center justify-center"
-                href={"./rangliste"}
+                href="/rangliste"
               >
                 <Button>Zur Rangliste</Button>
               </Link>
@@ -294,7 +297,7 @@ const QuestionForm = memo(
         return (
           <div className="flex flex-col items-center justify-center gap-6">
             <div>Du hast diese Frage bereits beantwortet.</div>
-            <Link className="flex items-center justify-center" href={"./"}>
+            <Link className="flex items-center justify-center" href="/">
               <Button>Zurück zum Kalender</Button>
             </Link>
           </div>

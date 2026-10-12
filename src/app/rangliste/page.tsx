@@ -1,14 +1,15 @@
+"use client"
+
 import { usePlayers } from "@/lib/hooks"
-import { GetServerSidePropsContext } from "next"
-import { createClient } from "@/utils/supabase/server"
 import Layout from "@/components/layout"
 import { useSelectedYear } from "@/lib/context"
-import ranglisteImage from "../../public/images/rangliste.webp"
+import ranglisteImage from "../../../public/images/rangliste.webp"
 import { memo } from "react"
 import { dateTimeFromIso } from "@/lib/dateTime"
 import { filter, maxBy, sortBy } from "lodash"
 import Image from "next/image"
-import { TreeEvergreen } from "phosphor-react"
+import { TreeEvergreen } from "@phosphor-icons/react"
+import { ERROR_TEXT, LOADING_TEXT } from "@/lib/texts"
 
 const Rangliste = memo(() => {
   const { players, error: fetchError, loading: fetchLoading } = usePlayers()
@@ -16,11 +17,11 @@ const Rangliste = memo(() => {
   const { selectedYear } = useSelectedYear()
 
   if (fetchLoading) {
-    return <div>Loading...</div>
+    return <div>{LOADING_TEXT}</div>
   }
 
   if (fetchError) {
-    return <div>{`Error: ${fetchError!.message}`}</div>
+    return <div>{ERROR_TEXT}</div>
   }
 
   if (!selectedYear) {
@@ -113,24 +114,3 @@ const Rangliste = memo(() => {
 })
 
 export default Rangliste
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createClient(ctx)
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session)
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    }
-
-  return {
-    props: {
-      user: session.user,
-    },
-  }
-}

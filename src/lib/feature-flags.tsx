@@ -1,3 +1,5 @@
+"use client"
+
 import {
   createContext,
   Dispatch,
@@ -22,15 +24,8 @@ type PartialFeatureFlagMap = Partial<FeatureFlagMap>
 
 const STORAGE_KEY = "FEATURE_FLAG_MAP"
 
-// effectively a constant
-const DEFAULT_FEATURE_FLAG_MAP: FeatureFlagMap = Object.values(
-  FeatureFlag,
-).reduce(
-  (acc, newKey) => ({
-    ...acc,
-  }),
-  {} as FeatureFlagMap,
-)
+// Every flag is off by default.
+const DEFAULT_FEATURE_FLAG_MAP = {} as FeatureFlagMap
 
 function getFeatureFlagMapFromStorage(): PartialFeatureFlagMap {
   return getValueFromStorage({

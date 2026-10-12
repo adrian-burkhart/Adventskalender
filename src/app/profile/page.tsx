@@ -1,18 +1,12 @@
-import { createClient } from "@/utils/supabase/server"
-import { createClient as createBrowserClient } from "@/utils/supabase/client"
-import { GetServerSidePropsContext } from "next"
+"use client"
+
+import { createClient as createBrowserClient } from "@/lib/supabase/client"
 import { usePlayer, useUpdatePlayerName } from "@/lib/hooks"
 import Layout from "@/components/layout"
 import { useState } from "react"
 import Button from "@/components/button"
 
-interface User {
-  id: string
-  email: string
-  phone: string
-}
-
-export default function Profile({ user }: { user: User }) {
+export default function Profile() {
   const [supabaseClient] = useState(() => createBrowserClient())
   const { player } = usePlayer()
   const { updatePlayerName, loading, error, updateSuccess } =
@@ -60,7 +54,7 @@ export default function Profile({ user }: { user: User }) {
                     type="text"
                   />
                   <Button type="submit">
-                    {loading ? "Loading..." : "Namen ändern"}
+                    {loading ? "Wird gespeichert …" : "Namen ändern"}
                   </Button>
                 </form>
                 {updateSuccess && !error && (
@@ -92,25 +86,4 @@ export default function Profile({ user }: { user: User }) {
       </main>
     </Layout>
   )
-}
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createClient(ctx)
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session)
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    }
-
-  return {
-    props: {
-      user: session.user,
-    },
-  }
 }

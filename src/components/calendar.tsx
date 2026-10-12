@@ -1,3 +1,5 @@
+"use client"
+
 import { memo, useState, useCallback, useEffect } from "react"
 import { useSelectedYear } from "@/lib/context"
 import doorClosedOne from "../../public/images/door-closed-1.webp"
@@ -6,12 +8,13 @@ import doorOpen from "../../public/images/door-open.webp"
 import doorAnswered from "../../public/images/door-answered.webp"
 import doorLocked from "../../public/images/door-locked.webp"
 import Image, { StaticImageData } from "next/image"
-// @ts-ignore
 import useSound from "use-sound"
 import { useDoors, DoorState, Year, Player } from "@/lib/hooks"
 import localFont from "next/font/local"
 import clsx from "clsx"
+import { ERROR_TEXT, LOADING_TEXT } from "@/lib/texts"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
+import { doorPath } from "@/lib/routes"
 
 function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
   if (doorState === "open") {
@@ -91,7 +94,7 @@ const CalendarDoor = memo(
     variant: DoorVariant
     doorNumber: number
   }) => {
-    const route = selectedYear ? `/${selectedYear.year}${doorNumber}` : ""
+    const route = selectedYear ? doorPath(selectedYear.year, doorNumber) : ""
 
     const [imageUrl, setImageUrl] = useState(
       mapDoorStateToImageUrl(doorState, variant),
@@ -163,11 +166,11 @@ const Calendar = memo(({ player }: { player: Player }) => {
   const [playUpsi] = useSound("/sounds/upsi.mp3")
 
   if (loading) {
-    return <div>Loading...</div>
+    return <div>{LOADING_TEXT}</div>
   }
 
   if (error) {
-    return <div>{"Error"}</div>
+    return <div>{ERROR_TEXT}</div>
   }
 
   if (!selectedYear) {

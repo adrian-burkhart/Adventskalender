@@ -1,5 +1,5 @@
-import { GetServerSidePropsContext } from "next"
-import { createClient } from "@/utils/supabase/server"
+"use client"
+
 import Layout from "@/components/layout"
 import Calendar from "@/components/calendar"
 import { memo, useEffect, useState } from "react"
@@ -8,6 +8,7 @@ import Image from "next/image"
 import title from "../../public/images/title.webp"
 import { DateTime, Duration } from "luxon"
 import { useSelectedYear } from "@/lib/context"
+import { LOADING_TEXT } from "@/lib/texts"
 
 const Home = memo(() => {
   const { player, loading: isPlayerLoading } = usePlayer()
@@ -38,7 +39,7 @@ const Home = memo(() => {
   }, [selectedYear?.year])
 
   if (isPlayerLoading) {
-    return <div>Loading...</div>
+    return <div>{LOADING_TEXT}</div>
   }
 
   return (
@@ -77,24 +78,3 @@ const Home = memo(() => {
 })
 
 export default Home
-
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const supabase = createClient(ctx)
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
-
-  if (!session)
-    return {
-      redirect: {
-        destination: "/login",
-        permanent: false,
-      },
-    }
-
-  return {
-    props: {
-      user: session.user,
-    },
-  }
-}

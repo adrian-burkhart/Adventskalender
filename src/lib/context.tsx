@@ -1,10 +1,6 @@
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react"
+"use client"
+
+import { ReactNode, createContext, useContext, useState } from "react"
 import { dateNowUtc, dateTimeFromIso } from "./dateTime"
 import { last } from "lodash"
 import { Year, useYears } from "./hooks"
@@ -43,14 +39,9 @@ export const useSelectedYear = () => {
 }
 
 export const YearProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedYear, setSelectedYear] = useState<Year | null>(null)
+  const [chosenYear, setSelectedYear] = useState<Year | null>(null)
   const { years } = useYears()
-
-  useEffect(() => {
-    if (years) {
-      setSelectedYear(getInitialYear(years))
-    }
-  }, [years])
+  const selectedYear = chosenYear ?? (years ? getInitialYear(years) : null)
 
   return (
     <YearContext.Provider value={{ selectedYear, setSelectedYear }}>

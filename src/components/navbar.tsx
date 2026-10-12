@@ -1,3 +1,5 @@
+"use client"
+
 import { memo, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import tree from "../../public/images/tree.webp"
