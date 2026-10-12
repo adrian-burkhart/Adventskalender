@@ -13,6 +13,7 @@ import {
   type DoorState,
   type LegacyDoor,
 } from "@/lib/doors"
+import { calendarNow } from "@/lib/clock"
 import { parseDoorParams } from "@/lib/routes"
 import { getQuestion, listYears, type QuestionContent } from "@/lib/sanity"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -136,7 +137,7 @@ export async function getDoorStates(request: NextRequest, yearParam: string) {
     ])
     if (error) throw error
 
-    const now = new Date()
+    const now = calendarNow()
     const doors: DoorState[] = Array.from({ length: DOOR_COUNT }, (_, i) => {
       const door = i + 1
       const row = rows?.find((r) => r.door === door)
@@ -275,7 +276,7 @@ export function getDoor(request: NextRequest, params: DoorParams) {
 
     const progress = await loadProgress(ctx)
     if (progress.answered) return { status: "answered" }
-    if (!isDoorAnswerable(ctx.year, ctx.door, ctx.now)) {
+    if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
       return { status: "locked" }
     }
 
@@ -302,7 +303,7 @@ export function openDoor(request: NextRequest, params: DoorParams) {
     if (ctx.testMode) {
       return { status: "intro", introAudio: ctx.question.introAudio }
     }
-    if (!isDoorAnswerable(ctx.year, ctx.door, ctx.now)) {
+    if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
       return { status: "locked" }
     }
     const { error } = await createAdminClient().rpc("open_door", {
@@ -322,7 +323,7 @@ export function startQuestion(request: NextRequest, params: DoorParams) {
 
     const progress = await loadProgress(ctx)
     if (progress.answered) return { status: "answered" }
-    if (!isDoorAnswerable(ctx.year, ctx.door, ctx.now)) {
+    if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
       return { status: "locked" }
     }
 
