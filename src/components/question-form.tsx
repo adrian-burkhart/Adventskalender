@@ -1,53 +1,82 @@
 "use client"
 
-import { Dispatch, SetStateAction, memo, useEffect, useState } from "react"
+import { memo, useCallback, useEffect, useRef, useState } from "react"
 import Link from "next/link"
 import AudioPlayer from "./audio-player"
-import {
-  Player,
-  Question,
-  Year,
-  useDoors,
-  usePlayer,
-  useUpdatePlayerScore,
-} from "@/lib/hooks"
 import giftGif from "../../public/images/gift.gif"
 import solutionImage from "../../public/images/solution.webp"
 import shrugImage from "../../public/images/shrug.webp"
 import thinkingImage from "../../public/images/thinking.webp"
 import Button from "./button"
-import { dateTimeFromIso } from "@/lib/dateTime"
 import Countdown from "./countdown"
-import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import ReadyButton from "./ready-button"
 import Image from "next/image"
-import { find } from "lodash"
+import { apiFetch } from "@/lib/api-client"
+import type { DoorResponse } from "@/lib/door-api"
+import { ERROR_TEXT, LOADING_TEXT } from "@/lib/texts"
 
-const QUESTION_TIME = 30
+type Result = Extract<DoorResponse, { status: "result" }>
 
-export enum QuestionFormStep {
-  INTRO = "intro",
-  QUESTION = "question",
-  OUTRO = "outro",
-  ALREADY_ANSWERED = "already_answered",
+type Step =
+  | { kind: "loading" }
+  | { kind: "error" }
+  | { kind: "missing" }
+  | { kind: "locked" }
+  | { kind: "answered" }
+  | { kind: "intro"; introAudio: string | null }
+  | {
+      kind: "question"
+      question: string
+      options: string[]
+      questionAudio: string | null
+      /** Deadline on this device's clock. */
+      deadline: number
+    }
+  | ({ kind: "result" } & Result)
+
+function toStep(response: DoorResponse): Step {
+  switch (response.status) {
+    case "question": {
+      // Use the server's deadline, corrected for this device's clock.
+      const offset = Date.parse(response.now) - Date.now()
+      return {
+        kind: "question",
+        question: response.question,
+        options: response.options,
+        questionAudio: response.questionAudio,
+        deadline: Date.parse(response.deadline) - offset,
+      }
+    }
+    case "intro":
+      return { kind: "intro", introAudio: response.introAudio }
+    case "result":
+      return { ...response, kind: "result" }
+    default:
+      return { kind: response.status }
+  }
 }
 
 const IntroStep = memo(
   ({
-    question,
-    setFormStep,
+    introAudio,
+    onReady,
   }: {
-    question: Question
-    setFormStep: Dispatch<SetStateAction<QuestionFormStep>>
+    introAudio: string | null
+    onReady: () => void
   }) => {
     return (
       <div className="mt-12 flex flex-col items-center justify-between gap-6">
-        {question.audiofile_intro ? (
-          <AudioPlayer url={question.audiofile_intro.file} />
+        {introAudio ? (
+          <AudioPlayer url={introAudio} />
         ) : (
           <div>Ups, hier fehlt noch was.</div>
         )}
-        <ReadyButton onClick={() => setFormStep(QuestionFormStep.QUESTION)} />
+        <div className="max-w-xs text-center text-sm">
+          Sobald du auf „Bereit“ tippst, läuft die Zeit. Bleib dann auf dieser
+          Seite: Wenn du den Tab oder die App wechselst, zählt deine Antwort als
+          falsch.
+        </div>
+        <ReadyButton onClick={onReady} />
       </div>
     )
   },
@@ -55,36 +84,50 @@ const IntroStep = memo(
 
 const QuestionStep = memo(
   ({
-    question,
+    step,
     isSubmitted,
-    handleSubmit,
-    setSelectedOption,
-    selectedOption,
+    onSubmit,
+    onLeave,
   }: {
+    step: Extract<Step, { kind: "question" }>
     isSubmitted: boolean
-    setSelectedOption: Dispatch<SetStateAction<string | null>>
-    handleSubmit: (e?: React.FormEvent<HTMLFormElement>) => void
-    question: Question
-    selectedOption: string | null
+    onSubmit: (option: string | null) => void
+    onLeave: () => void
   }) => {
+    const [selectedOption, setSelectedOption] = useState<string | null>(null)
+
+    // Switching tabs or apps during the question counts as a wrong answer.
+    useEffect(() => {
+      const handleVisibility = () => {
+        if (document.visibilityState === "hidden") onLeave()
+      }
+      document.addEventListener("visibilitychange", handleVisibility)
+      window.addEventListener("pagehide", onLeave)
+      return () => {
+        document.removeEventListener("visibilitychange", handleVisibility)
+        window.removeEventListener("pagehide", onLeave)
+      }
+    }, [onLeave])
+
+    const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
+      e?.preventDefault()
+      onSubmit(selectedOption)
+    }
+
     return (
       <div className="flex flex-col items-center justify-center gap-4">
-        {question.audiofile_question && (
-          <AudioPlayer
-            smallButton
-            autoPlay
-            url={question.audiofile_question?.file}
-          />
+        {step.questionAudio && (
+          <AudioPlayer smallButton autoPlay url={step.questionAudio} />
         )}
         <Countdown
-          time={QUESTION_TIME}
+          deadline={step.deadline}
           isSubmitted={isSubmitted}
-          onComplete={() => handleSubmit()}
+          onComplete={() => onSubmit(selectedOption)}
         />
-        <div className="text-center">{question.question}</div>
+        <div className="text-center">{step.question}</div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            {question.answer_options.map((option, i) => (
+            {step.options.map((option, i) => (
               <div className="flex gap-2" key={i}>
                 <input
                   value={option}
@@ -98,7 +141,7 @@ const QuestionStep = memo(
             ))}
           </div>
           <div>
-            <Button disabled={!selectedOption} type="submit">
+            <Button disabled={!selectedOption || isSubmitted} type="submit">
               Bestätigen
             </Button>
           </div>
@@ -109,220 +152,161 @@ const QuestionStep = memo(
   },
 )
 
-const OutroStep = memo(
-  ({
-    question,
-    selectedYear,
-    isCorrect,
-  }: {
-    selectedYear: Year
-    question: Question
-    isCorrect: boolean
-  }) => {
-    const { player } = usePlayer()
-    const [hasGiftOpened, setHasGiftOpened] = useState<boolean>(false)
+const OutroStep = memo(({ result }: { result: Result }) => {
+  const [hasGiftOpened, setHasGiftOpened] = useState<boolean>(false)
 
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        setHasGiftOpened(true)
-      }, 7000)
-      return () => clearTimeout(timer)
-    }, [isCorrect])
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setHasGiftOpened(true)
+    }, 7000)
+    return () => clearTimeout(timer)
+  }, [])
 
-    const currentScore = selectedYear
-      ? player?.scores.find((score) =>
-        dateTimeFromIso(score.year).hasSame(
-          dateTimeFromIso(selectedYear.year),
-          "year",
-        ),
-      )
-      : null
+  return (
+    <div className="flex flex-col gap-10 text-center">
+      {result.outroAudio && (
+        <AudioPlayer smallButton url={result.outroAudio} autoPlay />
+      )}
+      {!hasGiftOpened ? (
+        <Image src={giftGif} width={400} alt="" />
+      ) : (
+        <div className="flex flex-col items-center gap-10">
+          {result.isCorrect ? (
+            <Image src={solutionImage} alt="" />
+          ) : (
+            <Image src={shrugImage} alt="" />
+          )}
 
-    return (
-      <div className="flex flex-col gap-10 text-center">
-        {question.audiofile_outro && (
-          <AudioPlayer
-            smallButton
-            url={question.audiofile_outro?.file}
-            autoPlay
-          />
-        )}
-        {!hasGiftOpened ? (
-          <Image src={giftGif} width={400} alt="" />
-        ) : (
-          <div className="flex flex-col items-center gap-10">
-            {isCorrect ? (
-              <Image src={solutionImage} alt="" />
-            ) : (
-              <Image src={shrugImage} alt="" />
-            )}
-
-            {isCorrect ? (
-              <div>
-                Das war korrekt! Du bekommst dafür {question.reward} Punkte.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2">
+          {result.isCorrect ? (
+            <div>
+              Das war korrekt! Du bekommst dafür {result.reward} Punkte.
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              {result.leftPage && (
                 <div>
-                  Das war leider falsch! Du bekommst dafür keine Punkte.
+                  Du hast während der Frage die Seite verlassen, deshalb zählt
+                  die Antwort als falsch.
                 </div>
-                <div>Die richtige Antwort lautet: {question.answer}</div>
-              </div>
-            )}
-            {!!question.image && <div>
-              <Image width="0"
+              )}
+              <div>Das war leider falsch! Du bekommst dafür keine Punkte.</div>
+              <div>Die richtige Antwort lautet: {result.correctAnswer}</div>
+            </div>
+          )}
+          {!!result.image && (
+            <div>
+              <Image
+                width="0"
                 height="0"
                 sizes="100vw"
-                className="w-auto h-64" src={question.image} alt="" />
-            </div>}
-            <div>
-              {currentScore && (
-                <div>Deine Punktzahl ist jetzt: {currentScore.score}</div>
-              )}
-              <Link className="flex items-center justify-center" href="/">
-                <Button>Zurück zum Kalender</Button>
-              </Link>
-              <Link
-                className="flex items-center justify-center"
-                href="/rangliste"
-              >
-                <Button>Zur Rangliste</Button>
-              </Link>
+                className="h-64 w-auto"
+                src={result.image}
+                alt=""
+              />
             </div>
+          )}
+          <div>
+            {result.score !== null && (
+              <div>Deine Punktzahl ist jetzt: {result.score}</div>
+            )}
+            <Link className="flex items-center justify-center" href="/">
+              <Button>Zurück zum Kalender</Button>
+            </Link>
+            <Link
+              className="flex items-center justify-center"
+              href="/rangliste"
+            >
+              <Button>Zur Rangliste</Button>
+            </Link>
           </div>
-        )}
-      </div>
-    )
-  },
-)
+        </div>
+      )}
+    </div>
+  )
+})
 
-const hasQuestionBeenAnswered = (
-  player: Player,
-  year: string,
-  doorNumber: number,
-) => {
-  return !!find(
-    player?.doors_opened,
-    (d) =>
-      year &&
-      dateTimeFromIso(d.year).hasSame(dateTimeFromIso(year), "year") &&
-      d.door_number === doorNumber &&
-      d.isAnswered,
+function Message({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-6">
+      <div>{children}</div>
+      <Link className="flex items-center justify-center" href="/">
+        <Button>Zurück zum Kalender</Button>
+      </Link>
+    </div>
   )
 }
 
 const QuestionForm = memo(
-  ({
-    question,
-    player,
-    selectedYear,
-    doorNumber,
-  }: {
-    player: Player
-    doorNumber: number
-    question: Question
-    selectedYear: Year
-  }) => {
-    const storageKey = `currentFormStep-door-${doorNumber}-year-${selectedYear.year}`
-    const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
+  ({ year, doorNumber }: { year: string; doorNumber: number }) => {
+    const base = `/api/doors/${year}/${doorNumber}`
+    const [step, setStep] = useState<Step>({ kind: "loading" })
+    const [isSubmitted, setIsSubmitted] = useState(false)
+    const submitted = useRef(false)
 
-    const initialFormStep = hasQuestionBeenAnswered(
-      player,
-      selectedYear.year,
-      doorNumber,
+    const load = useCallback(
+      (path: string, init?: RequestInit) =>
+        apiFetch<DoorResponse>(path, init)
+          .then((response) => setStep(toStep(response)))
+          .catch((error) => {
+            console.error(error)
+            setStep({ kind: "error" })
+          }),
+      [],
     )
-      ? QuestionFormStep.ALREADY_ANSWERED
-      : (localStorage.getItem(storageKey) as QuestionFormStep) ||
-      QuestionFormStep.INTRO
-
-    const [formStep, setFormStep] = useState<QuestionFormStep>(
-      enabledTestMode ? QuestionFormStep.INTRO : initialFormStep,
-    )
-    const [isCorrect, setIsCorrect] = useState<boolean>(false)
-    const [selectedOption, setSelectedOption] = useState<string | null>(null)
-    const [isSubmitted, setIsSubmitted] = useState<boolean>(false)
 
     useEffect(() => {
-      if (
-        !hasQuestionBeenAnswered(player, selectedYear.year, doorNumber) &&
-        formStep !== localStorage.getItem(storageKey) &&
-        !enabledTestMode
-      ) {
-        localStorage.setItem(storageKey, formStep)
-      }
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [storageKey, formStep, player, selectedYear])
+      load(base)
+    }, [base, load])
 
-    useEffect(() => {
-      const savedFormStep = localStorage.getItem(
-        "currentFormStep",
-      ) as QuestionFormStep | null
-      if (savedFormStep && !enabledTestMode) {
-        setFormStep(savedFormStep)
-      }
-    }, [enabledTestMode])
-
-    const { lockDoorAfterAnswer } = useDoors(player, selectedYear)
-
-    const { updatePlayerScore } = useUpdatePlayerScore()
-
-    const handleSubmit = (e?: React.FormEvent<HTMLFormElement>) => {
-      if (e) {
-        e.preventDefault()
-      }
-      if (isSubmitted) {
-        return
-      }
-
-      setIsSubmitted(true)
-
-      lockDoorAfterAnswer(player, selectedYear.year, doorNumber).then(() => {
-        const answerIsCorrect = selectedOption === question.answer
-        setIsCorrect(answerIsCorrect)
-
-        if (player?.id && answerIsCorrect) {
-          updatePlayerScore(player, selectedYear.year, question.reward).then(
-            () => {
-              setFormStep(QuestionFormStep.OUTRO)
-            },
-          )
-        } else {
-          setFormStep(QuestionFormStep.OUTRO)
-        }
-      })
+    const start = () => {
+      setStep({ kind: "loading" })
+      submitted.current = false
+      setIsSubmitted(false)
+      load(`${base}/start`, { method: "POST" })
     }
 
-    switch (formStep) {
-      case QuestionFormStep.ALREADY_ANSWERED:
-        return (
-          <div className="flex flex-col items-center justify-center gap-6">
-            <div>Du hast diese Frage bereits beantwortet.</div>
-            <Link className="flex items-center justify-center" href="/">
-              <Button>Zurück zum Kalender</Button>
-            </Link>
-          </div>
-        )
-      case QuestionFormStep.QUESTION:
+    const submit = useCallback(
+      (option: string | null, leftPage = false) => {
+        if (submitted.current) return
+        submitted.current = true
+        setIsSubmitted(true)
+        load(`${base}/answer`, {
+          method: "POST",
+          body: JSON.stringify({ option, leftPage }),
+          // Lets the request finish even when the tab is being hidden.
+          keepalive: true,
+        })
+      },
+      [base, load],
+    )
+
+    const leave = useCallback(() => submit(null, true), [submit])
+
+    switch (step.kind) {
+      case "loading":
+        return <div>{LOADING_TEXT}</div>
+      case "error":
+        return <div>{ERROR_TEXT}</div>
+      case "missing":
+        return <div>Frage fehlt noch. Sorry ;(</div>
+      case "locked":
+        return <Message>Diese Tür ist gerade verschlossen.</Message>
+      case "answered":
+        return <Message>Du hast diese Frage bereits beantwortet.</Message>
+      case "question":
         return (
           <QuestionStep
-            setSelectedOption={setSelectedOption}
-            handleSubmit={handleSubmit}
-            question={question}
+            step={step}
             isSubmitted={isSubmitted}
-            selectedOption={selectedOption}
+            onSubmit={submit}
+            onLeave={leave}
           />
         )
-      case QuestionFormStep.OUTRO:
-        return (
-          <OutroStep
-            selectedYear={selectedYear}
-            isCorrect={isCorrect}
-            question={question}
-          />
-        )
-      case QuestionFormStep.INTRO:
+      case "result":
+        return <OutroStep result={step} />
+      case "intro":
       default:
-        return <IntroStep setFormStep={setFormStep} question={question} />
+        return <IntroStep introAudio={step.introAudio} onReady={start} />
     }
   },
 )

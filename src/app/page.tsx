@@ -63,14 +63,15 @@ const Home = memo(() => {
                 <div>
                   Bis dahin sind es noch:{" "}
                   {countdown
-                    ? `${countdown.days} Tage, ${countdown.hours
-                    } Stunden und ${Math.round(countdown.minutes)} Minuten`
+                    ? `${countdown.days} Tage, ${
+                        countdown.hours
+                      } Stunden und ${Math.round(countdown.minutes)} Minuten`
                     : ""}
                 </div>
               </div>
             )}
           </div>
-          {player && <Calendar player={player} />}
+          {player && <Calendar />}
         </div>
       </main>
     </Layout>

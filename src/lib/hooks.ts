@@ -3,9 +3,8 @@
 import { useEffect, useState } from "react"
 import { PostgrestError } from "@supabase/supabase-js"
 import { useUser, useSupabaseClient } from "@/lib/auth-context"
-import { createClient } from "@sanity/client"
-import { DateTime } from "luxon"
-import { FeatureFlag, useFeatureFlag } from "./feature-flags"
+import type { DoorState } from "./doors"
+import { apiFetch } from "./api-client"
 
 interface Score {
   year: string
@@ -115,106 +114,10 @@ export const useUpdatePlayerName = () => {
   return { updatePlayerName, error, loading, updateSuccess }
 }
 
-export const useUpdatePlayerScore = () => {
-  const supabaseClient = useSupabaseClient()
-  const [error, setError] = useState<PostgrestError | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
-
-  const updatePlayerScore = async (
-    player: Player,
-    year: string,
-    newScore: number,
-  ) => {
-    setLoading(true)
-
-    const numericYear = Number(year)
-
-    const existingEntryIndex = player.scores.findIndex(
-      (score) => Number(score.year) === numericYear,
-    )
-
-    let updatedScores
-    if (existingEntryIndex >= 0) {
-      updatedScores = player.scores.map((score, index) =>
-        index === existingEntryIndex
-          ? { ...score, score: score.score + newScore }
-          : score,
-      )
-    } else {
-      updatedScores = [...player.scores, { year: numericYear, score: newScore }]
-    }
-    
-    const { error } = await supabaseClient
-      .from("players")
-      .update({ scores: updatedScores })
-      .eq("id", player.id)
-      .select()
-
-    setLoading(false)
-
-    if (error) {
-      setError(error)
-      return
-    }
-  }
-
-  return { updatePlayerScore, error, loading }
-}
-
-export interface AudioFile {
-  name: string
-  file: string
-}
-
-export interface Question {
-  answer: string
-  door_number: number
-  question: string
-  reward: number
-  answer_options: string[]
-  audiofile_intro?: AudioFile
-  audiofile_question?: AudioFile
-  audiofile_outro?: AudioFile
-  image?: string
-}
-
 export interface Year {
   year: string
-  questions: Question[]
+  questionCount: number
 }
-
-const client = createClient({
-  projectId: "jrlkjoz0",
-  dataset: "production",
-  apiVersion: "2023-10-21",
-  useCdn: false,
-})
-
-const YEARS_QUERY = `
-  *[_type == "year"]{
-    year,
-    "questions": questions[] -> {
-      answer,
-      question,
-      reward,
-      door_number,
-      answer_options,
-      "audiofile_intro": audiofile_intro-> {
-        name,
-        "file": audiofile.asset->url
-      },
-      "audiofile_question": audiofile_question-> {
-        name,
-        "file": audiofile.asset->url
-      },
-      "audiofile_outro": audiofile_outro-> {
-        name,
-        "file": audiofile.asset->url
-      },
-      "image": image.asset->url
-    }
-  }
-`
 
 export const useYears = () => {
   const [years, setYears] = useState<Year[] | null>([])
@@ -224,9 +127,8 @@ export const useYears = () => {
   useEffect(() => {
     let cancelled = false
 
-    client
-      .fetch<Year[]>(YEARS_QUERY)
-      .then((years) => {
+    apiFetch<{ years: Year[] }>("/api/years")
+      .then(({ years }) => {
         if (!cancelled) setYears(years)
       })
       .catch((e: Error) => {
@@ -244,168 +146,41 @@ export const useYears = () => {
   return { years, loading, error }
 }
 
-export type DoorState = "closed" | "open" | "locked" | "answered"
-export interface Door {
-  year: string
-  door_number: number
-}
+export type { DoorState }
 
-export const useDoors = (player: Player | null, year: Year | null ) => {
-  const supabaseClient = useSupabaseClient()
-  const [error, setError] = useState<PostgrestError | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
+export const useDoors = (year: Year | null) => {
+  const [error, setError] = useState<Error | null>(null)
+  const [loading, setLoading] = useState<boolean>(true)
   const [doorStates, setDoorStates] = useState<DoorState[]>(
     Array(24).fill("locked"),
   )
-  const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
   useEffect(() => {
-    const fetchDoorStates = async () => {
-      setLoading(true)
-      if (!player  || !year) {
-        console.error("Missing player id or year", player, year)
-        setLoading(false)
-        return
-      }
+    if (!year) return
+    let cancelled = false
 
-      const { data, error } = await supabaseClient
-        .from("players")
-        .select("doors_opened")
-        .eq("id", player.id)
-
-      if (error) {
-        setError(error)
-        setLoading(false)
-        return
-      }
-
-      const today = DateTime.local().startOf("day")
-      const doorsOpened = data?.[0]?.doors_opened || []
-
-      const newDoorStates = doorStates.map((_, index) => {
-        const doorNumber = index + 1
-        const doorDate = DateTime.fromObject({
-          year: parseInt(year.year),
-          month: 12,
-          day: doorNumber,
-        })
-
-        if (doorDate > today && !enabledTestMode) {
-          return "locked"
-        }
-
-        const matchedDoor = doorsOpened.find(
-          (door: Door) =>
-            door.year === year.year && door.door_number === doorNumber,
-        )
-
-        if (matchedDoor?.isAnswered === true) {
-          return "answered"
-        }
-
-        return matchedDoor ? "open" : "closed"
+    apiFetch<{ doors: DoorState[] }>(`/api/doors/${year.year}`)
+      .then(({ doors }) => {
+        if (!cancelled) setDoorStates(doors)
+      })
+      .catch((e: Error) => {
+        if (!cancelled) setError(e)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
       })
 
-      setDoorStates(newDoorStates)
-      setLoading(false)
+    return () => {
+      cancelled = true
     }
-
-    fetchDoorStates()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [player, year])
+  }, [year])
 
   const openDoor = async (doorNumber: number) => {
-    if (!player || !year) {
-      console.error("Missing player id or year")
-      return
-    }
-
-    const existingDoors = player?.doors_opened || []
-    const isAlreadyOpened = existingDoors.some(
-      (door) => door.year === year.year && door.door_number === doorNumber,
-    )
-
-    if (isAlreadyOpened || doorStates[doorNumber - 1] === "answered") {
-      return
-    }
-
-    const updatedDoors = [
-      ...existingDoors,
-      { year: year.year, door_number: doorNumber },
-    ]
-
-    setLoading(true)
-
-    const { error } = await supabaseClient
-      .from("players")
-      .update({
-        doors_opened: updatedDoors,
-      })
-      .eq("id", player.id)
-
-    setLoading(false)
-
-    if (error) {
-      setError(error)
-      return
-    }
-
-    const updatedDoorStates = [...doorStates]
-    updatedDoorStates[doorNumber - 1] = "open"
-    setDoorStates(updatedDoorStates)
+    if (!year) return
+    await apiFetch(`/api/doors/${year.year}/${doorNumber}/open`, {
+      method: "POST",
+    }).catch((e: Error) => console.error(e))
   }
 
-  const lockDoorAfterAnswer = async (
-    player: Player,
-    year: string,
-    doorNumber: number,
-  ) => {
-    if (player === null || year === null) {
-      console.error("Missing player id or year")
-      return
-    }
-
-    setLoading(true)
-
-    let updatedDoors = player.doors_opened || []
-
-    // Find index of the existing door object with the same year and doorNumber
-    const existingDoorIndex = updatedDoors.findIndex(
-      (door) => door.year === year && door.door_number === doorNumber,
-    )
-
-    if (existingDoorIndex !== -1) {
-      // Update the existing door object
-      updatedDoors[existingDoorIndex] = {
-        ...updatedDoors[existingDoorIndex],
-        isAnswered: true,
-      }
-    } else {
-      // Add a new door object if it doesn't exist
-      updatedDoors = [
-        ...updatedDoors,
-        { year: year, door_number: doorNumber, isAnswered: true },
-      ]
-    }
-
-    const { error } = await supabaseClient
-      .from("players")
-      .update({
-        doors_opened: updatedDoors,
-      })
-      .eq("id", player.id)
-
-    setLoading(false)
-
-    if (error) {
-      setError(error)
-      return
-    }
-
-    const updatedDoorStates = [...doorStates]
-    updatedDoorStates[doorNumber - 1] = "answered"
-    setDoorStates(updatedDoorStates)
-  }
-
-  return { doorStates, openDoor, lockDoorAfterAnswer, error, loading }
+  return { doorStates, openDoor, error, loading }
 }
