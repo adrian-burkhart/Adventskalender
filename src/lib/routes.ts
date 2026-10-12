@@ -1,5 +1,5 @@
 const PUBLIC_PATHS = ["/login", "/impressum", "/datenschutz"]
-const PUBLIC_PREFIXES = ["/auth/", "/api/auth/"]
+const PUBLIC_PREFIXES = ["/auth/"]
 
 /** Pages that work without a login. Everything else needs a session. */
 export function isPublicPath(pathname: string): boolean {

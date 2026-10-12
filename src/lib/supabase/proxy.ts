@@ -10,6 +10,13 @@ import { supabaseAnonKey, supabaseUrl } from "./env"
 export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl
 
+  // E-mail links from the old app landed on /login?code=….
+  if (pathname === "/login" && request.nextUrl.searchParams.has("code")) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/auth/confirm"
+    return NextResponse.redirect(url)
+  }
+
   const legacyTarget = legacyDoorRedirect(pathname)
   if (legacyTarget) {
     const url = request.nextUrl.clone()
@@ -63,13 +70,7 @@ export async function updateSession(request: NextRequest) {
     return redirectTo("/login")
   }
 
-  // E-mail links land on /login?code=…, which the login page exchanges in
-  // the browser, so only redirect a plain /login visit.
-  if (
-    isLoggedIn &&
-    pathname === "/login" &&
-    !request.nextUrl.searchParams.has("code")
-  ) {
+  if (isLoggedIn && pathname === "/login") {
     return redirectTo("/")
   }
 

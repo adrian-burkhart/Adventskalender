@@ -1,0 +1,10 @@
+<h2>Dein Login-Code</h2>
+<p>Hallo!</p>
+<p>Mit diesem Code kannst du dich beim Adventskalender einloggen:</p>
+<p style="font-size: 28px; font-weight: bold; letter-spacing: 4px">{{ .Token }}</p>
+<p>
+  Oder tippe einfach hier:
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email">Einloggen</a>
+</p>
+<p>Der Code und der Link gelten eine Stunde.</p>
+<p>Du hast keinen Code angefordert? Dann kannst du diese E-Mail einfach ignorieren.</p>

@@ -12,7 +12,7 @@ describe("isPublicPath", () => {
     (path) => expect(isPublicPath(path)).toBe(true),
   )
 
-  it.each(["/auth/confirm", "/api/auth/callback"])("%s is public", (path) =>
+  it.each(["/auth/confirm"])("%s is public", (path) =>
     expect(isPublicPath(path)).toBe(true),
   )
 
@@ -22,6 +22,8 @@ describe("isPublicPath", () => {
     "/rangliste",
     "/flags",
     "/2025/12",
+    "/passwort-neu",
+    "/api/auth/callback",
     "/loginx",
     "/authx",
   ])("%s needs a login", (path) => expect(isPublicPath(path)).toBe(false))

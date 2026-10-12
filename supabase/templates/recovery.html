@@ -1,0 +1,10 @@
+<h2>Neues Passwort</h2>
+<p>Hallo!</p>
+<p>Hier kannst du dir ein neues Passwort für den Adventskalender aussuchen:</p>
+<p>
+  <a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery">Neues Passwort setzen</a>
+</p>
+<p>Oder gib auf der Login-Seite diesen Code ein:</p>
+<p style="font-size: 28px; font-weight: bold; letter-spacing: 4px">{{ .Token }}</p>
+<p>Der Link und der Code gelten eine Stunde.</p>
+<p>Du hast kein neues Passwort angefordert? Dann kannst du diese E-Mail einfach ignorieren. Dein bisheriges Passwort bleibt gültig.</p>
