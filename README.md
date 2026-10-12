@@ -23,4 +23,6 @@ npm test
 npm run build
 ```
 
+Database changes live in `supabase/migrations/` and are applied to the staging project first, production only at switch-over.
+
 `src/proxy.ts` is the only auth guard: every page except `/login`, `/impressum`, `/datenschutz` and `/auth/*` needs a session.
