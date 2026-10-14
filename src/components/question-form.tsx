@@ -1,14 +1,12 @@
 "use client"
 
 import { memo, useCallback, useEffect, useRef, useState } from "react"
-import Link from "next/link"
 import AudioPlayer from "./audio-player"
-import giftGif from "../../public/images/gift.gif"
-import solutionImage from "../../public/images/solution.webp"
-import shrugImage from "../../public/images/shrug.webp"
 import thinkingImage from "../../public/images/thinking.webp"
-import Button from "./button"
-import Countdown from "./countdown"
+import Button, { ButtonLink } from "./button"
+import Countdown from "./door/countdown"
+import Present from "./door/present"
+import ResultView from "./door/result"
 import ReadyButton from "./ready-button"
 import Image from "next/image"
 import { apiFetch } from "@/lib/api-client"
@@ -68,17 +66,17 @@ const IntroStep = memo(
     onReady: () => void
   }) => {
     return (
-      <div className="mt-12 flex flex-col items-center justify-between gap-6">
+      <div className="mt-4 flex flex-col items-center justify-between gap-6">
         {introAudio ? (
           <AudioPlayer url={introAudio} />
         ) : (
           <div>Ups, hier fehlt noch was.</div>
         )}
-        <div className="max-w-xs text-center text-sm">
+        <p className="card max-w-sm px-5 py-4 text-center text-base">
           Sobald du auf „Bereit“ tippst, läuft die Zeit. Bleib dann auf dieser
           Seite: Wenn du den Tab oder die App wechselst, zählt deine Antwort als
           falsch.
-        </div>
+        </p>
         <ReadyButton onClick={onReady} />
       </div>
     )
@@ -118,7 +116,7 @@ const QuestionStep = memo(
     }
 
     return (
-      <div className="flex flex-col items-center justify-center gap-4">
+      <div className="flex w-full max-w-xl flex-col items-center justify-center gap-6">
         {step.questionAudio && (
           <AudioPlayer smallButton autoPlay url={step.questionAudio} />
         )}
@@ -127,114 +125,59 @@ const QuestionStep = memo(
           isSubmitted={isSubmitted}
           onComplete={() => onSubmit(selectedOption)}
         />
-        <div className="text-center">{step.question}</div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
+        <h1 className="card w-full px-5 py-5 text-center font-body text-2xl font-semibold not-italic">
+          {step.question}
+        </h1>
+        <form
+          onSubmit={handleSubmit}
+          className="flex w-full flex-col items-center gap-6"
+        >
+          <fieldset className="flex w-full flex-col gap-3">
+            <legend className="sr-only">Antwortmöglichkeiten</legend>
             {step.options.map((option, i) => (
-              <div className="flex gap-2" key={i}>
+              <label
+                key={i}
+                className="flex min-h-[3.5rem] cursor-pointer items-center gap-4 rounded-2xl border-2 border-gold/40 bg-black/30 px-4 py-3 text-lg transition hover:border-gold hover:bg-black/40 has-[:checked]:border-gold has-[:checked]:bg-gold has-[:checked]:text-pine-950 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-gold/60"
+              >
                 <input
                   value={option}
-                  id={`option-${i}`}
                   name="questionOption"
                   type="radio"
+                  disabled={isSubmitted}
                   onChange={() => setSelectedOption(option)}
+                  className="h-6 w-6 shrink-0 accent-berry"
                 />
-                <label htmlFor={`option-${i}`}>{option}</label>
-              </div>
+                <span>{option}</span>
+              </label>
             ))}
-          </div>
-          <div>
-            <Button disabled={!selectedOption || isSubmitted} type="submit">
-              Bestätigen
-            </Button>
-          </div>
+          </fieldset>
+          <Button disabled={!selectedOption || isSubmitted} type="submit">
+            Bestätigen
+          </Button>
         </form>
-        <Image src={thinkingImage} width={200} alt="" />
+        <Image src={thinkingImage} width={160} alt="" />
       </div>
     )
   },
 )
 
-const OutroStep = memo(({ result }: { result: Result }) => {
-  const [hasGiftOpened, setHasGiftOpened] = useState<boolean>(false)
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasGiftOpened(true)
-    }, 7000)
-    return () => clearTimeout(timer)
-  }, [])
-
-  return (
-    <div className="flex flex-col gap-10 text-center">
-      {result.outroAudio && (
-        <AudioPlayer smallButton url={result.outroAudio} autoPlay />
-      )}
-      {!hasGiftOpened ? (
-        <Image src={giftGif} width={400} alt="" />
-      ) : (
-        <div className="flex flex-col items-center gap-10">
-          {result.isCorrect ? (
-            <Image src={solutionImage} alt="" />
-          ) : (
-            <Image src={shrugImage} alt="" />
-          )}
-
-          {result.isCorrect ? (
-            <div>
-              Das war korrekt! Du bekommst dafür {result.reward} Punkte.
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {result.leftPage && (
-                <div>
-                  Du hast während der Frage die Seite verlassen, deshalb zählt
-                  die Antwort als falsch.
-                </div>
-              )}
-              <div>Das war leider falsch! Du bekommst dafür keine Punkte.</div>
-              <div>Die richtige Antwort lautet: {result.correctAnswer}</div>
-            </div>
-          )}
-          {!!result.image && (
-            <div>
-              <Image
-                width="0"
-                height="0"
-                sizes="100vw"
-                className="h-64 w-auto"
-                src={result.image}
-                alt=""
-              />
-            </div>
-          )}
-          <div>
-            {result.score !== null && (
-              <div>Deine Punktzahl ist jetzt: {result.score}</div>
-            )}
-            <Link className="flex items-center justify-center" href="/">
-              <Button>Zurück zum Kalender</Button>
-            </Link>
-            <Link
-              className="flex items-center justify-center"
-              href="/rangliste"
-            >
-              <Button>Zur Rangliste</Button>
-            </Link>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-})
+/** The present waits for a tap, then the result shows. */
+const OutroStep = memo(
+  ({ result, doorNumber }: { result: Result; doorNumber: number }) => {
+    const [isOpen, setIsOpen] = useState(false)
+    return isOpen ? (
+      <ResultView result={result} doorNumber={doorNumber} />
+    ) : (
+      <Present onOpened={() => setIsOpen(true)} />
+    )
+  },
+)
 
 function Message({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div>{children}</div>
-      <Link className="flex items-center justify-center" href="/">
-        <Button>Zurück zum Kalender</Button>
-      </Link>
+    <div className="flex flex-col items-center justify-center gap-6 text-center">
+      <p className="card px-6 py-4 text-lg">{children}</p>
+      <ButtonLink href="/">Zurück zum Kalender</ButtonLink>
     </div>
   )
 }
@@ -333,7 +276,7 @@ const QuestionForm = memo(
           />
         )
       case "result":
-        return <OutroStep result={step} />
+        return <OutroStep result={step} doorNumber={doorNumber} />
       case "intro":
       default:
         return <IntroStep introAudio={step.introAudio} onReady={start} />

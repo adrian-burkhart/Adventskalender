@@ -125,14 +125,19 @@ export interface Year {
 
 export type { DoorState }
 
+/** The current year's doors, rendered on the server with the page. */
+export interface InitialDoors {
+  year: string
+  /** Today's door (1 to 24), or null outside 1 to 24 December. */
+  today: number | null
+  doors: DoorState[]
+}
+
 /**
  * The doors of one year. The server renders the current year's doors with
  * the page (`initial`); another year, or test mode, loads them here.
  */
-export const useDoors = (
-  year: Year | null,
-  initial?: { year: string; doors: DoorState[] },
-) => {
+export const useDoors = (year: Year | null, initial?: InitialDoors) => {
   const testMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
   const key = year ? `${year.year}:${testMode}` : null
   const seeded = !!initial && !testMode && initial.year === year?.year
@@ -140,6 +145,7 @@ export const useDoors = (
   const [state, setState] = useState<{
     key: string
     doors?: DoorState[]
+    today?: number | null
     error?: Error
   } | null>(null)
 
@@ -147,9 +153,11 @@ export const useDoors = (
     if (!key || seeded) return
     let cancelled = false
 
-    apiFetch<{ doors: DoorState[] }>(`/api/doors/${key.split(":")[0]}`)
-      .then(({ doors }) => {
-        if (!cancelled) setState({ key, doors })
+    apiFetch<{ doors: DoorState[]; today: number | null }>(
+      `/api/doors/${key.split(":")[0]}`,
+    )
+      .then(({ doors, today }) => {
+        if (!cancelled) setState({ key, doors, today })
       })
       .catch((error: Error) => {
         if (!cancelled) setState({ key, error })
@@ -162,6 +170,7 @@ export const useDoors = (
 
   const current = state?.key === key ? state : null
   const doorStates = seeded ? initial.doors : (current?.doors ?? null)
+  const today = seeded ? initial.today : (current?.today ?? null)
   const loading = !seeded && !current
   const error = seeded ? null : (current?.error ?? null)
 
@@ -172,5 +181,5 @@ export const useDoors = (
     }).catch((e: Error) => console.error(e))
   }
 
-  return { doorStates, openDoor, error, loading }
+  return { doorStates, today, openDoor, error, loading }
 }

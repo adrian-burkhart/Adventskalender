@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation"
 import Rangliste from "@/components/rangliste"
 import { loadCalendarYears } from "@/lib/door-api"
+import { calendarNow } from "@/lib/clock"
+import { doorsUnlocked } from "@/lib/doors"
 import type { LeaderboardEntry } from "@/lib/hooks"
 import { getSession } from "@/lib/session"
 
@@ -30,6 +32,8 @@ export default async function Page() {
             }
       }
       scoreYears={(scoreYears.data as number[] | null) ?? []}
+      currentYear={currentYear}
+      unlockedNow={doorsUnlocked(Number(currentYear), calendarNow())}
     />
   )
 }

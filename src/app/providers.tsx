@@ -4,6 +4,7 @@ import type { ReactNode } from "react"
 import type { AppData } from "@/lib/app-data"
 import { AuthProvider } from "@/lib/auth-context"
 import { AppDataProvider } from "@/lib/context"
+import { DesignProvider } from "@/lib/design-variants"
 import { FeatureFlagProvider } from "@/lib/feature-flags"
 
 export default function Providers({
@@ -16,7 +17,9 @@ export default function Providers({
   return (
     <AuthProvider initialUser={initial?.user ?? null}>
       <FeatureFlagProvider>
-        <AppDataProvider initial={initial}>{children}</AppDataProvider>
+        <AppDataProvider initial={initial}>
+          <DesignProvider>{children}</DesignProvider>
+        </AppDataProvider>
       </FeatureFlagProvider>
     </AuthProvider>
   )
