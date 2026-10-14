@@ -1,8 +1,10 @@
 import "server-only"
 import type { SupabaseClient, User } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
+import { DateTime } from "luxon"
 import {
   DOOR_COUNT,
+  TIME_ZONE,
   doorState,
   isCorrectAnswer,
   isDoorAnswerable,
@@ -106,7 +108,16 @@ export async function getYears() {
   const { user } = await currentUser()
   if (!user) return UNAUTHORIZED()
   try {
-    return reply({ years: await listYears() })
+    // The calendar always shows the current year, even before its
+    // questions exist in Sanity.
+    const currentYear = String(
+      DateTime.fromJSDate(calendarNow()).setZone(TIME_ZONE).year,
+    )
+    const years = await listYears()
+    if (!years.some((y) => y.year === currentYear)) {
+      years.push({ year: currentYear, questionCount: 0 })
+    }
+    return reply({ years, currentYear })
   } catch (error) {
     console.error("getYears", error)
     return FAILED()
@@ -116,16 +127,12 @@ export async function getYears() {
 export async function getDoorStates(request: NextRequest, yearParam: string) {
   const { supabase, user } = await currentUser()
   if (!user) return UNAUTHORIZED()
-  if (!/^\d{4}$/.test(yearParam))
+  const year = Number(yearParam)
+  if (!/^\d{4}$/.test(yearParam) || year < 2023 || year > 2100) {
     return reply({ error: "Unbekanntes Jahr" }, 404)
+  }
 
   try {
-    const years = await listYears()
-    if (!years.some((y) => y.year === yearParam)) {
-      return reply({ error: "Unbekanntes Jahr" }, 404)
-    }
-
-    const year = Number(yearParam)
     const testMode = isTestMode(request, user)
     const [{ data: rows, error }, legacy] = await Promise.all([
       supabase

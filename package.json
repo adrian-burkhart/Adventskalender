@@ -20,7 +20,6 @@
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.117.3",
     "clsx": "^2.1.1",
-    "lodash": "^4.17.21",
     "luxon": "^3.7.0",
     "next": "^16.4.0",
     "react": "^19.2.0",
@@ -30,7 +29,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@types/lodash": "^4.17.0",
     "@types/luxon": "^3.6.0",
     "@types/node": "^22",
     "@types/react": "^19",

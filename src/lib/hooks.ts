@@ -21,7 +21,8 @@ export interface Player {
 }
 
 export interface LeaderboardEntry {
-  player_id: string
+  /** null for imported players from old seasons without an account. */
+  player_id: string | null
   name: string
   score: number
   doors: number
@@ -61,6 +62,28 @@ export const useLeaderboard = (year: string | null) => {
   }, [user, year, supabaseClient])
 
   return { entries: data, loading, error }
+}
+
+/** Years that have points, for the leaderboard's year switch. */
+export const useScoreYears = () => {
+  const supabaseClient = useSupabaseClient()
+  const user = useUser()
+  const [years, setYears] = useState<number[]>([])
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+
+    supabaseClient.rpc("score_years").then(({ data }) => {
+      if (!cancelled && data) setYears(data as number[])
+    })
+
+    return () => {
+      cancelled = true
+    }
+  }, [user, supabaseClient])
+
+  return years
 }
 
 /** The logged-in player's points per year. */
@@ -156,15 +179,18 @@ export interface Year {
 
 export const useYears = () => {
   const [years, setYears] = useState<Year[] | null>([])
+  const [currentYear, setCurrentYear] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
     let cancelled = false
 
-    apiFetch<{ years: Year[] }>("/api/years")
-      .then(({ years }) => {
-        if (!cancelled) setYears(years)
+    apiFetch<{ years: Year[]; currentYear: string }>("/api/years")
+      .then(({ years, currentYear }) => {
+        if (cancelled) return
+        setYears(years)
+        setCurrentYear(currentYear)
       })
       .catch((e: Error) => {
         if (!cancelled) setError(e)
@@ -178,7 +204,7 @@ export const useYears = () => {
     }
   }, [])
 
-  return { years, loading, error }
+  return { years, currentYear, loading, error }
 }
 
 export type { DoorState }

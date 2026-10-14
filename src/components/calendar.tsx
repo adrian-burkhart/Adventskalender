@@ -177,7 +177,12 @@ const Calendar = memo(() => {
     return <div>{ERROR_TEXT}</div>
   }
 
-  if (!selectedYear.questionCount) {
+  // Past years without content (2024) say so; the current year always shows
+  // its doors, which stay locked until December.
+  if (
+    !selectedYear.questionCount &&
+    Number(selectedYear.year) < new Date().getFullYear()
+  ) {
     return <div>Keine Fragen für dieses Jahr</div>
   }
 
