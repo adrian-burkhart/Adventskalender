@@ -10,7 +10,8 @@ const START = { left: 0.71, top: 0.115, width: 0.13 }
 /**
  * The Wichtel with the parachute takes off from the Rangliste picture and
  * drifts slowly over the page on a changing wind, swaying a little. He
- * never blocks a tap: clicks go through him.
+ * flies behind the text and cards (in front of the snow) and never blocks
+ * a tap: clicks go through him.
  */
 export default function DriftingWichtel({
   picture,
@@ -80,7 +81,7 @@ export default function DriftingWichtel({
     <div
       ref={ref}
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 z-10 opacity-0 transition-opacity duration-500"
+      className="pointer-events-none fixed left-0 top-0 -z-[1] opacity-0 transition-opacity duration-500"
       style={{ transformOrigin: "50% 15%" }}
     >
       <Image src={parachuteWichtel} alt="" className="h-auto w-full" />
