@@ -157,9 +157,9 @@ export function SnowmanCountdown({
     <div
       role="timer"
       aria-label={`Noch ${seconds} Sekunden`}
-      className="flex flex-col items-center gap-1"
+      className="flex items-end justify-center gap-3 md:flex-col md:items-center md:gap-1"
     >
-      <div className="relative h-48 w-[19rem] max-w-full">
+      <div className="relative h-32 w-[12.5rem] shrink-0 md:h-48 md:w-[19rem]">
         <svg
           viewBox="0 0 300 190"
           className="absolute inset-0 h-full w-full overflow-visible"
@@ -237,13 +237,16 @@ export function SnowmanCountdown({
             alt=""
             priority
             className={clsx(
-              "wichtel-rock absolute bottom-1 left-0 h-auto w-32",
+              "wichtel-rock absolute -bottom-[7%] left-[5%] h-auto w-[42%]",
               hurry && "wichtel-rock-hurry",
             )}
           />
         )}
       </div>
-      <div aria-hidden className="text-center leading-none">
+      <div
+        aria-hidden
+        className="flex flex-col items-center pb-2 text-center leading-none md:block md:pb-0"
+      >
         <span
           className={clsx(
             "font-door text-5xl tabular-nums transition-colors duration-500",
@@ -252,7 +255,7 @@ export function SnowmanCountdown({
         >
           {seconds}
         </span>
-        <span className="ml-2 text-base text-candle/80">
+        <span className="text-base text-candle/80 md:ml-2">
           {seconds === 1 ? "Sekunde" : "Sekunden"}
         </span>
       </div>

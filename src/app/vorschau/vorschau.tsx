@@ -7,7 +7,13 @@ import {
   type CSSProperties,
   type ReactNode,
 } from "react"
+import NextImage from "next/image"
 import Layout from "@/components/layout"
+import Navbar, { type NavVariant } from "@/components/navbar"
+import DoorNumber, { type DoorNumberVariant } from "@/components/door-number"
+import doorClosed from "../../../public/images/door-closed-2.webp"
+import doorOpen from "../../../public/images/door-open.webp"
+import doorAnswered from "../../../public/images/door-answered.webp"
 import Loading from "@/components/loading"
 import Countdown, { type CountdownVariant } from "@/components/door/countdown"
 import Anticipation, {
@@ -95,9 +101,10 @@ export default function Vorschau() {
         <header className="card mx-auto max-w-2xl px-6 py-5 text-center">
           <h1 className="text-4xl">Design-Vorschau</h1>
           <p className="mt-3 text-lg">
-            Bei Schrift, Countdown und dem Moment vor dem Ergebnis gibt es
-            mehrere Vorschläge. Tippe auf „Verwenden“, dann zeigt die ganze App
-            auf diesem Gerät genau diesen Vorschlag, auch die echten Türchen.
+            Bei Menü, Hausnummern, Karten, Schrift, Countdown und dem Moment vor
+            dem Ergebnis gibt es mehrere Vorschläge. Tippe auf „Verwenden“, dann
+            zeigt die ganze App auf diesem Gerät genau diesen Vorschlag, auch
+            die echten Türchen.
           </p>
           <p className="mt-2 text-base text-candle/80">
             Auf Staging ist heute der 10. Dezember 2025: Die Türchen 1 bis 10
@@ -105,6 +112,9 @@ export default function Vorschau() {
           </p>
           <nav className="mt-4 flex flex-wrap justify-center gap-2 text-base">
             {[
+              ["#menue", "Menü"],
+              ["#hausnummern", "Hausnummern"],
+              ["#karten", "Karten"],
               ["#schrift", "Schrift"],
               ["#geschenk", "Vor dem Ergebnis"],
               ["#countdown", "Countdown"],
@@ -122,6 +132,80 @@ export default function Vorschau() {
             ))}
           </nav>
         </header>
+
+        <Section
+          id="menue"
+          title="Menü"
+          intro="So sieht die Kopfzeile mit dem Menü aus. Bei den Sternen kannst du zum Ausprobieren auf den Stern tippen."
+        >
+          <Tiles part="nav">
+            {(id) => (
+              <div className="flex min-h-[15rem] w-full items-start justify-between gap-2 rounded-xl bg-black/20 p-3">
+                <span className="rounded-full bg-black/40 px-3 py-1 text-sm">
+                  Deine Punkte: 120
+                </span>
+                <div className="flex flex-1 flex-wrap justify-end">
+                  <Navbar variant={id as NavVariant} />
+                </div>
+              </div>
+            )}
+          </Tiles>
+        </Section>
+
+        <Section
+          id="hausnummern"
+          title="Hausnummern"
+          intro="Die Zahl hängt über der Tür wie eine Hausnummer und bleibt dort, während die Tür aufgeht. Gezeigt: geschlossen, offen und beantwortet."
+        >
+          <Tiles part="hausnummer">
+            {(id) => (
+              <div className="grid w-full grid-cols-3 gap-2">
+                {[doorClosed, doorOpen, doorAnswered].map((image, i) => (
+                  <div
+                    key={i}
+                    className="relative overflow-hidden rounded-xl pt-1"
+                  >
+                    <NextImage src={image} alt="" className="h-auto w-full" />
+                    <DoorNumber
+                      number={[7, 12, 3][i]}
+                      variant={id as DoorNumberVariant}
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
+          </Tiles>
+        </Section>
+
+        <Section
+          id="karten"
+          title="Karten"
+          intro="Die Kästen auf allen Seiten, zum Beispiel „Gemeinsam geschafft“ und die Zeilen der Rangliste."
+        >
+          <Tiles part="cards">
+            {(id) => (
+              <div
+                data-cards-preview={id}
+                className="flex w-full flex-col gap-3"
+              >
+                <section className="card px-4 py-4 text-center">
+                  <h2 className="text-2xl">Gemeinsam geschafft</h2>
+                  <p className="mt-2 text-base text-candle/85">
+                    48 von 60 möglichen Türchen sind schon offen.
+                  </p>
+                </section>
+                <div className="card card-glow flex items-center justify-between px-4 py-2">
+                  <span className="font-semibold">Anna (Du)</span>
+                  <span>Punkte: 150</span>
+                </div>
+                <div className="card flex items-center justify-between px-4 py-2">
+                  <span className="font-semibold">Opa Heinz</span>
+                  <span>Punkte: 120</span>
+                </div>
+              </div>
+            )}
+          </Tiles>
+        </Section>
 
         <Section
           id="schrift"

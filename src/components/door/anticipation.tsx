@@ -149,7 +149,7 @@ function WichtelWithPresent() {
       <g className="anticipation-carry">
         <g className="anticipation-steps" filter="url(#paint-carry)">
           <g transform="translate(66 38) scale(1.1)">
-            <DrawnWichtel look={RED_WICHTEL} />
+            <DrawnWichtel look={RED_WICHTEL} lookDown />
             {/* The present in his hands. */}
             {/* The wobble is a CSS transform, so the position sits on
                 a wrapper (CSS would replace it). */}
@@ -352,7 +352,7 @@ function RisingFlakes({ x, y }: { x: number; y: number }) {
           style={
             {
               "--drift": `${(i % 2 ? 1 : -1) * (6 + ((i * 7) % 14))}px`,
-              animationDelay: `${6.1 + i * 0.08}s`,
+              animationDelay: `${6.5 + i * 0.05}s`,
             } as CSSProperties
           }
         />

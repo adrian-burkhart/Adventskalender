@@ -142,6 +142,49 @@
   }
 }
 
+/* Card proposal "weiss" (see /vorschau): a white, softly glowing edge and
+   white text, like the Rangliste title. [data-cards-preview] shows one
+   proposal inside /vorschau, whatever is chosen. */
+html[data-cards="weiss"] .card,
+html [data-cards-preview="weiss"] .card.card {
+  color: #fff;
+  box-shadow:
+    0 0 0 1.5px rgb(255 255 255 / 0.7),
+    0 0 14px 2px rgb(220 235 255 / 0.3),
+    inset 0 0 14px rgb(255 255 255 / 0.1),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+html[data-cards="weiss"] .card-glow,
+html [data-cards-preview="weiss"] .card.card-glow {
+  box-shadow:
+    0 0 0 2px rgb(255 255 255 / 0.9),
+    0 0 22px 4px rgb(220 235 255 / 0.5),
+    inset 0 0 18px rgb(255 255 255 / 0.16),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+html[data-cards="weiss"] .card :is(h1, h2, h3, [class*="text-candle"]),
+html
+  [data-cards-preview="weiss"]
+  .card.card
+  :is(h1, h2, h3, [class*="text-candle"]) {
+  color: #fff;
+  text-shadow: 0 0 8px rgb(200 225 255 / 0.55);
+}
+html [data-cards-preview="gold"] .card.card {
+  color: inherit;
+  box-shadow:
+    0 0 16px 1px rgb(233 196 106 / 0.12),
+    inset 0 0 18px rgb(233 196 106 / 0.08),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+html
+  [data-cards-preview="gold"]
+  .card.card
+  :is(h1, h2, h3, [class*="text-candle"]) {
+  color: theme("colors.candle.DEFAULT");
+  text-shadow: none;
+}
+
 /* --- Snow (proposals on /vorschau) ---------------------------------------- */
 
 .snowfall {
@@ -289,13 +332,13 @@
   animation: steps 0.4s ease-in-out 6 alternate;
 }
 .anticipation-playing .anticipation-box {
-  animation: wobble-grow 3.4s 2.6s ease-in-out both;
+  animation: wobble-grow 3.8s 2.6s ease-in-out both;
 }
 .anticipation-playing .anticipation-lid {
-  animation: lid-pop 0.9s 6s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
+  animation: lid-pop 0.45s 6.45s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
 }
 .anticipation-playing .anticipation-glow {
-  animation: glow-in 0.9s 6s ease-out forwards;
+  animation: glow-in 0.5s 6.45s ease-out forwards;
 }
 .anticipation-playing .anticipation-flake {
   animation-name: flake-up;

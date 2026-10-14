@@ -26,7 +26,7 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
 
   return (
     <>
-      <header className="mx-auto flex w-full max-w-5xl items-start justify-between gap-4 px-2 pt-2">
+      <header className="mx-auto flex w-full max-w-5xl flex-wrap items-start justify-between gap-x-4 gap-y-2 px-2 pt-2">
         <div className="flex flex-col items-start gap-2">
           {currentScore && (
             <div className="card flex items-center gap-2 rounded-full py-1 pl-1.5 pr-4">

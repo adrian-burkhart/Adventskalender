@@ -44,6 +44,57 @@ export const DESIGN_OPTIONS = {
       hint: "Rund und freundlich, wie von Hand gesetzt.",
     },
   ],
+  nav: [
+    {
+      id: "baum",
+      name: "Baum, schlicht",
+      hint: "Wie bisher der Stern mit dem Bäumchen, aber kleinere Einträge ohne Rahmen.",
+    },
+    {
+      id: "leiste",
+      name: "Leiste",
+      hint: "Kein Aufklappen: Kalender, Rangliste und Profil stehen immer sichtbar oben.",
+    },
+    {
+      id: "karte",
+      name: "Stern mit Karte",
+      hint: "Der Stern öffnet eine kleine Karte mit den Einträgen und gemalten Bildchen.",
+    },
+  ],
+  hausnummer: [
+    {
+      id: "bisher",
+      name: "Wie bisher",
+      hint: "Die rote Zahl mitten auf der Tür.",
+    },
+    {
+      id: "emaille",
+      name: "Emailleschild",
+      hint: "Ein blaues Hausnummernschild über der Tür, wie an deutschen Häusern.",
+    },
+    {
+      id: "holz",
+      name: "Holzschild",
+      hint: "Ein kleines Holzschild mit gemalter Zahl, an einer Schnur über der Tür.",
+    },
+    {
+      id: "messing",
+      name: "Messingzahl",
+      hint: "Eine goldene Zahl auf einem dunklen Schild über der Tür.",
+    },
+  ],
+  cards: [
+    {
+      id: "gold",
+      name: "Goldener Schimmer",
+      hint: "Wie jetzt: ein weicher, warmer Rand.",
+    },
+    {
+      id: "weiss",
+      name: "Weiß wie die Rangliste",
+      hint: "Weißer Rand mit leichtem Leuchten und weiße Schrift, wie der Titel der Rangliste.",
+    },
+  ],
   countdown: [
     {
       id: "bild",
@@ -84,6 +135,9 @@ const DEFAULTS: Choices = {
   font: "fraunces",
   present: "wichtel",
   countdown: "bild",
+  nav: "baum",
+  hausnummer: "bisher",
+  cards: "gold",
 }
 
 const STORAGE_KEY = "DESIGN_VARIANTS"
@@ -120,10 +174,12 @@ export function DesignProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  // The heading font is chosen in CSS by this attribute on <html>.
+  // The heading font and the cards are styled in CSS by these attributes
+  // on <html>.
   useEffect(() => {
     document.documentElement.dataset.font = choices.font
-  }, [choices.font])
+    document.documentElement.dataset.cards = choices.cards
+  }, [choices.font, choices.cards])
 
   const value = useMemo(() => ({ choices, choose }), [choices, choose])
   return (

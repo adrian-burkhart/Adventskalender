@@ -109,45 +109,52 @@ const QuestionStep = memo(
     }
 
     return (
-      <div className="flex w-full max-w-xl flex-col items-center justify-center gap-6">
-        {step.questionAudio && (
-          <AudioPlayer smallButton autoPlay url={step.questionAudio} />
-        )}
-        <Countdown
-          deadline={step.deadline}
-          isSubmitted={isSubmitted}
-          onComplete={() => onSubmit(selectedOption)}
-        />
-        <h1 className="card w-full px-5 py-4 text-center font-body text-xl font-semibold not-italic">
-          {step.question}
-        </h1>
-        <form
-          onSubmit={handleSubmit}
-          className="flex w-full flex-col items-center gap-6"
-        >
-          <fieldset className="flex w-full flex-col gap-3">
-            <legend className="sr-only">Antwortmöglichkeiten</legend>
-            {step.options.map((option, i) => (
-              <label
-                key={i}
-                className="flex min-h-[3rem] cursor-pointer items-center gap-3 rounded-2xl border-2 border-gold/40 bg-black/30 px-4 py-2 text-base transition hover:border-gold hover:bg-black/40 has-[:checked]:border-gold has-[:checked]:bg-gold has-[:checked]:text-pine-950 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-gold/60"
-              >
-                <input
-                  value={option}
-                  name="questionOption"
-                  type="radio"
-                  disabled={isSubmitted}
-                  onChange={() => setSelectedOption(option)}
-                  className="h-5 w-5 shrink-0 accent-berry"
-                />
-                <span>{option}</span>
-              </label>
-            ))}
-          </fieldset>
-          <Button disabled={!selectedOption || isSubmitted} type="submit">
-            Bestätigen
-          </Button>
-        </form>
+      // Phones: a small countdown above the question. Wider screens: the
+      // question on the left, the countdown on the right. Either way all
+      // of it fits without scrolling.
+      <div className="grid w-full max-w-4xl items-start gap-4 md:grid-cols-[minmax(0,1fr)_19rem] md:gap-10">
+        <div className="flex flex-col items-center gap-2 md:order-2 md:pt-4">
+          {step.questionAudio && (
+            <AudioPlayer smallButton autoPlay url={step.questionAudio} />
+          )}
+          <Countdown
+            deadline={step.deadline}
+            isSubmitted={isSubmitted}
+            onComplete={() => onSubmit(selectedOption)}
+          />
+        </div>
+        <div className="flex w-full flex-col items-center gap-4 md:order-1">
+          <h1 className="card w-full px-5 py-4 text-center font-body text-xl font-semibold not-italic">
+            {step.question}
+          </h1>
+          <form
+            onSubmit={handleSubmit}
+            className="flex w-full flex-col items-center gap-4"
+          >
+            <fieldset className="flex w-full flex-col gap-2.5">
+              <legend className="sr-only">Antwortmöglichkeiten</legend>
+              {step.options.map((option, i) => (
+                <label
+                  key={i}
+                  className="flex min-h-[3rem] cursor-pointer items-center gap-3 rounded-2xl border-2 border-gold/40 bg-black/30 px-4 py-2 text-base transition hover:border-gold hover:bg-black/40 has-[:checked]:border-gold has-[:checked]:bg-gold has-[:checked]:text-pine-950 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-gold/60"
+                >
+                  <input
+                    value={option}
+                    name="questionOption"
+                    type="radio"
+                    disabled={isSubmitted}
+                    onChange={() => setSelectedOption(option)}
+                    className="h-5 w-5 shrink-0 accent-berry"
+                  />
+                  <span>{option}</span>
+                </label>
+              ))}
+            </fieldset>
+            <Button disabled={!selectedOption || isSubmitted} type="submit">
+              Bestätigen
+            </Button>
+          </form>
+        </div>
       </div>
     )
   },
