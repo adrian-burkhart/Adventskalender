@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 import {
+  doorOfTheDay,
+  doorsUnlocked,
   doorState,
   doorUnlocksAt,
   isCorrectAnswer,
@@ -132,5 +134,28 @@ describe("legacyDoorStatus", () => {
       opened: false,
       answered: false,
     })
+  })
+})
+
+describe("door of the day", () => {
+  it("follows the Berlin date, not UTC", () => {
+    // 23:30 UTC on 4 December is already 5 December in Berlin.
+    expect(doorOfTheDay(2026, at("2026-12-04T23:30:00Z"))).toBe(5)
+    expect(doorOfTheDay(2026, at("2026-12-01T08:00:00+01:00"))).toBe(1)
+    expect(doorOfTheDay(2026, at("2026-12-24T20:00:00+01:00"))).toBe(24)
+  })
+
+  it("has no door of the day outside 1 to 24 December of that year", () => {
+    expect(doorOfTheDay(2026, at("2026-11-30T12:00:00+01:00"))).toBeNull()
+    expect(doorOfTheDay(2026, at("2026-12-25T12:00:00+01:00"))).toBeNull()
+    expect(doorOfTheDay(2025, at("2026-12-05T12:00:00+01:00"))).toBeNull()
+  })
+})
+
+describe("doors unlocked so far", () => {
+  it("counts the doors that have opened", () => {
+    expect(doorsUnlocked(2026, at("2026-11-30T12:00:00+01:00"))).toBe(0)
+    expect(doorsUnlocked(2026, at("2026-12-10T09:00:00+01:00"))).toBe(10)
+    expect(doorsUnlocked(2026, at("2027-01-05T09:00:00+01:00"))).toBe(24)
   })
 })

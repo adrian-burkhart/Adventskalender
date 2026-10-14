@@ -25,6 +25,24 @@ export function seasonEndsAt(year: number): Date {
   ).toJSDate()
 }
 
+/** How many of the year's doors have opened by now (0 to 24). */
+export function doorsUnlocked(year: number, now: Date): number {
+  let count = 0
+  for (let door = 1; door <= DOOR_COUNT; door++) {
+    if (now >= doorUnlocksAt(year, door)) count = door
+  }
+  return count
+}
+
+/** The door of the day (1 to 24) in Berlin, or null outside 1 to 24 December. */
+export function doorOfTheDay(year: number, now: Date): number | null {
+  const day = DateTime.fromJSDate(now).setZone(TIME_ZONE)
+  if (day.year !== year || day.month !== 12 || day.day > DOOR_COUNT) {
+    return null
+  }
+  return day.day
+}
+
 export function isDoorAnswerable(year: number, door: number, now: Date) {
   return now >= doorUnlocksAt(year, door) && now < seasonEndsAt(year)
 }

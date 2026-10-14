@@ -1,9 +1,471 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  padding: 0.5rem;
-  background-color: rgb(5 46 22);
-  color: rgb(254 240 138);
+@theme {
+  --color-pine-700: #14532d;
+  --color-pine-800: #0b3d22;
+  --color-pine-900: #052e16;
+  --color-pine-950: #03170c;
+
+  --color-candle: #fef08a;
+  --color-candle-soft: #fdf6c8;
+
+  --color-gold: #e9c46a;
+  --color-gold-light: #f6dc94;
+  --color-gold-dark: #b8862b;
+
+  --color-berry: #c62f2f;
+  --color-berry-light: #e25555;
+  --color-berry-dark: #8e1d1d;
+
+  --color-paper: #fbf3e2;
+
+  /* Line heights as in Tailwind v3 (fixed rem instead of ratios), so text
+     sits exactly as before with the larger base font size. */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
+  /* Headings: the J from Lora, everything else from Fraunces. */
+  --font-display: var(--font-lora-j), var(--font-fraunces), Georgia, serif;
+  --font-door: var(--font-cochin), Georgia, serif;
+  --font-body: var(--font-lora), Georgia, serif;
+
+  --animate-spin-thrice: spin 1s linear 3;
+  --animate-glow: glow 2.4s ease-in-out infinite;
+  --animate-bob: bob 2.6s ease-in-out infinite;
+  --animate-fade-in: fade-in 0.6s ease-out both;
+  --animate-rise-in: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes glow {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 6px rgb(254 240 138 / 0.45))
+        drop-shadow(0 0 16px rgb(233 196 106 / 0.25));
+    }
+    50% {
+      filter: drop-shadow(0 0 12px rgb(254 240 138 / 0.8))
+        drop-shadow(0 0 30px rgb(233 196 106 / 0.45));
+    }
+  }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0) rotate(-1deg);
+    }
+    50% {
+      transform: translateY(-6px) rotate(1deg);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Tailwind v3 defaults that v4 changed: pointer on buttons, gray
+     placeholders. Kept so the design stays as it was. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+}
+
+@utility card {
+  /* A warm, slightly transparent card, like a window at night. Its edge is
+     a soft glow instead of a sharp line. */
+  @apply rounded-2xl bg-black/35 backdrop-blur-[2px];
+  box-shadow:
+    0 0 16px 1px rgb(233 196 106 / 0.12),
+    inset 0 0 18px rgb(233 196 106 / 0.08),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+
+@utility card-glow {
+  /* A card that stands out (your own row, the chosen proposal). */
+  box-shadow:
+    0 0 22px 4px rgb(233 196 106 / 0.35),
+    inset 0 0 22px rgb(233 196 106 / 0.18),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+
+@utility btn {
+  /* Like the painted play button: a golden bauble with a green rim. */
+  @apply relative inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 py-2 text-center font-body text-lg font-bold transition focus-visible:ring-4 focus-visible:ring-candle/70 focus-visible:outline-hidden active:translate-y-[2px];
+  border: 5px solid #3f7a2a;
+  background: radial-gradient(
+    circle at 32% 28%,
+    #fbd56b 0%,
+    #e39a1c 55%,
+    #b86d0c 100%
+  );
+  color: #8e1d1d;
+  text-shadow: 0 1px 0 rgb(255 230 160 / 0.6);
+  box-shadow:
+    0 0 10px 2px rgb(110 170 60 / 0.55),
+    inset 0 3px 8px rgb(255 245 200 / 0.7),
+    inset 0 -5px 10px rgb(120 60 0 / 0.45);
+  &:hover {
+    background: radial-gradient(
+      circle at 32% 28%,
+      #ffe08a 0%,
+      #eda72a 55%,
+      #c47710 100%
+    );
+  }
+  /* Not ready yet (no answer picked): the same bauble, pale and quiet. */
+  &:disabled {
+    @apply pointer-events-none;
+    opacity: 0.5;
+    filter: saturate(0.55);
+    box-shadow:
+      inset 0 3px 8px rgb(255 245 200 / 0.5),
+      inset 0 -5px 10px rgb(120 60 0 / 0.3);
+  }
+}
+
+@utility btn-quiet {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-transparent px-6 py-2 text-center font-body text-lg text-candle transition hover:bg-gold/10 focus-visible:ring-4 focus-visible:ring-candle/70 focus-visible:outline-hidden;
+  border: 4px solid #3f7a2a;
+  box-shadow: 0 0 8px 1px rgb(110 170 60 / 0.45);
+}
+
+@layer base {
+  html {
+    /* A little larger than the default: many players read without glasses. */
+    font-size: 112.5%;
+  }
+
+  body {
+    min-height: 100vh;
+    padding: 0.5rem;
+    background-color: var(--color-pine-900);
+    color: var(--color-candle);
+    font-family: var(--font-body);
+    line-height: 1.55;
+  }
+
+  /* Candle light in the middle of the room, darker towards the corners. */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        ellipse 70% 55% at 50% 30%,
+        rgb(20 83 45 / 0.85),
+        transparent 70%
+      ),
+      radial-gradient(
+        ellipse 120% 90% at 50% 40%,
+        var(--color-pine-900) 40%,
+        var(--color-pine-950) 100%
+      );
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-variation-settings: "SOFT" 50;
+    color: var(--color-candle);
+    line-height: 1.2;
+  }
+}
+
+/* A white, softly glowing edge and white text, like the Rangliste title.
+   Only for a few things on the Rangliste. */
+.card-white {
+  color: #fff;
+  box-shadow:
+    0 0 0 1.5px rgb(255 255 255 / 0.7),
+    0 0 14px 2px rgb(220 235 255 / 0.3),
+    inset 0 0 14px rgb(255 255 255 / 0.1),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+.card-white :is(h1, h2, h3, [class*="text-candle"]) {
+  color: #fff;
+  text-shadow: 0 0 8px rgb(200 225 255 / 0.55);
+}
+
+/* --- Snow ---------------------------------------- */
+
+.snowfall {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.flake {
+  position: absolute;
+  top: -40px;
+  display: block;
+  animation-name: flake-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+.flake-sway {
+  display: block;
+  width: 100%;
+  height: 100%;
+  animation: flake-sway ease-in-out infinite alternate;
+}
+.flake-spin {
+  animation: flake-spin linear infinite;
+}
+
+@keyframes flake-fall {
+  to {
+    transform: translateY(calc(100vh + 80px));
+  }
+}
+@keyframes flake-sway {
+  from {
+    transform: translateX(calc(var(--sway) * -1));
+  }
+  to {
+    transform: translateX(var(--sway));
+  }
+}
+@keyframes flake-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flake {
+    top: var(--top);
+    animation: none;
+  }
+  .flake-sway,
+  .flake-spin {
+    animation: none;
+  }
+}
+
+/* A locked door wobbles when tapped. */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px) rotate(-1deg);
+  }
+  40%,
+  80% {
+    transform: translateX(6px) rotate(1deg);
+  }
+}
+
+/* --- Countdown ------------------------------------------------------------ */
+
+/* The Wichtel rocks gently while he thinks. */
+.wichtel-rock {
+  transform-origin: 50% 100%;
+  animation: rock 3.2s ease-in-out infinite;
+}
+.wichtel-rock-hurry {
+  animation-duration: 1.6s;
+}
+
+@keyframes rock {
+  0%,
+  100% {
+    transform: rotate(-2deg);
+  }
+  50% {
+    transform: rotate(2deg);
+  }
+}
+
+/* --- Before the result ---------------------------------------------------
+   Runs on its own while the jingle plays (7 s). Everything waits until
+   .anticipation-playing is set, when the outro audio starts. */
+
+.anticipation-carry {
+  opacity: 0;
+}
+.anticipation-glow {
+  opacity: 0;
+}
+.anticipation-flake {
+  opacity: 0;
+}
+.anticipation-box,
+.anticipation-lid {
+  transform-box: fill-box;
+}
+.anticipation-box {
+  transform-origin: 50% 100%;
+}
+.anticipation-lid {
+  transform-origin: 20% 100%;
+}
+.anticipation-playing .anticipation-carry {
+  animation: carry-in 2.4s ease-out both;
+}
+.anticipation-playing .anticipation-steps {
+  animation: steps 0.4s ease-in-out 6 alternate;
+}
+.anticipation-playing .anticipation-box {
+  animation: wobble-grow 3.8s 2.6s ease-in-out both;
+}
+.anticipation-playing .anticipation-lid {
+  animation: lid-pop 0.45s 6.45s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
+}
+.anticipation-playing .anticipation-glow {
+  animation: glow-in 0.5s 6.45s ease-out forwards;
+}
+.anticipation-playing .anticipation-flake {
+  animation-name: flake-up;
+  animation-duration: 1.6s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+@keyframes carry-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-180px);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes steps {
+  to {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+}
+/* Still at first, then the present wiggles more and more. */
+@keyframes wobble-grow {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  15% {
+    transform: rotate(-2deg);
+  }
+  30% {
+    transform: rotate(2deg);
+  }
+  45% {
+    transform: rotate(-4deg);
+  }
+  60% {
+    transform: rotate(4deg) translateY(-2px);
+  }
+  72% {
+    transform: rotate(-6deg) translateY(-3px);
+  }
+  84% {
+    transform: rotate(6deg) translateY(-4px);
+  }
+  94% {
+    transform: rotate(-3deg);
+  }
+}
+@keyframes lid-pop {
+  to {
+    transform: translate(3px, -16px) rotate(-16deg);
+  }
+}
+@keyframes glow-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes flake-up {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0);
+  }
+  20% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--drift), -80px);
+  }
+}
+/* --- Christmas tree ------------------------------------------------------ */
+
+.ornament-new {
+  animation: ornament-drop 0.9s 0.4s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+}
+
+@keyframes ornament-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wichtel-rock,
+  .anticipation-playing *,
+  .animate-bob,
+  .animate-glow {
+    animation: none !important;
+  }
+}
+/* Without motion: the Wichtel stands in place. */
+@media (prefers-reduced-motion: reduce) {
+  .anticipation-carry {
+    opacity: 1;
+  }
 }

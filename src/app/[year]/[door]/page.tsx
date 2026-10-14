@@ -19,13 +19,13 @@ export default async function Page({
 
   return (
     <Layout>
-      <main className="flex h-full items-center justify-center">
+      <div className="flex h-full items-center justify-center">
         <QuestionForm
           year={door.year}
           doorNumber={door.doorNumber}
           initial={initial}
         />
-      </main>
+      </div>
     </Layout>
   )
 }

@@ -6,6 +6,7 @@ import { cache } from "react"
 import {
   DOOR_COUNT,
   TIME_ZONE,
+  doorOfTheDay,
   doorState,
   isCorrectAnswer,
   isDoorAnswerable,
@@ -17,6 +18,7 @@ import {
   type LegacyDoor,
 } from "@/lib/doors"
 import { calendarNow } from "@/lib/clock"
+import { rankOf } from "@/lib/ranking"
 import { parseDoorParams } from "@/lib/routes"
 import { getQuestion, listYears, type QuestionContent } from "@/lib/sanity"
 import { createAdminClient } from "@/lib/supabase/admin"
@@ -50,6 +52,9 @@ export type DoorResponse =
       image: string | null
       leftPage: boolean
       timedOut: boolean
+      /** Place in this year's Rangliste after the answer; ties share one. */
+      rank: number | null
+      playerCount: number | null
     }
 
 function reply(data: unknown, status = 200) {
@@ -144,6 +149,11 @@ export async function loadDoorStates(
   })
 }
 
+/** Today's door in that year, by the calendar's clock. */
+export function loadToday(year: number): number | null {
+  return doorOfTheDay(year, calendarNow())
+}
+
 export async function getYears() {
   const { user } = await getSession()
   if (!user) return UNAUTHORIZED()
@@ -170,7 +180,7 @@ export async function getDoorStates(request: NextRequest, yearParam: string) {
       year,
       isTestMode(request, user),
     )
-    return reply({ doors })
+    return reply({ doors, today: loadToday(year) })
   } catch (error) {
     console.error("getDoorStates", error)
     return FAILED()
@@ -299,6 +309,29 @@ async function recordAnswer(
   return { recorded: data.recorded, score: data.year_score, points }
 }
 
+/**
+ * The player's place in the year's Rangliste, for the result screen. Ties
+ * share a place. If the Rangliste can't be loaded, the result still shows.
+ */
+async function standing(
+  ctx: DoorContext,
+): Promise<{ rank: number | null; playerCount: number | null }> {
+  const { data, error } = await ctx.supabase.rpc("leaderboard", {
+    p_year: ctx.year,
+  })
+  if (error) console.error("standing", error)
+
+  // Only players who took part this year; the Rangliste also lists the rest.
+  const entries = (
+    (data ?? []) as { player_id: string | null; score: number; doors: number }[]
+  ).filter((entry) => entry.score > 0 || entry.doors > 0)
+  const mine = entries.find((entry) => entry.player_id === ctx.user.id)
+  return {
+    rank: mine ? rankOf(mine.score, entries) : null,
+    playerCount: entries.length > 0 ? entries.length : null,
+  }
+}
+
 /** Where the player stands with this door. */
 async function doorStep(ctx: DoorContext): Promise<DoorResponse> {
   if (ctx.testMode) {
@@ -417,12 +450,12 @@ export function submitAnswer(request: NextRequest, params: DoorParams) {
       typeof body.option === "string" ? body.option.slice(0, 500) : null
     const leftPage = body.leftPage === true
 
-    const result = (
+    const result = async (
       correct: boolean,
       points: number,
       score: number | null,
       timedOut: boolean,
-    ): DoorResponse => ({
+    ): Promise<DoorResponse> => ({
       status: "result",
       isCorrect: correct,
       correctAnswer: normalizeOption(ctx.question.answer),
@@ -433,6 +466,7 @@ export function submitAnswer(request: NextRequest, params: DoorParams) {
       image: ctx.question.image,
       leftPage,
       timedOut,
+      ...(await standing(ctx)),
     })
 
     if (ctx.testMode) {

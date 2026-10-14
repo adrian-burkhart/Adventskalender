@@ -1,74 +1,37 @@
 "use client"
 
-import { memo, useEffect, useRef, useState } from "react"
+import { memo } from "react"
 import Link from "next/link"
-import tree from "../../public/images/tree.webp"
-import star from "../../public/images/star.webp"
-import Image from "next/image"
-import clsx from "clsx"
+import { usePathname } from "next/navigation"
 
+const LINKS = [
+  { text: "Kalender", href: "/" },
+  { text: "Rangliste", href: "/rangliste" },
+  { text: "Profil", href: "/profile" },
+]
+
+/**
+ * The menu: three links, always visible. On phones it takes its own row
+ * under the points; on wider screens it sits next to them.
+ */
 const Navbar = memo(() => {
-  const [open, setOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside)
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [open])
-
+  const pathname = usePathname()
   return (
-    <div className="relative">
-      <div
-        ref={menuRef}
-        className="absolute inset-0 left-auto flex h-max w-max flex-col items-center justify-center pt-8"
-      >
-        <div
-          className={clsx("mx-10 flex cursor-pointer items-center justify-center", { "hover:animate-spin": !open })}
-          onClick={() => setOpen(!open)}
-        >
-          <Image src={star} width={32} height={32} alt="menu" />
-          {open && (
-            <Image
-              className="absolute inset-0 -left-[2px] top-[50px] -z-10"
-              src={tree}
-              alt="menu"
-            />
-          )}
-        </div>
-        {open && (
-          <div className="h-full">
-            <div className="flex flex-col items-center gap-2 bg-transparent px-2 py-5">
-              {[
-                { text: "Profil", href: "/profile" },
-                { text: "Kalender", href: "/" },
-                { text: "Rangliste", href: "/rangliste" },
-              ].map((link) => (
-                <Link
-                  className="text-xs text-yellow-200 hover:text-red-700"
-                  href={link.href}
-                  key={link.href}
-                >
-                  {link.text}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+    <nav className="order-last basis-full sm:order-0 sm:basis-auto">
+      <ul className="flex items-center justify-center gap-1 sm:justify-end">
+        {LINKS.map((link) => (
+          <li key={link.href}>
+            <Link
+              href={link.href}
+              aria-current={pathname === link.href ? "page" : undefined}
+              className="block rounded-full px-3 py-1.5 text-base text-candle/85 hover:text-candle focus-visible:ring-4 focus-visible:ring-gold/60 focus-visible:outline-hidden aria-[current=page]:text-candle aria-[current=page]:underline aria-[current=page]:decoration-gold aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
+            >
+              {link.text}
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </nav>
   )
 })
 

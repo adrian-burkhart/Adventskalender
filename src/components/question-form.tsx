@@ -1,16 +1,12 @@
 "use client"
 
 import { memo, useCallback, useEffect, useRef, useState } from "react"
-import Link from "next/link"
 import AudioPlayer from "./audio-player"
-import giftGif from "../../public/images/gift.gif"
-import solutionImage from "../../public/images/solution.webp"
-import shrugImage from "../../public/images/shrug.webp"
-import thinkingImage from "../../public/images/thinking.webp"
-import Button from "./button"
-import Countdown from "./countdown"
+import Button, { ButtonLink } from "./button"
+import Countdown from "./door/countdown"
+import Anticipation from "./door/anticipation"
+import ResultView from "./door/result"
 import ReadyButton from "./ready-button"
-import Image from "next/image"
 import { apiFetch } from "@/lib/api-client"
 import type { DoorResponse } from "@/lib/door-api"
 import { ERROR_TEXT } from "@/lib/texts"
@@ -68,17 +64,12 @@ const IntroStep = memo(
     onReady: () => void
   }) => {
     return (
-      <div className="mt-12 flex flex-col items-center justify-between gap-6">
+      <div className="mt-4 flex flex-col items-center justify-between gap-6">
         {introAudio ? (
           <AudioPlayer url={introAudio} />
         ) : (
           <div>Ups, hier fehlt noch was.</div>
         )}
-        <div className="max-w-xs text-center text-sm">
-          Sobald du auf „Bereit“ tippst, läuft die Zeit. Bleib dann auf dieser
-          Seite: Wenn du den Tab oder die App wechselst, zählt deine Antwort als
-          falsch.
-        </div>
         <ReadyButton onClick={onReady} />
       </div>
     )
@@ -118,123 +109,100 @@ const QuestionStep = memo(
     }
 
     return (
-      <div className="flex flex-col items-center justify-center gap-4">
-        {step.questionAudio && (
-          <AudioPlayer smallButton autoPlay url={step.questionAudio} />
-        )}
-        <Countdown
-          deadline={step.deadline}
-          isSubmitted={isSubmitted}
-          onComplete={() => onSubmit(selectedOption)}
-        />
-        <div className="text-center">{step.question}</div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            {step.options.map((option, i) => (
-              <div className="flex gap-2" key={i}>
-                <input
-                  value={option}
-                  id={`option-${i}`}
-                  name="questionOption"
-                  type="radio"
-                  onChange={() => setSelectedOption(option)}
-                />
-                <label htmlFor={`option-${i}`}>{option}</label>
-              </div>
-            ))}
-          </div>
-          <div>
+      // Phones: a small countdown above the question. Wider screens: the
+      // question on the left, the countdown on the right. Either way all
+      // of it fits without scrolling.
+      <div className="grid w-full max-w-4xl items-start gap-4 md:grid-cols-[minmax(0,1fr)_19rem] md:gap-10">
+        <div className="flex flex-col items-center gap-2 md:order-2 md:pt-4">
+          {step.questionAudio && (
+            <AudioPlayer smallButton autoPlay url={step.questionAudio} />
+          )}
+          <Countdown
+            deadline={step.deadline}
+            isSubmitted={isSubmitted}
+            onComplete={() => onSubmit(selectedOption)}
+          />
+        </div>
+        <div className="flex w-full flex-col items-center gap-4 md:order-1">
+          <h1 className="w-full card px-5 py-4 text-center font-body text-xl font-semibold not-italic">
+            {step.question}
+          </h1>
+          <form
+            onSubmit={handleSubmit}
+            className="flex w-full flex-col items-center gap-4"
+          >
+            <fieldset className="flex w-full flex-col gap-2.5">
+              <legend className="sr-only">Antwortmöglichkeiten</legend>
+              {step.options.map((option, i) => (
+                <label
+                  key={i}
+                  className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border-2 border-gold/40 bg-black/30 px-4 py-2 text-base transition hover:border-gold hover:bg-black/40 has-checked:border-gold has-checked:bg-gold has-checked:text-pine-950 has-focus-visible:ring-4 has-focus-visible:ring-gold/60"
+                >
+                  <input
+                    value={option}
+                    name="questionOption"
+                    type="radio"
+                    disabled={isSubmitted}
+                    onChange={() => setSelectedOption(option)}
+                    className="h-5 w-5 shrink-0 accent-berry"
+                  />
+                  <span>{option}</span>
+                </label>
+              ))}
+            </fieldset>
             <Button disabled={!selectedOption || isSubmitted} type="submit">
               Bestätigen
             </Button>
-          </div>
-        </form>
-        <Image src={thinkingImage} width={200} alt="" />
+          </form>
+        </div>
       </div>
     )
   },
 )
 
-const OutroStep = memo(({ result }: { result: Result }) => {
-  const [hasGiftOpened, setHasGiftOpened] = useState<boolean>(false)
+/**
+ * The outro audio starts with a jingle; while it plays, something builds up
+ * to the result, which shows when the jingle ends.
+ */
+const OutroStep = memo(
+  ({ result, doorNumber }: { result: Result; doorNumber: number }) => {
+    const [started, setStarted] = useState(false)
+    const [revealed, setRevealed] = useState(false)
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setHasGiftOpened(true)
-    }, 7000)
-    return () => clearTimeout(timer)
-  }, [])
+    // Without outro audio, or when the browser holds it back, start anyway.
+    useEffect(() => {
+      const timer = setTimeout(
+        () => setStarted(true),
+        result.outroAudio ? 1500 : 0,
+      )
+      return () => clearTimeout(timer)
+    }, [result.outroAudio])
 
-  return (
-    <div className="flex flex-col gap-10 text-center">
-      {result.outroAudio && (
-        <AudioPlayer smallButton url={result.outroAudio} autoPlay />
-      )}
-      {!hasGiftOpened ? (
-        <Image src={giftGif} width={400} alt="" />
-      ) : (
-        <div className="flex flex-col items-center gap-10">
-          {result.isCorrect ? (
-            <Image src={solutionImage} alt="" />
-          ) : (
-            <Image src={shrugImage} alt="" />
-          )}
-
-          {result.isCorrect ? (
-            <div>
-              Das war korrekt! Du bekommst dafür {result.reward} Punkte.
-            </div>
-          ) : (
-            <div className="flex flex-col gap-2">
-              {result.leftPage && (
-                <div>
-                  Du hast während der Frage die Seite verlassen, deshalb zählt
-                  die Antwort als falsch.
-                </div>
-              )}
-              <div>Das war leider falsch! Du bekommst dafür keine Punkte.</div>
-              <div>Die richtige Antwort lautet: {result.correctAnswer}</div>
-            </div>
-          )}
-          {!!result.image && (
-            <div>
-              <Image
-                width="0"
-                height="0"
-                sizes="100vw"
-                className="h-64 w-auto"
-                src={result.image}
-                alt=""
-              />
-            </div>
-          )}
-          <div>
-            {result.score !== null && (
-              <div>Deine Punktzahl ist jetzt: {result.score}</div>
-            )}
-            <Link className="flex items-center justify-center" href="/">
-              <Button>Zurück zum Kalender</Button>
-            </Link>
-            <Link
-              className="flex items-center justify-center"
-              href="/rangliste"
-            >
-              <Button>Zur Rangliste</Button>
-            </Link>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-})
+    return (
+      <div className="flex w-full flex-col items-center gap-6">
+        {result.outroAudio && (
+          <AudioPlayer
+            smallButton
+            autoPlay
+            url={result.outroAudio}
+            onPlaying={() => setStarted(true)}
+          />
+        )}
+        {revealed ? (
+          <ResultView result={result} doorNumber={doorNumber} />
+        ) : (
+          <Anticipation started={started} onDone={() => setRevealed(true)} />
+        )}
+      </div>
+    )
+  },
+)
 
 function Message({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div>{children}</div>
-      <Link className="flex items-center justify-center" href="/">
-        <Button>Zurück zum Kalender</Button>
-      </Link>
+    <div className="flex flex-col items-center justify-center gap-6 text-center">
+      <p className="card px-6 py-4 text-lg">{children}</p>
+      <ButtonLink href="/">Zurück zum Kalender</ButtonLink>
     </div>
   )
 }
@@ -333,7 +301,7 @@ const QuestionForm = memo(
           />
         )
       case "result":
-        return <OutroStep result={step} />
+        return <OutroStep result={step} doorNumber={doorNumber} />
       case "intro":
       default:
         return <IntroStep introAudio={step.introAudio} onReady={start} />

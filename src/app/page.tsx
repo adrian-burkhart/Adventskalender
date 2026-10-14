@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import Home from "@/components/home"
-import { loadCalendarYears, loadDoorStates } from "@/lib/door-api"
+import { loadCalendarYears, loadDoorStates, loadToday } from "@/lib/door-api"
 import { getSession } from "@/lib/session"
 
 // The calendar is rendered on the server with the player's doors, so the
@@ -12,6 +12,7 @@ export default async function Page() {
   const initialDoors = await loadCalendarYears()
     .then(async ({ currentYear }) => ({
       year: currentYear,
+      today: loadToday(Number(currentYear)),
       doors: await loadDoorStates(
         supabase,
         user.id,

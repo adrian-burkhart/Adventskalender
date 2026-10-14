@@ -67,7 +67,7 @@ async function logOut(page: Page) {
 async function startQuestion(page: Page, door: number) {
   await page.goto(`/${env.year()}/${door}`)
   await tap(page.getByAltText("Bereit button"), { force: true })
-  await expect(page.getByText(/Countdown: \d+/)).toBeVisible()
+  await expect(page.getByLabel(/^Noch \d+ Sekunden?$/)).toBeVisible()
 }
 
 test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async ({
@@ -108,9 +108,9 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await expect(page).toHaveURL(new RegExp(`/${year}/1$`), {
       timeout: 15_000,
     })
-    await expect(page.getByText(/Sobald du auf „Bereit“ tippst/)).toBeVisible()
+    await expect(page.getByAltText("Bereit button")).toBeVisible()
     await tap(page.getByAltText("Bereit button"), { force: true })
-    await expect(page.getByText(/Countdown: \d+/)).toBeVisible()
+    await expect(page.getByLabel(/^Noch \d+ Sekunden?$/)).toBeVisible()
 
     await page.getByLabel(door1.answer.trim(), { exact: true }).check()
     await tap(page.getByRole("button", { name: "Bestätigen" }))
@@ -140,7 +140,7 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await expect(
       page.getByText(/Du hast während der Frage die Seite verlassen/),
     ).toBeVisible()
-    await expect(page.getByText(/Das war leider falsch!/)).toBeVisible()
+    await expect(page.getByText(/Die richtige Antwort lautet:/)).toBeVisible()
     await expect(
       page.getByText(`Deine Punkte: ${door1.reward}`, { exact: true }),
     ).toBeVisible()
@@ -167,14 +167,17 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
 
   await test.step("Rangliste und Profil zeigen die Punkte", async () => {
     await page.goto("/rangliste")
-    const row = page
-      .locator("div.w-64")
-      .filter({ has: page.getByText(name, { exact: true }) })
+    const row = page.getByRole("listitem").filter({ hasText: name })
     await expect(row).toContainText(`Punkte: ${door1.reward}`)
     await expect(row).toContainText("Türchen geöffnet: 2")
 
     await page.goto("/profile")
-    await expect(page.getByText(`${year}: ${door1.reward}`)).toBeVisible()
+    await expect(
+      page
+        .getByRole("listitem")
+        .filter({ hasText: year })
+        .filter({ hasText: `${door1.reward} Punkte` }),
+    ).toBeVisible()
   })
 
   await test.step("Passwort vergessen", async () => {

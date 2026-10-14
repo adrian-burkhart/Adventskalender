@@ -8,14 +8,20 @@ import Image from "next/image"
 import title from "../../public/images/title.webp"
 import { Duration } from "luxon"
 import { useSelectedYear } from "@/lib/context"
-import { doorUnlocksAt, type DoorState } from "@/lib/doors"
+import { doorUnlocksAt } from "@/lib/doors"
+import type { InitialDoors } from "@/lib/hooks"
+
+/** "1 Tag", "2 Tage", "0 Tage". */
+function plural(count: number, one: string, many: string) {
+  return `${count} ${count === 1 ? one : many}`
+}
 
 const Home = memo(
   ({
     initialDoors,
     renderedAt,
   }: {
-    initialDoors?: { year: string; doors: DoorState[] }
+    initialDoors?: InitialDoors
     /** The server's clock, so the first render matches the HTML. */
     renderedAt: number
   }) => {
@@ -44,33 +50,32 @@ const Home = memo(
 
     return (
       <Layout>
-        <main>
-          <div className="mt-24 flex flex-col items-center justify-center gap-4">
-            <div className="text-2xl text-yellow-200">
-              <Image
-                alt="Adventskalender der Familie Haas"
-                src={title}
-                priority
-                className="h-full w-full"
-              />
-            </div>
-            <div className="mb-4 flex flex-col items-center justify-center gap-2 text-center">
-              {player && player.name && <div>Hallo {player.name}!</div>}
-              {!calendarHasStarted && (
-                <div className="flex flex-col items-center justify-center gap-2 text-center">
-                  <div>Schön, dass du schon hier bist!</div>
-                  <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
-                  <div>
-                    Bis dahin sind es noch: {countdown.days} Tage,{" "}
-                    {countdown.hours} Stunden und{" "}
-                    {Math.floor(countdown.minutes)} Minuten
-                  </div>
+        <div className="flex w-full flex-col items-center justify-center gap-4">
+          <Image
+            alt="Adventskalender der Familie Haas"
+            src={title}
+            priority
+            className="h-auto w-full max-w-2xl"
+          />
+          <div className="mb-6 flex flex-col items-center justify-center gap-2 text-center">
+            {player && player.name && (
+              <h1 className="text-3xl sm:text-4xl">Hallo {player.name}!</h1>
+            )}
+            {!calendarHasStarted && (
+              <div className="mt-2 flex max-w-md flex-col items-center justify-center gap-2 card px-6 py-4 text-center">
+                <div>Schön, dass du schon hier bist!</div>
+                <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
+                <div>
+                  Bis dahin sind es noch:{" "}
+                  {plural(countdown.days, "Tag", "Tage")},{" "}
+                  {plural(countdown.hours, "Stunde", "Stunden")} und{" "}
+                  {plural(Math.floor(countdown.minutes), "Minute", "Minuten")}
                 </div>
-              )}
-            </div>
-            {player && <Calendar initialDoors={initialDoors} />}
+              </div>
+            )}
           </div>
-        </main>
+          {player && <Calendar initialDoors={initialDoors} />}
+        </div>
       </Layout>
     )
   },
