@@ -30,7 +30,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.64.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/luxon": "^3.6.0",
     "@types/node": "^22",
