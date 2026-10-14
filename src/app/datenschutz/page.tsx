@@ -31,8 +31,8 @@ export default function Datenschutz() {
           <h4>Wie erfassen wir Ihre Daten?</h4>
           <p>
             Ihre Daten werden zum einen dadurch erhoben, dass Sie uns diese
-            mitteilen. Hierbei kann es sich z.&nbsp;B. um Daten handeln, die Sie
-            in ein Kontaktformular eingeben.
+            mitteilen, z.&nbsp;B. bei der Registrierung (E-Mail-Adresse, Name)
+            und beim Beantworten der Fragen.
           </p>
           <p>
             Andere Daten werden automatisch oder nach Ihrer Einwilligung beim
@@ -44,8 +44,10 @@ export default function Datenschutz() {
           <h4>Wof&uuml;r nutzen wir Ihre Daten?</h4>
           <p>
             Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung
-            der Website zu gew&auml;hrleisten. Andere Daten k&ouml;nnen zur
-            Analyse Ihres Nutzerverhaltens verwendet werden.
+            der Website zu gew&auml;hrleisten. Die &uuml;brigen Daten brauchen
+            wir, damit Sie am Adventskalender teilnehmen k&ouml;nnen und Ihre
+            Punkte in der Rangliste erscheinen. Ihr Nutzerverhalten werten wir
+            nicht aus.
           </p>
           <h4>Welche Rechte haben Sie bez&uuml;glich Ihrer Daten?</h4>
           <p>
@@ -65,46 +67,98 @@ export default function Datenschutz() {
             Hierzu sowie zu weiteren Fragen zum Thema Datenschutz k&ouml;nnen
             Sie sich jederzeit an uns wenden.
           </p>
-          <h2 className="font-bold">2. Hosting</h2>
-          <p>Wir hosten die Inhalte unserer Website bei folgendem Anbieter:</p>
-          <h3 className="font-semibold">Strato</h3>
+          <h2 className="font-bold">2. Hosting und eingesetzte Dienste</h2>
           <p>
-            Anbieter ist die Strato AG, Otto-Ostrowski-Stra&szlig;e 7, 10249
-            Berlin (nachfolgend &bdquo;Strato&ldquo;). Wenn Sie unsere Website
-            besuchen, erfasst Strato verschiedene Logfiles inklusive Ihrer
-            IP-Adressen.
+            Für den Betrieb des Adventskalenders nutzen wir die folgenden
+            Anbieter. Sie verarbeiten die Daten ausschließlich in unserem
+            Auftrag und nach unseren Weisungen (Auftragsverarbeitung nach Art.
+            28 DSGVO).
+          </p>
+          <h3 className="font-semibold">Vercel (Hosting)</h3>
+          <p>
+            Die Website wird bei Vercel Inc., USA gehostet. Beim Aufruf der
+            Website verarbeitet Vercel technisch notwendige Daten wie Ihre
+            IP-Adresse, Datum und Uhrzeit des Aufrufs, die aufgerufene Seite und
+            Informationen zu Browser und Betriebssystem (Server-Logfiles). Diese
+            Logfiles werden nur kurzzeitig gespeichert.
           </p>
           <p>
-            Weitere Informationen entnehmen Sie der Datenschutzerkl&auml;rung
-            von Strato:
+            Weitere Informationen:{" "}
             <a
-              href="https://www.strato.de/datenschutz/"
+              href="https://vercel.com/legal/privacy-policy"
               target="_blank"
               rel="noopener noreferrer"
             >
-              https://www.strato.de/datenschutz/
+              https://vercel.com/legal/privacy-policy
             </a>
-            .
+          </p>
+          <h3 className="font-semibold">
+            Supabase (Benutzerkonten und Spielstände)
+          </h3>
+          <p>
+            Benutzerkonten, Anmeldung und Spielstände verwalten wir mit Supabase
+            (Supabase Inc., USA). Die Datenbank befindet sich in einem
+            Rechenzentrum in der EU (Irland). Gespeichert werden die in
+            Abschnitt 4 genannten Daten.
           </p>
           <p>
-            Die Verwendung von Strato erfolgt auf Grundlage von Art. 6 Abs. 1
-            lit. f DSGVO. Wir haben ein berechtigtes Interesse an einer
-            m&ouml;glichst zuverl&auml;ssigen Darstellung unserer Website.
-            Sofern eine entsprechende Einwilligung abgefragt wurde, erfolgt die
-            Verarbeitung ausschlie&szlig;lich auf Grundlage von Art. 6 Abs. 1
-            lit. a DSGVO und &sect; 25 Abs. 1 TTDSG, soweit die Einwilligung die
-            Speicherung von Cookies oder den Zugriff auf Informationen im
-            Endger&auml;t des Nutzers (z.&nbsp;B. Device-Fingerprinting) im
-            Sinne des TTDSG umfasst. Die Einwilligung ist jederzeit widerrufbar.
+            Weitere Informationen:{" "}
+            <a
+              href="https://supabase.com/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              https://supabase.com/privacy
+            </a>
           </p>
-          <h4>Auftragsverarbeitung</h4>
+          <h3 className="font-semibold">Sanity (Inhalte)</h3>
           <p>
-            Wir haben einen Vertrag &uuml;ber Auftragsverarbeitung (AVV) zur
-            Nutzung des oben genannten Dienstes geschlossen. Hierbei handelt es
-            sich um einen datenschutzrechtlich vorgeschriebenen Vertrag, der
-            gew&auml;hrleistet, dass dieser die personenbezogenen Daten unserer
-            Websitebesucher nur nach unseren Weisungen und unter Einhaltung der
-            DSGVO verarbeitet.
+            Die Fragen, Bilder und Audiodateien des Adventskalenders verwalten
+            wir mit Sanity (Sanity AS, Norwegen). Bilder und Audiodateien werden
+            beim Anzeigen bzw. Abspielen direkt von Servern von Sanity geladen;
+            dabei wird Ihre IP-Adresse an Sanity übermittelt.
+          </p>
+          <p>
+            Weitere Informationen:{" "}
+            <a
+              href="https://www.sanity.io/legal/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              https://www.sanity.io/legal/privacy
+            </a>
+          </p>
+          <h3 className="font-semibold">Resend (E-Mail-Versand)</h3>
+          <p>
+            E-Mails zur Anmeldung (Login-Code, Bestätigungs- und Passwort-Links)
+            versenden wir über Resend (Resend, Inc., USA). Dafür werden Ihre
+            E-Mail-Adresse und der Inhalt der E-Mail an Resend übermittelt.
+          </p>
+          <p>
+            Weitere Informationen:{" "}
+            <a
+              href="https://resend.com/legal/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              https://resend.com/legal/privacy-policy
+            </a>
+          </p>
+          <h4>Rechtsgrundlage und Datenübermittlung in die USA</h4>
+          <p>
+            Der Einsatz dieser Dienste erfolgt auf Grundlage von Art. 6 Abs. 1
+            lit. b DSGVO, soweit er für die Teilnahme am Adventskalender nötig
+            ist, und im Übrigen auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO.
+            Unser berechtigtes Interesse liegt in einem sicheren und
+            zuverlässigen Betrieb der Website.
+          </p>
+          <p>
+            Einige Anbieter haben ihren Sitz in den USA. Soweit dabei Daten in
+            die USA übermittelt werden, erfolgt dies auf Grundlage des
+            Angemessenheitsbeschlusses der EU-Kommission zum EU-US Data Privacy
+            Framework, soweit der Anbieter danach zertifiziert ist, und im
+            Übrigen auf Grundlage der Standardvertragsklauseln der
+            EU-Kommission.
           </p>
           <h2 className="font-bold">
             3. Allgemeine Hinweise und Pflicht&shy;informationen
@@ -178,7 +232,7 @@ export default function Datenschutz() {
             Zugriff auf Informationen in Ihr Endger&auml;t (z.&nbsp;B. via
             Device-Fingerprinting) eingewilligt haben, erfolgt die
             Datenverarbeitung zus&auml;tzlich auf Grundlage von &sect; 25 Abs. 1
-            TTDSG. Die Einwilligung ist jederzeit widerrufbar. Sind Ihre Daten
+            TDDDG. Die Einwilligung ist jederzeit widerrufbar. Sind Ihre Daten
             zur Vertragserf&uuml;llung oder zur Durchf&uuml;hrung
             vorvertraglicher Ma&szlig;nahmen erforderlich, verarbeiten wir Ihre
             Daten auf Grundlage des Art. 6 Abs. 1 lit. b DSGVO. Des Weiteren
@@ -351,89 +405,67 @@ export default function Datenschutz() {
             Dritten mitgelesen werden.
           </p>
           <h2 className="font-bold">4. Datenerfassung auf dieser Website</h2>
+          <h3 className="font-semibold">Benutzerkonto und Teilnahme</h3>
+          <p>
+            Um mitzuspielen, legen Sie ein Benutzerkonto an. Dabei verarbeiten
+            wir:
+          </p>
+          <ul className="list-disc pl-6">
+            <li>Ihre E-Mail-Adresse,</li>
+            <li>Ihr Passwort (nur verschlüsselt als Hash gespeichert),</li>
+            <li>
+              den von Ihnen gewählten Namen, der in der Rangliste für andere
+              angemeldete Teilnehmer sichtbar ist,
+            </li>
+            <li>
+              Ihre Antworten mit Zeitpunkt, ob sie richtig waren, ob Sie die
+              Seite während einer Frage verlassen haben, und Ihre Punkte.
+            </li>
+          </ul>
+          <p>
+            Die Rangliste (Name, Punkte, geöffnete Türchen) ist nur für
+            angemeldete Teilnehmer sichtbar. Ihre E-Mail-Adresse sieht niemand
+            außer uns.
+          </p>
+          <p>
+            Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO (Teilnahme am
+            Adventskalender). Die Daten bleiben gespeichert, solange Ihr Konto
+            besteht, damit Ihre Punkte auch in den folgenden Jahren in der
+            Rangliste erscheinen. Wenn Sie Ihr Konto löschen lassen möchten,
+            schreiben Sie uns eine E-Mail; dann löschen wir Ihr Konto und Ihre
+            Spielstände.
+          </p>
+          <h3 className="font-semibold">E-Mails zur Anmeldung</h3>
+          <p>
+            Auf Ihre Anforderung schicken wir Ihnen E-Mails mit einem
+            Login-Code, einem Link zum Bestätigen Ihrer E-Mail-Adresse oder zum
+            Setzen eines neuen Passworts. Rechtsgrundlage ist Art. 6 Abs. 1 lit.
+            b DSGVO. Werbung oder Newsletter verschicken wir nicht.
+          </p>
           <h3 className="font-semibold">Cookies</h3>
           <p>
-            Unsere Internetseiten verwenden so genannte &bdquo;Cookies&ldquo;.
-            Cookies sind kleine Datenpakete und richten auf Ihrem Endger&auml;t
-            keinen Schaden an. Sie werden entweder vor&uuml;bergehend f&uuml;r
-            die Dauer einer Sitzung (Session-Cookies) oder dauerhaft (permanente
-            Cookies) auf Ihrem Endger&auml;t gespeichert. Session-Cookies werden
-            nach Ende Ihres Besuchs automatisch gel&ouml;scht. Permanente
-            Cookies bleiben auf Ihrem Endger&auml;t gespeichert, bis Sie diese
-            selbst l&ouml;schen oder eine automatische L&ouml;schung durch Ihren
-            Webbrowser erfolgt.
+            Wir verwenden ausschließlich technisch notwendige Cookies, damit Sie
+            nach der Anmeldung eingeloggt bleiben. Diese Cookies enthalten Ihre
+            Sitzungsdaten und bleiben gespeichert, bis Sie sich ausloggen oder
+            die Sitzung abläuft. Die Speicherung erfolgt auf Grundlage von § 25
+            Abs. 2 Nr. 2 TDDDG, da sie für den von Ihnen gewünschten Dienst
+            unbedingt erforderlich ist; die weitere Verarbeitung erfolgt auf
+            Grundlage von Art. 6 Abs. 1 lit. b DSGVO.
           </p>
           <p>
-            Cookies k&ouml;nnen von uns (First-Party-Cookies) oder von
-            Drittunternehmen stammen (sog. Third-Party-Cookies).
-            Third-Party-Cookies erm&ouml;glichen die Einbindung bestimmter
-            Dienstleistungen von Drittunternehmen innerhalb von Webseiten
-            (z.&nbsp;B. Cookies zur Abwicklung von Zahlungsdienstleistungen).
+            Wir setzen keine Analyse-, Tracking- oder Werbe-Cookies ein und
+            binden keine Dienste Dritter zu diesen Zwecken ein.
           </p>
           <p>
-            Cookies haben verschiedene Funktionen. Zahlreiche Cookies sind
-            technisch notwendig, da bestimmte Webseitenfunktionen ohne diese
-            nicht funktionieren w&uuml;rden (z.&nbsp;B. die Warenkorbfunktion
-            oder die Anzeige von Videos). Andere Cookies k&ouml;nnen zur
-            Auswertung des Nutzerverhaltens oder zu Werbezwecken verwendet
-            werden.
+            Sie können Ihren Browser so einstellen, dass Sie über das Setzen von
+            Cookies informiert werden und Cookies nur im Einzelfall erlauben.
+            Ohne Cookies ist eine Anmeldung allerdings nicht möglich.
           </p>
+          <h3 className="font-semibold">Schriftarten</h3>
           <p>
-            Cookies, die zur Durchf&uuml;hrung des elektronischen
-            Kommunikationsvorgangs, zur Bereitstellung bestimmter, von Ihnen
-            erw&uuml;nschter Funktionen (z.&nbsp;B. f&uuml;r die
-            Warenkorbfunktion) oder zur Optimierung der Website (z.&nbsp;B.
-            Cookies zur Messung des Webpublikums) erforderlich sind (notwendige
-            Cookies), werden auf Grundlage von Art. 6 Abs. 1 lit. f DSGVO
-            gespeichert, sofern keine andere Rechtsgrundlage angegeben wird. Der
-            Websitebetreiber hat ein berechtigtes Interesse an der Speicherung
-            von notwendigen Cookies zur technisch fehlerfreien und optimierten
-            Bereitstellung seiner Dienste. Sofern eine Einwilligung zur
-            Speicherung von Cookies und vergleichbaren
-            Wiedererkennungstechnologien abgefragt wurde, erfolgt die
-            Verarbeitung ausschlie&szlig;lich auf Grundlage dieser Einwilligung
-            (Art. 6 Abs. 1 lit. a DSGVO und &sect; 25 Abs. 1 TTDSG); die
-            Einwilligung ist jederzeit widerrufbar.
-          </p>
-          <p>
-            Sie k&ouml;nnen Ihren Browser so einstellen, dass Sie &uuml;ber das
-            Setzen von Cookies informiert werden und Cookies nur im Einzelfall
-            erlauben, die Annahme von Cookies f&uuml;r bestimmte F&auml;lle oder
-            generell ausschlie&szlig;en sowie das automatische L&ouml;schen der
-            Cookies beim Schlie&szlig;en des Browsers aktivieren. Bei der
-            Deaktivierung von Cookies kann die Funktionalit&auml;t dieser
-            Website eingeschr&auml;nkt sein.
-          </p>
-          <p>
-            Welche Cookies und Dienste auf dieser Website eingesetzt werden,
-            k&ouml;nnen Sie dieser Datenschutzerkl&auml;rung entnehmen.
-          </p>
-          <h2 className="font-bold">5. Plugins und Tools</h2>
-          <h3 className="font-semibold">Google Fonts (lokales Hosting)</h3>
-          <p>
-            Diese Seite nutzt zur einheitlichen Darstellung von Schriftarten so
-            genannte Google Fonts, die von Google bereitgestellt werden. Die
-            Google Fonts sind lokal installiert. Eine Verbindung zu Servern von
-            Google findet dabei nicht statt.
-          </p>
-          <p>
-            Weitere Informationen zu Google Fonts finden Sie unter
-            <a
-              href="https://developers.google.com/fonts/faq"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://developers.google.com/fonts/faq
-            </a>
-            und in der Datenschutzerkl&auml;rung von Google:
-            <a
-              href="https://policies.google.com/privacy?hl=de"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              https://policies.google.com/privacy?hl=de
-            </a>
-            .
+            Die verwendeten Schriftarten sind lokal auf unserem Server
+            gespeichert. Eine Verbindung zu Servern Dritter (z.&nbsp;B. Google)
+            findet dabei nicht statt.
           </p>
           <p>
             Quelle:

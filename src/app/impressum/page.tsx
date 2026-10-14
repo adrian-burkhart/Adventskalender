@@ -7,7 +7,7 @@ export default function Impressum() {
         <div className="flex flex-col gap-2">
           <h1 className="text-lg font-bold">Impressum</h1>
 
-          <h2 className="font-bold">Angaben gem&auml;&szlig; &sect; 5 TMG</h2>
+          <h2 className="font-bold">Angaben gem&auml;&szlig; &sect; 5 DDG</h2>
           <p>
             Adrian Burkhart
             <br />
