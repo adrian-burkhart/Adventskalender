@@ -60,10 +60,10 @@ export function confirmLink(mail: Mail): URL {
   return new URL(href.replaceAll("&amp;", "&"))
 }
 
-/** The 6-digit code in an e-mail. */
+/** The one-time code in an e-mail (Supabase setting: 6 to 10 digits). */
 export function loginCode(mail: Mail): string {
-  const body = mail.text ?? mail.html?.replace(/<[^>]+>/g, " ") ?? ""
-  const code = body.match(/\b(\d{6})\b/)?.[1]
+  const body = mail.text || mail.html?.replace(/<[^>]+>/g, " ") || ""
+  const code = body.match(/\b(\d{6,10})\b/)?.[1]
   if (!code) throw new Error(`No code in "${mail.subject}"`)
   return code
 }

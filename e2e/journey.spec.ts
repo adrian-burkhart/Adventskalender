@@ -167,7 +167,7 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
 
     const mail = await waitForMail(email, since)
     expectGermanMail(mail, "Neues Passwort für den Adventskalender")
-    expect(loginCode(mail)).toMatch(/^\d{6}$/)
+    expect(loginCode(mail)).toMatch(/^\d{6,10}$/)
     await openConfirmLink(page, confirmLink(mail))
     await expect(
       page.getByText("Gleich kannst du dir ein neues Passwort aussuchen."),
