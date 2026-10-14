@@ -1,14 +1,10 @@
 import clsx from "clsx"
 import { ButtonHTMLAttributes, DetailedHTMLProps, memo } from "react"
 
-interface ButtonProps
-  extends Omit<
-    DetailedHTMLProps<
-      ButtonHTMLAttributes<HTMLButtonElement>,
-      HTMLButtonElement
-    >,
-    "ref"
-  > {
+interface ButtonProps extends Omit<
+  DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>,
+  "ref"
+> {
   loading?: boolean
 }
 

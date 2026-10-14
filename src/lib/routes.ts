@@ -1,4 +1,5 @@
-const PUBLIC_PATHS = ["/login", "/impressum", "/datenschutz"]
+// /api/keepalive checks its own secret (Vercel Cron), not a login.
+const PUBLIC_PATHS = ["/login", "/impressum", "/datenschutz", "/api/keepalive"]
 const PUBLIC_PREFIXES = ["/auth/"]
 
 /** Pages that work without a login. Everything else needs a session. */

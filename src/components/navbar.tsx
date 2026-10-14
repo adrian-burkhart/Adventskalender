@@ -36,7 +36,10 @@ const Navbar = memo(() => {
         className="absolute inset-0 left-auto flex h-max w-max flex-col items-center justify-center pt-8"
       >
         <div
-          className={clsx("mx-10 flex cursor-pointer items-center justify-center", { "hover:animate-spin": !open })}
+          className={clsx(
+            "mx-10 flex cursor-pointer items-center justify-center",
+            { "hover:animate-spin": !open },
+          )}
           onClick={() => setOpen(!open)}
         >
           <Image src={star} width={32} height={32} alt="menu" />

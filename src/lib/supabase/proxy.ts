@@ -66,7 +66,7 @@ export async function updateSession(request: NextRequest) {
     return redirect
   }
 
-  if (!isLoggedIn && pathname.startsWith("/api/")) {
+  if (!isLoggedIn && pathname.startsWith("/api/") && !isPublicPath(pathname)) {
     return NextResponse.json(
       { error: "Bitte logge dich ein." },
       { status: 401, headers: { "cache-control": "no-store" } },
