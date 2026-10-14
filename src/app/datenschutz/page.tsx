@@ -196,7 +196,7 @@ export default function Datenschutz() {
             Lenauweg 1<br />
             21407 Deutsch Evern
           </p>
-          <p>E-Mail: mail@adrian-burkhart.de</p>
+          <p>E-Mail: mail@adventskalender-haas.de</p>
           <p>
             Verantwortliche Stelle ist die nat&uuml;rliche oder juristische
             Person, die allein oder gemeinsam mit anderen &uuml;ber die Zwecke
