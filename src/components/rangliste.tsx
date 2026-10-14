@@ -65,18 +65,35 @@ const Rangliste = memo(
           </div>
           <DriftingWichtel picture={picture} />
           {years.length > 1 ? (
-            <select
-              aria-label="Jahr"
-              value={year}
-              onChange={(e) => setChosenYear(e.target.value)}
-              className="cursor-pointer rounded-full border-2 border-gold/60 bg-pine-950/60 px-4 py-1 font-display text-2xl text-candle focus:outline-none focus:ring-4 focus:ring-gold/50"
-            >
-              {years.map((y) => (
-                <option key={y} value={y} className="bg-pine-900 font-body">
-                  {y}
-                </option>
-              ))}
-            </select>
+            // Our own arrow: the browser's sits too close to the edge.
+            <div className="relative">
+              <select
+                aria-label="Jahr"
+                value={year}
+                onChange={(e) => setChosenYear(e.target.value)}
+                className="cursor-pointer appearance-none rounded-full border-2 border-gold/60 bg-pine-950/60 py-1 pl-5 pr-12 font-display text-2xl text-candle focus:outline-none focus:ring-4 focus:ring-gold/50"
+              >
+                {years.map((y) => (
+                  <option key={y} value={y} className="bg-pine-900 font-body">
+                    {y}
+                  </option>
+                ))}
+              </select>
+              <svg
+                viewBox="0 0 12 8"
+                aria-hidden
+                className="pointer-events-none absolute right-5 top-1/2 h-2 w-3 -translate-y-1/2 text-candle"
+              >
+                <path
+                  d="M1 1.5 L6 6.5 L11 1.5"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
           ) : (
             <div className="font-display text-3xl">{year}</div>
           )}
