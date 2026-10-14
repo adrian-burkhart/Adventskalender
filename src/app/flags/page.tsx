@@ -13,7 +13,9 @@ export default function Flags() {
       {Object.values(FeatureFlag).map((flag) => {
         return <FeatureFlagItem key={flag} flag={flag as FeatureFlag} />
       })}
-      <Button onClick={resetFeatureFlagMap}>{"Reset flags"}</Button>
+      <Button className="mt-6" onClick={resetFeatureFlagMap}>
+        {"Reset flags"}
+      </Button>
     </div>
   )
 }

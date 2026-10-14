@@ -3,7 +3,7 @@ import Layout from "@/components/layout"
 export default function Impressum() {
   return (
     <Layout>
-      <main>
+      <div className="w-full max-w-3xl px-2">
         <div className="flex flex-col gap-2">
           <h1 className="text-lg font-bold">Impressum</h1>
 
@@ -18,7 +18,7 @@ export default function Impressum() {
           <h2 className="font-bold">Kontakt</h2>
           <p>E-Mail: mail@adventskalender-haas.de</p>
         </div>
-      </main>
+      </div>
     </Layout>
   )
 }

@@ -1,30 +1,38 @@
 import clsx from "clsx"
-import { ButtonHTMLAttributes, DetailedHTMLProps, memo } from "react"
+import Link from "next/link"
+import {
+  ButtonHTMLAttributes,
+  ComponentProps,
+  DetailedHTMLProps,
+  memo,
+} from "react"
 
-interface ButtonProps
-  extends Omit<
-    DetailedHTMLProps<
-      ButtonHTMLAttributes<HTMLButtonElement>,
-      HTMLButtonElement
-    >,
-    "ref"
-  > {
-  loading?: boolean
+interface ButtonProps extends Omit<
+  DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>,
+  "ref"
+> {
+  /** A quieter outline button for the second choice next to a main one. */
+  quiet?: boolean
 }
 
-const Button = memo(({ children, disabled, ...rest }: ButtonProps) => {
+const Button = memo(({ className, quiet, ...rest }: ButtonProps) => {
   return (
     <button
-      className={clsx("mt-6 px-2 py-1 hover:text-white", {
-        "pointer-events-none bg-gray-500 text-white": disabled,
-        "bg-red-500": !disabled,
-      })}
-      disabled={disabled}
+      className={clsx(quiet ? "btn-quiet" : "btn", className)}
       {...rest}
-    >
-      {children}
-    </button>
+    />
   )
 })
+
+/** A link that looks like a button (a button inside a link is invalid). */
+export function ButtonLink({
+  className,
+  quiet,
+  ...rest
+}: ComponentProps<typeof Link> & { quiet?: boolean }) {
+  return (
+    <Link className={clsx(quiet ? "btn-quiet" : "btn", className)} {...rest} />
+  )
+}
 
 export default Button

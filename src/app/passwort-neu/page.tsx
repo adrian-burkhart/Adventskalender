@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useState, type FormEvent } from "react"
 import {
   AuthField,
@@ -9,7 +8,7 @@ import {
   AuthSubmit,
   AuthText,
 } from "@/components/auth-form"
-import Button from "@/components/button"
+import { ButtonLink } from "@/components/button"
 import Layout from "@/components/layout"
 import { useSupabaseClient } from "@/lib/auth-context"
 import { authErrorMessage } from "@/lib/auth/errors"
@@ -50,16 +49,16 @@ export default function NewPasswordPage() {
 
   return (
     <Layout>
-      <main className="flex flex-col items-center text-center">
-        <div className="mb-6 text-lg">Neues Passwort</div>
+      <div className="flex flex-col items-center text-center">
+        <h1 className="mb-6 text-3xl">Neues Passwort</h1>
         {saved ? (
           <div className="flex flex-col items-center">
             <div className="text-green-500">
               Das hat geklappt! Dein neues Passwort ist gespeichert.
             </div>
-            <Link href="/">
-              <Button>Zum Kalender</Button>
-            </Link>
+            <ButtonLink href="/" className="mt-6">
+              Zum Kalender
+            </ButtonLink>
           </div>
         ) : (
           <AuthForm onSubmit={handleSubmit}>
@@ -93,7 +92,7 @@ export default function NewPasswordPage() {
             </AuthSubmit>
           </AuthForm>
         )}
-      </main>
+      </div>
     </Layout>
   )
 }

@@ -2,72 +2,79 @@
 
 import { memo, useEffect, useRef, useState } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import tree from "../../public/images/tree.webp"
 import star from "../../public/images/star.webp"
 import Image from "next/image"
 import clsx from "clsx"
 
+const LINKS = [
+  { text: "Kalender", href: "/" },
+  { text: "Rangliste", href: "/rangliste" },
+  { text: "Profil", href: "/profile" },
+]
+
+/** The star at the top right opens a little tree with the menu on it. */
 const Navbar = memo(() => {
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const pathname = usePathname()
 
   useEffect(() => {
+    if (!open) return
     function handleClickOutside(event: MouseEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpen(false)
       }
     }
-
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside)
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside)
+    function handleKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false)
     }
-
+    document.addEventListener("mousedown", handleClickOutside)
+    document.addEventListener("keydown", handleKey)
     return () => {
       document.removeEventListener("mousedown", handleClickOutside)
+      document.removeEventListener("keydown", handleKey)
     }
   }, [open])
 
   return (
-    <div className="relative">
-      <div
-        ref={menuRef}
-        className="absolute inset-0 left-auto flex h-max w-max flex-col items-center justify-center pt-8"
+    <div ref={menuRef} className="relative z-20 flex flex-col items-center">
+      <button
+        type="button"
+        aria-label="Menü"
+        aria-expanded={open}
+        aria-controls="hauptmenue"
+        onClick={() => setOpen(!open)}
+        className={clsx(
+          "rounded-full p-2 transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/60",
+          open ? "animate-glow" : "hover:animate-spin",
+        )}
       >
-        <div
-          className={clsx("mx-10 flex cursor-pointer items-center justify-center", { "hover:animate-spin": !open })}
-          onClick={() => setOpen(!open)}
+        <Image src={star} width={44} height={44} alt="" />
+      </button>
+      {open && (
+        <nav
+          id="hauptmenue"
+          className="absolute right-0 top-12 w-44 animate-fade-in"
         >
-          <Image src={star} width={32} height={32} alt="menu" />
-          {open && (
-            <Image
-              className="absolute inset-0 -left-[2px] top-[50px] -z-10"
-              src={tree}
-              alt="menu"
-            />
-          )}
-        </div>
-        {open && (
-          <div className="h-full">
-            <div className="flex flex-col items-center gap-2 bg-transparent px-2 py-5">
-              {[
-                { text: "Profil", href: "/profile" },
-                { text: "Kalender", href: "/" },
-                { text: "Rangliste", href: "/rangliste" },
-              ].map((link) => (
+          <Image src={tree} alt="" className="absolute inset-0 -z-10 w-full" />
+          <ul className="flex flex-col items-center gap-1 px-2 pb-10 pt-12">
+            {LINKS.map((link) => (
+              <li key={link.href}>
                 <Link
-                  className="text-xs text-yellow-200 hover:text-red-700"
                   href={link.href}
-                  key={link.href}
+                  onClick={() => setOpen(false)}
+                  aria-current={pathname === link.href ? "page" : undefined}
+                  className="block rounded-full bg-pine-950/75 px-4 py-1.5 text-base text-candle shadow hover:bg-berry focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/60 aria-[current=page]:bg-berry"
                 >
                   {link.text}
                 </Link>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
     </div>
   )
 })

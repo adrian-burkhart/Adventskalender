@@ -3,7 +3,7 @@ import Layout from "@/components/layout"
 export default function Datenschutz() {
   return (
     <Layout>
-      <main>
+      <div className="w-full max-w-3xl px-2">
         <div className="flex flex-col gap-2 px-12">
           <h1 className="text-lg font-bold">Datenschutz&shy;erkl&auml;rung</h1>
           <h2 className="font-bold">1. Datenschutz auf einen Blick</h2>
@@ -472,7 +472,7 @@ export default function Datenschutz() {
             <a href="https://www.e-recht24.de">https://www.e-recht24.de</a>
           </p>
         </div>
-      </main>
+      </div>
     </Layout>
   )
 }

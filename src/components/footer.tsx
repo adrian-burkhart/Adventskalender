@@ -1,33 +1,10 @@
-"use client"
-
-import { memo, useEffect, useRef, useState } from "react"
+import { memo } from "react"
 import Link from "next/link"
 
 const Footer = memo(() => {
-  const [open, setOpen] = useState(false)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setOpen(false)
-      }
-    }
-
-    if (open) {
-      document.addEventListener("mousedown", handleClickOutside)
-    } else {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [open])
-
   return (
-    <div className="mt-12 border-t-2 border-t-yellow-200">
-      <div className="flex flex-col items-center justify-center gap-2 bg-transparent px-2 py-5">
+    <footer className="mx-auto mt-16 max-w-5xl border-t border-gold/30">
+      <ul className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 px-2 py-6">
         {[
           { text: "Impressum", href: "/impressum" },
           { text: "Datenschutz", href: "/datenschutz" },
@@ -35,17 +12,22 @@ const Footer = memo(() => {
             text: "GitHub",
             href: "https://github.com/adrian-burkhart/Adventskalender",
           },
+          // Staging and local runs link the design proposals.
+          ...(process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
+            ? []
+            : [{ text: "Design-Vorschau", href: "/vorschau" }]),
         ].map((link) => (
-          <Link
-            className="text-xs text-yellow-200 hover:text-red-700"
-            href={link.href}
-            key={link.href}
-          >
-            {link.text}
-          </Link>
+          <li key={link.href}>
+            <Link
+              className="text-sm text-candle/80 hover:text-white"
+              href={link.href}
+            >
+              {link.text}
+            </Link>
+          </li>
         ))}
-      </div>
-    </div>
+      </ul>
+    </footer>
   )
 })
 

@@ -47,7 +47,7 @@ export default async function ConfirmPage({
             <AuthText tone="error">{errorText(fehler || "missing")}</AuthText>
             <Link
               href="/login"
-              className="text-[13px] text-[gray] underline hover:text-[darkgray]"
+              className="text-sm text-candle/85 underline underline-offset-4 hover:text-white"
             >
               ZUM LOGIN
             </Link>

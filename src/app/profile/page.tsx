@@ -38,57 +38,72 @@ export default function Profile() {
 
   return (
     <Layout>
-      <main>
-        <div className="flex flex-col text-center">
-          <div className="mb-6 text-lg">Profil</div>
-          {player && (
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col gap-1">
-                <div>Hier kannst du deinen Namen ändern:</div>
-                <form onSubmit={handleSubmit} className="flex flex-col gap-1">
-                  <input
-                    placeholder="Dein Name"
-                    id="name"
-                    maxLength={30}
-                    value={newName}
-                    onChange={handleNameChange}
-                    className="rounded-md border border-yellow-200 bg-transparent p-2 text-sm text-yellow-200 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-red-500"
-                    type="text"
-                  />
-                  <Button type="submit">
-                    {loading ? "Wird gespeichert …" : "Namen ändern"}
-                  </Button>
-                </form>
-                {updateSuccess && !error && (
-                  <div className="text-green-500">
-                    Das hat geklappt! Dein Name wurde geändert!
-                  </div>
-                )}
-                {error && (
-                  <div className="text-red-500">
-                    {error.code === "23505"
-                      ? "Diesen Namen gibt es schon. Bitte wähle einen anderen."
-                      : error.code === "23514"
-                        ? "Der Name muss 1 bis 30 Zeichen lang sein."
-                        : "Das hat leider nicht geklappt. Bitte versuche es später noch einmal."}
-                  </div>
-                )}
-              </div>
+      <div className="flex w-full max-w-md flex-col gap-6 text-center">
+        <h1 className="text-4xl">Profil</h1>
+        {player && (
+          <>
+            <section className="card flex flex-col gap-3 px-5 py-5">
+              <label htmlFor="name" className="text-lg">
+                Hier kannst du deinen Namen ändern:
+              </label>
+              <form
+                onSubmit={handleSubmit}
+                className="flex flex-col items-center gap-4"
+              >
+                <input
+                  placeholder="Dein Name"
+                  id="name"
+                  maxLength={30}
+                  value={newName}
+                  onChange={handleNameChange}
+                  className="w-full rounded-lg border border-gold/50 bg-black/30 px-4 py-3 text-lg text-white focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/40"
+                  type="text"
+                />
+                <Button type="submit">
+                  {loading ? "Wird gespeichert …" : "Namen ändern"}
+                </Button>
+              </form>
+              {updateSuccess && !error && (
+                <div className="text-[#9be3ad]">
+                  Das hat geklappt! Dein Name wurde geändert!
+                </div>
+              )}
+              {error && (
+                <div role="alert" className="text-[#ff9b9b]">
+                  {error.code === "23505"
+                    ? "Diesen Namen gibt es schon. Bitte wähle einen anderen."
+                    : error.code === "23514"
+                      ? "Der Name muss 1 bis 30 Zeichen lang sein."
+                      : "Das hat leider nicht geklappt. Bitte versuche es später noch einmal."}
+                </div>
+              )}
+            </section>
 
-              <div className="mt-4">Historie deiner Punkte:</div>
-              <div>
-                {scores?.map((score) => (
-                  <div key={score.year}>
-                    {score.year}: {score.score}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+            {!!scores?.length && (
+              <section className="card px-5 py-5">
+                <h2 className="text-2xl">Deine Punkte der letzten Jahre</h2>
+                <ul className="mt-3 flex flex-col gap-1 text-lg">
+                  {[...scores].reverse().map((score) => (
+                    <li
+                      key={score.year}
+                      className="flex justify-between border-b border-gold/15 py-1 last:border-0"
+                    >
+                      <span>{score.year}</span>
+                      <span>{score.score} Punkte</span>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </>
+        )}
 
-          <Button onClick={handleLogout}>Ausloggen</Button>
+        <div>
+          <Button quiet onClick={handleLogout}>
+            Ausloggen
+          </Button>
         </div>
-      </main>
+      </div>
     </Layout>
   )
 }

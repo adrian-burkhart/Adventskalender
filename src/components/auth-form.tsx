@@ -5,14 +5,15 @@ import type {
   ReactNode,
 } from "react"
 
-// Same look as the Supabase Auth UI form the login page used before.
+// The login, sign-up and password forms. Labels and fields are large and
+// high-contrast: many players are older.
 
 export function AuthForm({
   children,
   ...rest
 }: React.FormHTMLAttributes<HTMLFormElement>) {
   return (
-    <form className="flex w-[250px] flex-col" {...rest}>
+    <form className="flex w-full max-w-[20rem] flex-col" {...rest}>
       {children}
     </form>
   )
@@ -29,13 +30,13 @@ export function AuthField({
 }: InputHTMLAttributes<HTMLInputElement> & { label: string; id: string }) {
   return (
     <div>
-      <label htmlFor={id} className="mb-2 block text-sm text-[gray]">
+      <label htmlFor={id} className="mb-2 block text-base text-candle">
         {label}
       </label>
       <input
         id={id}
         name={id}
-        className="w-full rounded border border-[lightgray] bg-transparent px-[15px] py-[10px] text-sm text-white caret-white outline-none placeholder:text-white/70 hover:border-[gray] focus:border-[gray]"
+        className="w-full rounded-lg border border-gold/50 bg-black/30 px-4 py-3 text-base text-white caret-white outline-none placeholder:text-white/60 hover:border-gold focus:border-gold focus:ring-2 focus:ring-gold/40"
         {...rest}
       />
     </div>
@@ -47,11 +48,7 @@ export function AuthSubmit({
   ...rest
 }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      type="submit"
-      className="mt-6 w-full rounded border border-[darkred] bg-red-500 px-[15px] py-[10px] text-sm text-white hover:bg-[darkred] disabled:pointer-events-none disabled:opacity-70"
-      {...rest}
-    >
+    <button type="submit" className="btn mt-6 w-full" {...rest}>
       {children}
     </button>
   )
@@ -68,7 +65,7 @@ export function AuthLink({
   return (
     <button
       type="button"
-      className="text-[13px] text-[gray] underline hover:text-[darkgray]"
+      className="text-sm text-candle/85 underline underline-offset-4 hover:text-white"
       {...rest}
     >
       {children}
@@ -86,7 +83,7 @@ export function AuthText({
   return (
     <p
       role={tone === "error" ? "alert" : undefined}
-      className={clsx("mb-4 text-center text-sm", {
+      className={clsx("mb-4 text-center text-base", {
         "text-yellow-200": tone === "info",
         "text-[#ff6369]": tone === "error",
       })}

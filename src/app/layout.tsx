@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import Providers from "./providers"
 import { loadAppData } from "@/lib/app-data"
+import { bodyFont, displayFont } from "@/lib/fonts"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -17,7 +18,7 @@ export default async function RootLayout({
   const appData = await loadAppData()
 
   return (
-    <html lang="de">
+    <html lang="de" className={`${displayFont.variable} ${bodyFont.variable}`}>
       <body>
         <Providers initial={appData}>{children}</Providers>
       </body>
