@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test"
+import { expect, test, type Locator, type Page } from "@playwright/test"
 import { doorContent } from "./content"
 import { env } from "./env"
 import { confirmLink, loginCode, waitForMail, type Mail } from "./mail"
@@ -25,6 +25,26 @@ async function requestMail(page: Page, send: () => Promise<void>) {
   return since
 }
 
+/**
+ * Clicks once React has hydrated the element. Pages are rendered on the
+ * server, so they are visible before their click handlers exist, and a
+ * click in that moment would get lost.
+ */
+async function hydrated(locator: Locator) {
+  await expect
+    .poll(() =>
+      locator.evaluate((el) =>
+        Object.keys(el).some((key) => key.startsWith("__reactProps$")),
+      ),
+    )
+    .toBe(true)
+}
+
+async function tap(locator: Locator, options?: { force?: boolean }) {
+  await hydrated(locator)
+  await locator.click(options)
+}
+
 function expectGermanMail(mail: Mail, subject: string) {
   expect(mail.subject).toBe(subject)
   expect(mail.from).toContain(SENDER)
@@ -39,13 +59,14 @@ async function openConfirmLink(page: Page, link: URL) {
 
 async function logOut(page: Page) {
   await page.goto("/profile")
-  await page.getByRole("button", { name: "Ausloggen" }).click()
+  await tap(page.getByRole("button", { name: "Ausloggen" }))
   await expect(page).toHaveURL(/\/login$/)
+  await hydrated(page.getByLabel("Deine E-Mail-Adresse"))
 }
 
 async function startQuestion(page: Page, door: number) {
   await page.goto(`/${env.year()}/${door}`)
-  await page.getByAltText("Bereit button").click({ force: true })
+  await tap(page.getByAltText("Bereit button"), { force: true })
   await expect(page.getByText(/Countdown: \d+/)).toBeVisible()
 }
 
@@ -58,12 +79,12 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
 
   await test.step("Registrieren und E-Mail bestätigen", async () => {
     await page.goto("/login")
-    await page.getByRole("button", { name: "ZUR REGISTRIERUNG" }).click()
+    await tap(page.getByRole("button", { name: "ZUR REGISTRIERUNG" }))
     await page.getByLabel("Dein Name").fill(name)
     await page.getByLabel("Deine E-Mail-Adresse").fill(email)
     await page.getByLabel("Dein Passwort").fill(password)
     const since = await requestMail(page, () =>
-      page.getByRole("button", { name: "Registrieren" }).click(),
+      tap(page.getByRole("button", { name: "Registrieren" })),
     )
     await expect(
       page.getByText("Du bekommst eine E-Mail mit einem Bestätigungslink."),
@@ -73,26 +94,26 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     expectGermanMail(mail, "Bestätige deine E-Mail-Adresse")
     await openConfirmLink(page, confirmLink(mail))
     await expect(page.getByText("Fast geschafft!")).toBeVisible()
-    await page.getByRole("button", { name: "Einloggen" }).click()
+    await tap(page.getByRole("button", { name: "Einloggen" }))
 
     await expect(page).toHaveURL(/\/$/)
     await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
   })
 
   await test.step("Tür 1 öffnen und richtig antworten", async () => {
-    await page
-      .getByAltText("Tür Nummer 1", { exact: true })
-      .click({ force: true })
+    await tap(page.getByAltText("Tür Nummer 1", { exact: true }), {
+      force: true,
+    })
     // The door opens for 6 seconds, then the door page appears.
     await expect(page).toHaveURL(new RegExp(`/${year}/1$`), {
       timeout: 15_000,
     })
     await expect(page.getByText(/Sobald du auf „Bereit“ tippst/)).toBeVisible()
-    await page.getByAltText("Bereit button").click({ force: true })
+    await tap(page.getByAltText("Bereit button"), { force: true })
     await expect(page.getByText(/Countdown: \d+/)).toBeVisible()
 
     await page.getByLabel(door1.answer.trim(), { exact: true }).check()
-    await page.getByRole("button", { name: "Bestätigen" }).click()
+    await tap(page.getByRole("button", { name: "Bestätigen" }))
 
     await expect(
       page.getByText(
@@ -158,10 +179,10 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
 
   await test.step("Passwort vergessen", async () => {
     await logOut(page)
-    await page.getByRole("button", { name: "Passwort vergessen?" }).click()
+    await tap(page.getByRole("button", { name: "Passwort vergessen?" }))
     await page.getByLabel("Deine E-Mail-Adresse").fill(email)
     const since = await requestMail(page, () =>
-      page.getByRole("button", { name: "E-Mail schicken" }).click(),
+      tap(page.getByRole("button", { name: "E-Mail schicken" })),
     )
     await expect(page.getByText(/Falls es zu .* ein Konto gibt/)).toBeVisible()
 
@@ -172,39 +193,40 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await expect(
       page.getByText("Gleich kannst du dir ein neues Passwort aussuchen."),
     ).toBeVisible()
-    await page.getByRole("button", { name: "Weiter" }).click()
+    await tap(page.getByRole("button", { name: "Weiter" }))
 
     await expect(page).toHaveURL(/\/passwort-neu$/)
+    await hydrated(page.getByLabel("Neues Passwort"))
     await page.getByLabel("Neues Passwort").fill(newPassword)
     await page.getByLabel("Passwort wiederholen").fill(newPassword)
-    await page.getByRole("button", { name: "Passwort speichern" }).click()
+    await tap(page.getByRole("button", { name: "Passwort speichern" }))
     await expect(page.getByText("Das hat geklappt!")).toBeVisible()
 
     await logOut(page)
     await page.getByLabel("Deine E-Mail-Adresse").fill(email)
     await page.getByLabel("Dein Passwort").fill(password)
-    await page.getByRole("button", { name: "Einloggen" }).click()
+    await tap(page.getByRole("button", { name: "Einloggen" }))
     await expect(page.locator("form [role=alert]")).toBeVisible()
 
     await page.getByLabel("Dein Passwort").fill(newPassword)
-    await page.getByRole("button", { name: "Einloggen" }).click()
+    await tap(page.getByRole("button", { name: "Einloggen" }))
     await expect(page).toHaveURL(/\/$/)
     await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
   })
 
   await test.step("Login-Code per E-Mail", async () => {
     await logOut(page)
-    await page.getByRole("button", { name: "Login-Code per E-Mail" }).click()
+    await tap(page.getByRole("button", { name: "Login-Code per E-Mail" }))
     await page.getByLabel("Deine E-Mail-Adresse").fill(email)
     const since = await requestMail(page, () =>
-      page.getByRole("button", { name: "Code schicken" }).click(),
+      tap(page.getByRole("button", { name: "Code schicken" })),
     )
     await expect(page.getByText(/Wir haben dir eine E-Mail an/)).toBeVisible()
 
     const mail = await waitForMail(email, since)
     expectGermanMail(mail, "Dein Login-Code für den Adventskalender")
     await page.getByLabel("Dein Code").fill(loginCode(mail))
-    await page.getByRole("button", { name: "Einloggen" }).click()
+    await tap(page.getByRole("button", { name: "Einloggen" }))
 
     await expect(page).toHaveURL(/\/$/)
     await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
