@@ -80,7 +80,9 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
   })
 
   await test.step("Tür 1 öffnen und richtig antworten", async () => {
-    await page.getByAltText("Tür Nummer 1").click({ force: true })
+    await page
+      .getByAltText("Tür Nummer 1", { exact: true })
+      .click({ force: true })
     // The door opens for 6 seconds, then the door page appears.
     await expect(page).toHaveURL(new RegExp(`/${year}/1$`), {
       timeout: 15_000,
@@ -136,10 +138,9 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
 
     await page.goto("/")
     for (const door of [1, 2]) {
-      await expect(page.getByAltText(`Tür Nummer ${door}`)).toHaveAttribute(
-        "src",
-        /door-answered/,
-      )
+      await expect(
+        page.getByAltText(`Tür Nummer ${door}`, { exact: true }),
+      ).toHaveAttribute("src", /door-answered/)
     }
   })
 
