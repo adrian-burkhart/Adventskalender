@@ -19,6 +19,17 @@
 
   --color-paper: #fbf3e2;
 
+  /* Line heights as in Tailwind v3 (fixed rem instead of ratios), so text
+     sits exactly as before with the larger base font size. */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
   /* Headings: the J from Lora, everything else from Fraunces. */
   --font-display: var(--font-lora-j), var(--font-fraunces), Georgia, serif;
   --font-door: var(--font-cochin), Georgia, serif;
