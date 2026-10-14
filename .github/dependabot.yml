@@ -1,0 +1,25 @@
+# Monthly update PRs. Security updates come separately, as soon as there
+# are any. The E2E workflow runs on each PR's preview.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
+    groups:
+      # Minor and patch updates of all packages in one PR.
+      minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # Major versions are updated by hand (breaking changes).
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]

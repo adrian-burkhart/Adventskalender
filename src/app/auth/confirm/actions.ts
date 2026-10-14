@@ -12,8 +12,10 @@ function field(formData: FormData, name: string): string | null {
 /**
  * Confirms a link from an auth e-mail. Runs on a button press, not on page
  * load, so mail scanners that open links can't use up the one-time token.
+ * Returns where to go next; the browser loads that page in full, so it
+ * starts with the new session (see ConfirmForm).
  */
-export async function confirmLink(formData: FormData) {
+export async function confirmLink(formData: FormData): Promise<string> {
   const tokenHash = field(formData, "token_hash")
   const type = parseEmailOtpType(field(formData, "type"))
   const code = field(formData, "code")
@@ -40,5 +42,5 @@ export async function confirmLink(formData: FormData) {
     redirect(`/auth/confirm?fehler=${encodeURIComponent(errorCode)}`)
   }
 
-  redirect(confirmTarget(type, next))
+  return confirmTarget(type, next)
 }

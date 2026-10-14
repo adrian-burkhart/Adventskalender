@@ -1,11 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
 import Footer from "@/components/footer"
-import { AuthForm, AuthSubmit, AuthText } from "@/components/auth-form"
+import { AuthText } from "@/components/auth-form"
 import { authErrorMessage } from "@/lib/auth/errors"
 import { parseEmailOtpType } from "@/lib/auth/redirect"
 import welcomeImage from "../../../../public/images/welcome.webp"
 import { confirmLink } from "./actions"
+import ConfirmForm from "./confirm-form"
 
 type SearchParams = Record<string, string | string[] | undefined>
 
@@ -53,7 +54,10 @@ export default async function ConfirmPage({
             </Link>
           </div>
         ) : (
-          <AuthForm action={confirmLink}>
+          <ConfirmForm
+            action={confirmLink}
+            submitLabel={isRecovery ? "Weiter" : "Einloggen"}
+          >
             <AuthText>
               {isRecovery
                 ? "Gleich kannst du dir ein neues Passwort aussuchen."
@@ -63,8 +67,7 @@ export default async function ConfirmPage({
             <input type="hidden" name="type" value={type ?? ""} />
             <input type="hidden" name="code" value={code} />
             <input type="hidden" name="next" value={next} />
-            <AuthSubmit>{isRecovery ? "Weiter" : "Einloggen"}</AuthSubmit>
-          </AuthForm>
+          </ConfirmForm>
         )}
         <Image src={welcomeImage} alt="" className="mt-6" />
       </div>
