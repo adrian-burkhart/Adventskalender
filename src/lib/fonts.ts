@@ -25,6 +25,9 @@ const loraJ = localFont({
   weight: "600",
   display: "swap",
   variable: "--font-lora-j",
+  // No Arial stand-in: it would cover every letter, not just the J, and
+  // hide Fraunces behind it.
+  adjustFontFallback: false,
 })
 
 /** Body text: a warm, easy-to-read serif. */

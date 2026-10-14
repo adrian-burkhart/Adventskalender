@@ -28,15 +28,11 @@ const Result = memo(
           className="h-auto w-72 animate-rise-in drop-shadow-[0_0_30px_rgb(254_240_138/0.25)] sm:w-80"
         />
         <h2 className="text-4xl">
-          <Headline result={result} />
+          <Headline result={result} doorNumber={doorNumber} />
         </h2>
         <div className="card flex w-full flex-col gap-3 px-5 py-5 text-lg">
           <Explanation result={result} />
           <Standing result={result} />
-          <p className="text-base text-candle/85">
-            An deinem Weihnachtsbaum hängt jetzt etwas Neues.
-          </p>
-          {!result.isCorrect && <Encouragement doorNumber={doorNumber} />}
         </div>
         <SolutionPicture result={result} />
         <Actions />
@@ -47,8 +43,20 @@ const Result = memo(
 
 // --- Shared texts --------------------------------------------------------------
 
-function Headline({ result }: { result: ResultData }) {
-  return result.isCorrect ? <>Richtig!</> : <>Diesmal leider nicht</>
+function Headline({
+  result,
+  doorNumber,
+}: {
+  result: ResultData
+  doorNumber: number
+}) {
+  if (result.isCorrect) return <>Richtig!</>
+  // After door 24 there is no tomorrow to try again.
+  return doorNumber === 24 ? (
+    <>Diesmal leider nicht</>
+  ) : (
+    <>Versuche es morgen nochmal</>
+  )
 }
 
 /** What happened, said kindly. */
@@ -78,14 +86,6 @@ function Explanation({ result }: { result: ResultData }) {
   )
 }
 
-function Encouragement({ doorNumber }: { doorNumber: number }) {
-  return doorNumber === 24 ? (
-    <p>Frohe Weihnachten!</p>
-  ) : (
-    <p>Morgen wartet schon das nächste Türchen auf dich.</p>
-  )
-}
-
 /** Points and place in the Rangliste. */
 function Standing({ result }: { result: ResultData }) {
   return (
@@ -95,11 +95,11 @@ function Standing({ result }: { result: ResultData }) {
           Deine Punktzahl ist jetzt: <strong>{result.score}</strong>
         </p>
       )}
-      {result.rank !== null && result.playerCount !== null && (
+      {result.rank !== null && (
         <p>
           {result.rank === 1
-            ? `Du stehst auf Platz 1 von ${result.playerCount}!`
-            : `Du bist jetzt auf Platz ${result.rank} von ${result.playerCount}.`}
+            ? "Du stehst auf Platz 1!"
+            : `Du bist jetzt auf Platz ${result.rank}.`}
         </p>
       )}
     </div>
