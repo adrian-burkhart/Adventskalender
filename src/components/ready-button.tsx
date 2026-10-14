@@ -26,7 +26,7 @@ const ReadyButton = memo(({ disabled, onClick }: ReadyButtonProps) => {
       width={300}
       onClick={handleClick}
       className={clsx(
-        "cursor-pointer transition-all duration-500 ease-out hover:translate-y-1.5 active:translate-y-2.5 active:transform",
+        "cursor-pointer transition-all duration-500 ease-out hover:translate-y-1.5 active:translate-y-2.5  active:transform",
         {
           "pointer-events-none grayscale": disabled,
         },
