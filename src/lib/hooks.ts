@@ -6,11 +6,6 @@ import { useUser, useSupabaseClient } from "@/lib/auth-context"
 import type { DoorState } from "./doors"
 import { apiFetch } from "./api-client"
 
-interface Score {
-  year: string
-  score: number
-}
-
 /* eslint-disable react-hooks/exhaustive-deps */
 export function useEffectOnce(fn: () => void) {
   useEffect(() => {
@@ -23,36 +18,75 @@ export interface Player {
   id: string
   created_at: string
   name: string
-  scores: Score[]
-  doors_opened: { year: string; door_number: number; isAnswered?: boolean }[]
 }
 
-export const usePlayers = () => {
+export interface LeaderboardEntry {
+  player_id: string
+  name: string
+  score: number
+  doors: number
+}
+
+export interface YearScore {
+  year: number
+  score: number
+  doors: number
+}
+
+/** Every player's points for one year, best first (computed in the DB). */
+export const useLeaderboard = (year: string | null) => {
   const supabaseClient = useSupabaseClient()
   const user = useUser()
 
-  const [data, setData] = useState<Player[] | null>(null)
+  const [data, setData] = useState<LeaderboardEntry[] | null>(null)
   const [error, setError] = useState<PostgrestError | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(true)
 
   useEffect(() => {
-    const loadData = async () => {
-      setLoading(true)
-      const { data, error } = await supabaseClient.from("players").select("*")
-      setLoading(false)
+    if (!user || !year) return
+    let cancelled = false
 
-      if (error) {
-        setError(error)
-        return
-      }
+    supabaseClient
+      .rpc("leaderboard", { p_year: Number(year) })
+      .then(({ data, error }) => {
+        if (cancelled) return
+        if (error) setError(error)
+        else setData(data as LeaderboardEntry[])
+        setLoading(false)
+      })
 
-      setData(data)
+    return () => {
+      cancelled = true
     }
+  }, [user, year, supabaseClient])
 
-    if (user) loadData()
+  return { entries: data, loading, error }
+}
+
+/** The logged-in player's points per year. */
+export const useMyScores = () => {
+  const supabaseClient = useSupabaseClient()
+  const user = useUser()
+
+  const [data, setData] = useState<YearScore[] | null>(null)
+  const [error, setError] = useState<PostgrestError | null>(null)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+
+    supabaseClient.rpc("my_scores").then(({ data, error }) => {
+      if (cancelled) return
+      if (error) setError(error)
+      else setData(data as YearScore[])
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [user, supabaseClient])
 
-  return { players: data, loading, error }
+  return { scores: data, error }
 }
 
 export const usePlayer = () => {
@@ -68,7 +102,7 @@ export const usePlayer = () => {
       setLoading(true)
       const { data, error } = await supabaseClient
         .from("players")
-        .select("*")
+        .select("id, created_at, name")
         .eq("id", user?.id)
         .single()
       setLoading(false)
@@ -96,10 +130,11 @@ export const useUpdatePlayerName = () => {
   const updatePlayerName = async (player: Player, newName: string) => {
     setLoading(true)
     setUpdateSuccess(false)
+    setError(null)
 
     const { error } = await supabaseClient
       .from("players")
-      .update({ name: newName })
+      .update({ name: newName.trim() })
       .eq("id", player.id)
 
     setLoading(false)

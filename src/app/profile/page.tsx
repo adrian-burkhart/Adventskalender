@@ -1,7 +1,7 @@
 "use client"
 
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
-import { usePlayer, useUpdatePlayerName } from "@/lib/hooks"
+import { useMyScores, usePlayer, useUpdatePlayerName } from "@/lib/hooks"
 import Layout from "@/components/layout"
 import { useState } from "react"
 import Button from "@/components/button"
@@ -9,6 +9,7 @@ import Button from "@/components/button"
 export default function Profile() {
   const [supabaseClient] = useState(() => createBrowserClient())
   const { player } = usePlayer()
+  const { scores } = useMyScores()
   const { updatePlayerName, loading, error, updateSuccess } =
     useUpdatePlayerName()
   const [newName, setNewName] = useState(player?.name ?? "")
@@ -65,16 +66,19 @@ export default function Profile() {
                 )}
                 {error && (
                   <div className="text-red-500">
-                    Das hat leider nicht geklappt. Bitte versuche es später noch
-                    einmal.
+                    {error.code === "23505"
+                      ? "Diesen Namen gibt es schon. Bitte wähle einen anderen."
+                      : error.code === "23514"
+                        ? "Der Name muss 1 bis 30 Zeichen lang sein."
+                        : "Das hat leider nicht geklappt. Bitte versuche es später noch einmal."}
                   </div>
                 )}
               </div>
 
               <div className="mt-4">Historie deiner Punkte:</div>
               <div>
-                {player.scores.map((score, i) => (
-                  <div key={i}>
+                {scores?.map((score) => (
+                  <div key={score.year}>
                     {score.year}: {score.score}
                   </div>
                 ))}
