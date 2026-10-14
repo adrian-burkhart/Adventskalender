@@ -359,7 +359,7 @@ function Stat({ value, label }: { value: number; label: string }) {
       <span className="font-door text-3xl text-candle sm:text-4xl">
         {value}
       </span>
-      <span className="text-sm leading-tight text-candle/85 sm:text-base">
+      <span className="text-sm leading-tight text-candle/85 sm:text-base sm:leading-6">
         {label}
       </span>
     </div>
