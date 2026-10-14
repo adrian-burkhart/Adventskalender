@@ -1,3 +1,5 @@
+"use client"
+
 import { memo, useState, useCallback, useEffect } from "react"
 import { useSelectedYear } from "@/lib/context"
 import doorClosedOne from "../../public/images/door-closed-1.webp"
@@ -6,12 +8,13 @@ import doorOpen from "../../public/images/door-open.webp"
 import doorAnswered from "../../public/images/door-answered.webp"
 import doorLocked from "../../public/images/door-locked.webp"
 import Image, { StaticImageData } from "next/image"
-// @ts-ignore
 import useSound from "use-sound"
-import { useDoors, DoorState, Year, Player } from "@/lib/hooks"
+import { useDoors, DoorState, Year } from "@/lib/hooks"
 import localFont from "next/font/local"
 import clsx from "clsx"
+import { ERROR_TEXT, LOADING_TEXT } from "@/lib/texts"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
+import { doorPath } from "@/lib/routes"
 
 function mapDoorStateToImageUrl(doorState: DoorState, variant: DoorVariant) {
   if (doorState === "open") {
@@ -41,31 +44,33 @@ interface DoorProps {
   doorState: DoorState
 }
 
-const Door = memo(({ delayedNavigation, imageUrl, doorNumber, doorState }: DoorProps) => {
-  const isAnswered = doorState === "answered"
+const Door = memo(
+  ({ delayedNavigation, imageUrl, doorNumber, doorState }: DoorProps) => {
+    const isAnswered = doorState === "answered"
 
-  return (
-    <div
-      onClick={delayedNavigation}
-      className={clsx(
-        "relative flex gap-2 transition-transform duration-200",
-        !isAnswered && "cursor-pointer hover:scale-105"
-      )}
-    >
+    return (
       <div
+        onClick={delayedNavigation}
         className={clsx(
-          "absolute inset-0 top-[40%] text-center text-2xl text-red-500 md:top-[40%] md:text-5xl",
-          myFont.className,
+          "relative flex gap-2 transition-transform duration-200",
+          !isAnswered && "cursor-pointer hover:scale-105",
         )}
       >
-        {doorNumber}
+        <div
+          className={clsx(
+            "absolute inset-0 top-[40%] text-center text-2xl text-red-500 md:top-[40%] md:text-5xl",
+            myFont.className,
+          )}
+        >
+          {doorNumber}
+        </div>
+        <div className="flex items-center justify-center shadow-md">
+          <Image src={imageUrl} alt={`Tür Nummer ${doorNumber}`} />
+        </div>
       </div>
-      <div className="flex items-center justify-center shadow-md">
-        <Image src={imageUrl} alt={`Tür Nummer ${doorNumber}`} />
-      </div>
-    </div>
-  )
-})
+    )
+  },
+)
 
 type DoorVariant = "closed-one" | "closed-two"
 
@@ -91,7 +96,7 @@ const CalendarDoor = memo(
     variant: DoorVariant
     doorNumber: number
   }) => {
-    const route = selectedYear ? `/${selectedYear.year}${doorNumber}` : ""
+    const route = selectedYear ? doorPath(selectedYear.year, doorNumber) : ""
 
     const [imageUrl, setImageUrl] = useState(
       mapDoorStateToImageUrl(doorState, variant),
@@ -130,7 +135,8 @@ const CalendarDoor = memo(
     }, [
       route,
       openDoor,
-      playChristmas, enabledTestMode,
+      playChristmas,
+      enabledTestMode,
       doorState,
       playUpsi,
       doorNumber,
@@ -150,31 +156,33 @@ const CalendarDoor = memo(
   },
 )
 
-const Calendar = memo(({ player }: { player: Player }) => {
+const Calendar = memo(() => {
   const { selectedYear } = useSelectedYear()
-  const { doorStates, openDoor, loading, error } = useDoors(
-    player,
-    selectedYear,
-  )
+  const { doorStates, openDoor, loading, error } = useDoors(selectedYear)
 
   const [playOpen] = useSound("/sounds/opening-door.mp3")
   const [playLocked] = useSound("/sounds/locked-door.mp3")
   const [playChristmas] = useSound("/sounds/christmas.mp3")
   const [playUpsi] = useSound("/sounds/upsi.mp3")
 
-  if (loading) {
-    return <div>Loading...</div>
-  }
-
-  if (error) {
-    return <div>{"Error"}</div>
-  }
-
   if (!selectedYear) {
     return <div>Kein Jahr ausgewählt</div>
   }
 
-  if (!selectedYear.questions) {
+  if (loading) {
+    return <div>{LOADING_TEXT}</div>
+  }
+
+  if (error) {
+    return <div>{ERROR_TEXT}</div>
+  }
+
+  // Past years without content (2024) say so; the current year always shows
+  // its doors, which stay locked until December.
+  if (
+    !selectedYear.questionCount &&
+    Number(selectedYear.year) < new Date().getFullYear()
+  ) {
     return <div>Keine Fragen für dieses Jahr</div>
   }
 

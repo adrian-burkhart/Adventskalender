@@ -1,16 +1,23 @@
+"use client"
+
 import { memo, useEffect, useRef, useState } from "react"
 
+function secondsLeft(deadline: number) {
+  return Math.max(0, Math.ceil((deadline - Date.now()) / 1000))
+}
+
+/** Counts down to the server's deadline, so a reload doesn't reset it. */
 const Countdown = memo(
   ({
-    time,
+    deadline,
     onComplete,
     isSubmitted,
   }: {
+    deadline: number
     isSubmitted: boolean
-    time: number
-    onComplete: (e?: React.FormEvent<HTMLFormElement>) => void
+    onComplete: () => void
   }) => {
-    const [count, setCount] = useState(time)
+    const [count, setCount] = useState(() => secondsLeft(deadline))
     const onCompleteRef = useRef(onComplete)
 
     useEffect(() => {
@@ -18,20 +25,18 @@ const Countdown = memo(
     }, [onComplete])
 
     useEffect(() => {
-      setCount(time)
-    }, [time])
-
-    useEffect(() => {
-      if (isSubmitted || count <= 0) {
-        if (count === 0 && !isSubmitted) {
+      if (isSubmitted) return
+      const tick = () => {
+        const left = secondsLeft(deadline)
+        setCount(left)
+        if (left === 0) {
+          clearInterval(timer)
           onCompleteRef.current()
         }
-        return
       }
-
-      const timer = setTimeout(() => setCount((prev) => prev - 1), 1000)
-      return () => clearTimeout(timer)
-    }, [count, isSubmitted])
+      const timer = setInterval(tick, 250)
+      return () => clearInterval(timer)
+    }, [deadline, isSubmitted])
 
     return (
       <div>

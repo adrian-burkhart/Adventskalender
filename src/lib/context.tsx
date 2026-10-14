@@ -1,33 +1,7 @@
-import {
-  ReactNode,
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react"
-import { dateNowUtc, dateTimeFromIso } from "./dateTime"
-import { last } from "lodash"
+"use client"
+
+import { ReactNode, createContext, useContext, useState } from "react"
 import { Year, useYears } from "./hooks"
-
-function getInitialYear(years: Year[]) {
-  const now = dateNowUtc()
-
-  const currentYear = years?.find((year) =>
-    dateTimeFromIso(year.year).hasSame(now, "year"),
-  )
-
-  const lastYear = last(years)
-
-  if (currentYear) {
-    return currentYear
-  }
-
-  if (lastYear) {
-    return lastYear
-  }
-
-  return null
-}
 
 const YearContext = createContext<{
   selectedYear: Year | null
@@ -43,14 +17,11 @@ export const useSelectedYear = () => {
 }
 
 export const YearProvider = ({ children }: { children: ReactNode }) => {
-  const [selectedYear, setSelectedYear] = useState<Year | null>(null)
-  const { years } = useYears()
-
-  useEffect(() => {
-    if (years) {
-      setSelectedYear(getInitialYear(years))
-    }
-  }, [years])
+  const [chosenYear, setSelectedYear] = useState<Year | null>(null)
+  const { years, currentYear } = useYears()
+  // The calendar shows the current year unless an admin picks another.
+  const selectedYear =
+    chosenYear ?? years?.find((y) => y.year === currentYear) ?? null
 
   return (
     <YearContext.Provider value={{ selectedYear, setSelectedYear }}>

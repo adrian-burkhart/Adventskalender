@@ -1,9 +1,9 @@
+"use client"
+
 import { ReactNode, memo } from "react"
 import Navbar from "./navbar"
-import { usePlayer, useYears } from "@/lib/hooks"
+import { useMyScores, useYears } from "@/lib/hooks"
 import { useSelectedYear } from "@/lib/context"
-import { dateTimeFromIso } from "@/lib/dateTime"
-import Head from "next/head"
 import Footer from "./footer"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 
@@ -12,15 +12,10 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
   const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
   const { selectedYear, setSelectedYear } = useSelectedYear()
-  const { player } = usePlayer()
+  const { scores } = useMyScores()
 
   const currentScore = selectedYear
-    ? player?.scores.find((score) =>
-      dateTimeFromIso(score.year).hasSame(
-        dateTimeFromIso(selectedYear.year),
-        "year",
-      ),
-    )
+    ? scores?.find((score) => score.year === Number(selectedYear.year))
     : null
 
   const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -30,9 +25,6 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
 
   return (
     <>
-      <Head>
-        <title>Adventskalender der Familie Haas</title>
-      </Head>
       <Navbar />
       {enabledTestMode && years && (
         <select
@@ -40,7 +32,9 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
           value={selectedYear?.year}
           className="bg-red-500"
         >
-          {years?.map((year) => <option key={year.year}>{year.year}</option>)}
+          {years?.map((year) => (
+            <option key={year.year}>{year.year}</option>
+          ))}
         </select>
       )}
       {currentScore && <div>Deine Punkte: {currentScore.score}</div>}
