@@ -1,0 +1,59 @@
+name: E2E
+
+# Runs the end-to-end journey (e2e/) against a preview deployment, which
+# uses the staging database. Never against production.
+on:
+  deployment_status:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Preview URL to test (https://….vercel.app)
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  # One run at a time: the teardown deletes all test accounts.
+  group: e2e
+  cancel-in-progress: false
+
+jobs:
+  e2e:
+    # Skipped until the repository has the E2E_MAIL_DOMAIN variable.
+    if: >-
+      vars.E2E_MAIL_DOMAIN != '' &&
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.deployment_status.state == 'success' &&
+        startsWith(github.event.deployment_status.environment, 'Preview')))
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      E2E_BASE_URL: ${{ inputs.base_url || github.event.deployment_status.environment_url }}
+      E2E_MAIL_DOMAIN: ${{ vars.E2E_MAIL_DOMAIN }}
+      E2E_RESEND_API_KEY: ${{ secrets.E2E_RESEND_API_KEY }}
+      E2E_SANITY_TOKEN: ${{ secrets.E2E_SANITY_TOKEN }}
+      E2E_SUPABASE_URL: https://ezpfqoydxccofpxvklvp.supabase.co
+      E2E_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
+    steps:
+      - name: Refuse production
+        run: |
+          case "$E2E_BASE_URL" in
+            *adventskalender-haas.de*) echo "Not against production"; exit 1 ;;
+          esac
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 14
