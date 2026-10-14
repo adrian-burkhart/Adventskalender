@@ -83,6 +83,18 @@ export const DESIGN_OPTIONS = {
       hint: "Weiche Flocken im Hintergrund, ein paar Kristalle ganz vorne.",
     },
   ],
+  countdown: [
+    {
+      id: "bild",
+      name: "Gemalter Wichtel",
+      hint: "Dein gemalter Wichtel denkt nach, daneben entsteht ein Schneemann.",
+    },
+    {
+      id: "gezeichnet",
+      name: "Zwei gezeichnete Wichtel",
+      hint: "Zwei in SVG nachgezeichnete Wichtel schieben den Schneemann zusammen.",
+    },
+  ],
   present: [
     {
       id: "deckel",
@@ -112,6 +124,7 @@ const DEFAULTS: Choices = {
   buttons: "schlicht",
   snow: "punkte",
   present: "deckel",
+  countdown: "bild",
 }
 
 const STORAGE_KEY = "DESIGN_VARIANTS"

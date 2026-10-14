@@ -3,13 +3,15 @@
 import { useLeaderboard, usePlayer, type LeaderboardEntry } from "@/lib/hooks"
 import Layout from "@/components/layout"
 import { useSelectedYear } from "@/lib/context"
-import ranglisteImage from "../../public/images/rangliste.webp"
-import { memo, useState } from "react"
+// The picture without the parachute Wichtel: he flies on his own.
+import ranglisteImage from "../../public/images/rangliste-ohne-wichtel.webp"
+import { memo, useRef, useState } from "react"
 import Image from "next/image"
 import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import { ranks } from "@/lib/ranking"
 import ChristmasTree from "./christmas-tree"
+import DriftingWichtel from "./drifting-wichtel"
 import Loading from "./loading"
 
 const Rangliste = memo(
@@ -29,6 +31,7 @@ const Rangliste = memo(
     const { selectedYear } = useSelectedYear()
     const { player } = usePlayer()
     const [chosenYear, setChosenYear] = useState<string | null>(null)
+    const picture = useRef<HTMLDivElement>(null)
     const year = chosenYear ?? selectedYear?.year ?? initial?.year ?? null
     const { entries, error, loading } = useLeaderboard(year, initial)
 
@@ -52,11 +55,15 @@ const Rangliste = memo(
     return (
       <Layout>
         <div className="flex w-full flex-col items-center gap-8">
-          <Image
-            src={ranglisteImage}
-            alt="Rangliste"
-            className="h-auto w-full max-w-md"
-          />
+          <div ref={picture} className="w-full max-w-md">
+            <Image
+              src={ranglisteImage}
+              alt="Rangliste"
+              priority
+              className="h-auto w-full"
+            />
+          </div>
+          <DriftingWichtel picture={picture} />
           {years.length > 1 ? (
             <select
               aria-label="Jahr"

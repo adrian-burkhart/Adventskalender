@@ -5,6 +5,10 @@ import Image from "next/image"
 import { memo, useEffect, useRef, useState } from "react"
 import { QUESTION_SECONDS } from "@/lib/doors"
 import thinkingImage from "../../../public/images/thinking.webp"
+import { useDesign, type DesignChoice } from "@/lib/design-variants"
+import { DrawnWichtel, ORANGE_WICHTEL, RED_WICHTEL } from "./drawn-wichtel"
+
+export type CountdownVariant = DesignChoice<"countdown">
 
 function msLeft(deadline: number) {
   return Math.max(0, deadline - Date.now())
@@ -19,11 +23,15 @@ const Countdown = memo(
     deadline,
     onComplete,
     isSubmitted,
+    variant,
   }: {
     deadline: number
     isSubmitted: boolean
     onComplete: () => void
+    /** Overrides the chosen design (for /vorschau). */
+    variant?: CountdownVariant
   }) => {
+    const chosen = useDesign("countdown")
     const [left, setLeft] = useState(() => msLeft(deadline))
     const onCompleteRef = useRef(onComplete)
 
@@ -47,7 +55,13 @@ const Countdown = memo(
 
     const seconds = Math.ceil(left / 1000)
     const fraction = Math.min(1, left / (QUESTION_SECONDS * 1000))
-    return <SnowmanCountdown seconds={seconds} fraction={fraction} />
+    return (
+      <SnowmanCountdown
+        seconds={seconds}
+        fraction={fraction}
+        variant={variant ?? chosen}
+      />
+    )
   },
 )
 
@@ -64,7 +78,9 @@ function stage(progress: number, from: number, to: number) {
 export function SnowmanCountdown({
   seconds,
   fraction,
+  variant,
 }: {
+  variant: CountdownVariant
   /** Whole seconds left, as shown. */
   seconds: number
   /** 1 at the start, 0 when the time is up. */
@@ -93,6 +109,50 @@ export function SnowmanCountdown({
       </g>
     )
 
+  // The snowman stands right of the painted Wichtel, or between the two
+  // drawn ones.
+  const dx = variant === "gezeichnet" ? -40 : 0
+  const snowman = (
+    <g transform={`translate(${dx} 0)`}>
+      {ball(200, 142, 32, bottom)}
+      {ball(200, 92, 23, middle)}
+      {ball(200, 54, 17, head)}
+      {face > 0 && (
+        <g opacity={face}>
+          <circle cx="194" cy="50" r="2.2" fill="#2b2b2b" />
+          <circle cx="206" cy="50" r="2.2" fill="#2b2b2b" />
+          <path d="M200 56 l14 3 l-14 2 z" fill="#e8812d" />
+          <circle cx="200" cy="84" r="2.6" fill="#2b2b2b" />
+          <circle cx="200" cy="96" r="2.6" fill="#2b2b2b" />
+          <circle cx="200" cy="133" r="2.8" fill="#2b2b2b" />
+        </g>
+      )}
+      {hat > 0 && (
+        <g
+          style={{
+            transform: `translateY(${(1 - hat) * -30}px)`,
+            opacity: hat,
+          }}
+        >
+          {/* A red Wichtel hat with a white rim. */}
+          <path d="M184 40 Q200 2 228 12 Q212 18 216 40 Z" fill="#c0392b" />
+          <ellipse cx="200" cy="40" rx="18" ry="5" fill="#f3f3f3" />
+          <circle cx="229" cy="13" r="4.5" fill="#f3f3f3" />
+        </g>
+      )}
+      {scarf > 0 && (
+        <g opacity={scarf}>
+          <path
+            d="M182 70 Q200 78 218 70 L218 76 Q200 84 182 76 Z"
+            fill="#2f7a40"
+          />
+          <path d="M210 76 l6 20 l-7 1 l-4 -19 z" fill="#2f7a40" />
+        </g>
+      )}
+    </g>
+  )
+  const building = seconds > 0 && progress < 1
+
   return (
     <div
       role="timer"
@@ -117,6 +177,22 @@ export function SnowmanCountdown({
               <feDisplacementMap in="SourceGraphic" scale="3" />
               <feGaussianBlur stdDeviation="0.7" />
             </filter>
+            <filter
+              id="painted-soft"
+              x="-10%"
+              y="-10%"
+              width="120%"
+              height="120%"
+            >
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="0.08"
+                numOctaves="2"
+                seed="5"
+              />
+              <feDisplacementMap in="SourceGraphic" scale="1.5" />
+              <feGaussianBlur stdDeviation="0.45" />
+            </filter>
             <radialGradient id="snowball" cx="38%" cy="32%" r="75%">
               <stop offset="0%" stopColor="#ffffff" />
               <stop offset="55%" stopColor="#e9eff6" />
@@ -137,55 +213,35 @@ export function SnowmanCountdown({
               fill="url(#snowbank)"
               opacity="0.95"
             />
-            {ball(200, 142, 32, bottom)}
-            {ball(200, 92, 23, middle)}
-            {ball(200, 54, 17, head)}
-            {face > 0 && (
-              <g opacity={face}>
-                <circle cx="194" cy="50" r="2.2" fill="#2b2b2b" />
-                <circle cx="206" cy="50" r="2.2" fill="#2b2b2b" />
-                <path d="M200 56 l14 3 l-14 2 z" fill="#e8812d" />
-                <circle cx="200" cy="84" r="2.6" fill="#2b2b2b" />
-                <circle cx="200" cy="96" r="2.6" fill="#2b2b2b" />
-                <circle cx="200" cy="133" r="2.8" fill="#2b2b2b" />
-              </g>
-            )}
-            {hat > 0 && (
-              <g
-                style={{
-                  transform: `translateY(${(1 - hat) * -30}px)`,
-                  opacity: hat,
-                }}
-              >
-                {/* A red Wichtel hat with a white rim. */}
-                <path
-                  d="M184 40 Q200 2 228 12 Q212 18 216 40 Z"
-                  fill="#c0392b"
-                />
-                <ellipse cx="200" cy="40" rx="18" ry="5" fill="#f3f3f3" />
-                <circle cx="229" cy="13" r="4.5" fill="#f3f3f3" />
-              </g>
-            )}
-            {scarf > 0 && (
-              <g opacity={scarf}>
-                <path
-                  d="M182 70 Q200 78 218 70 L218 76 Q200 84 182 76 Z"
-                  fill="#2f7a40"
-                />
-                <path d="M210 76 l6 20 l-7 1 l-4 -19 z" fill="#2f7a40" />
-              </g>
-            )}
+            {snowman}
           </g>
-        </svg>
-        <Image
-          src={thinkingImage}
-          alt=""
-          priority
-          className={clsx(
-            "wichtel-rock absolute bottom-1 left-0 h-auto w-32",
-            hurry && "wichtel-rock-hurry",
+          {variant === "gezeichnet" && (
+            <g filter="url(#painted-soft)">
+              <g className={clsx(building && "wichtel-push")}>
+                <g transform="translate(30 42) scale(0.9)">
+                  <DrawnWichtel look={RED_WICHTEL} />
+                </g>
+              </g>
+              <g className={clsx(building && "wichtel-push wichtel-push-late")}>
+                <g transform="translate(290 42) scale(-0.9 0.9)">
+                  <DrawnWichtel look={ORANGE_WICHTEL} />
+                </g>
+              </g>
+            </g>
           )}
-        />
+          <g></g>
+        </svg>
+        {variant === "gezeichnet" ? null : (
+          <Image
+            src={thinkingImage}
+            alt=""
+            priority
+            className={clsx(
+              "wichtel-rock absolute bottom-1 left-0 h-auto w-32",
+              hurry && "wichtel-rock-hurry",
+            )}
+          />
+        )}
       </div>
       <div aria-hidden className="text-center leading-none">
         <span

@@ -5,7 +5,7 @@ import { useState, useSyncExternalStore, type ReactNode } from "react"
 import Layout from "@/components/layout"
 import Button from "@/components/button"
 import Loading from "@/components/loading"
-import Countdown from "@/components/door/countdown"
+import Countdown, { type CountdownVariant } from "@/components/door/countdown"
 import Present, { type PresentVariant } from "@/components/door/present"
 import Result, { type ResultData } from "@/components/door/result"
 import ChristmasTree from "@/components/christmas-tree"
@@ -161,9 +161,11 @@ export default function Vorschau() {
         <Section
           id="countdown"
           title="Countdown"
-          intro="Der Wichtel denkt nach, während neben ihm ein Schneemann entsteht. Ist der Schneemann fertig, ist die Zeit um."
+          intro="Neben den Wichteln entsteht ein Schneemann. Ist er fertig, ist die Zeit um. Vorschlag 2 sind zwei in SVG nachgezeichnete Wichtel, kein gemaltes Bild."
         >
-          <CountdownDemo />
+          <Tiles part="countdown">
+            {(id) => <CountdownDemo variant={id} />}
+          </Tiles>
         </Section>
 
         <ResultSection />
@@ -173,7 +175,7 @@ export default function Vorschau() {
         <Section
           id="rangliste"
           title="Rangliste"
-          intro="„Gemeinsam geschafft“ über der bekannten Liste, und neben jedem Namen der eigene Weihnachtsbaum."
+          intro="„Gemeinsam geschafft“ über der bekannten Liste, und neben jedem Namen der eigene Weihnachtsbaum. Den Fallschirm-Wichtel siehst du auf der echten Rangliste."
         >
           <div className="flex justify-center">
             <Board entries={demoEntries} myId={ME} unlocked={10} />
@@ -267,17 +269,18 @@ function Tiles<P extends DesignPart>({
   )
 }
 
-function CountdownDemo() {
+function CountdownDemo({ variant }: { variant: string }) {
   const [deadline, setDeadline] = useState(
     () => Date.now() + QUESTION_SECONDS * 1000,
   )
   return (
-    <div className="card mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 py-6">
+    <div className="flex w-full flex-col items-center gap-4">
       <Countdown
         key={deadline}
         deadline={deadline}
         isSubmitted={false}
         onComplete={() => {}}
+        variant={variant as CountdownVariant}
       />
       <div className="flex flex-wrap justify-center gap-2">
         <button

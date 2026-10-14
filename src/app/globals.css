@@ -365,6 +365,35 @@ html .btn.btn:disabled::after {
   animation-duration: 1.6s;
 }
 
+/* The drawn Wichtel push the snowballs. */
+.wichtel-push {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: push 1.3s ease-in-out infinite;
+}
+.wichtel-push-late {
+  animation-name: push-left;
+  animation-delay: -0.65s;
+}
+
+@keyframes push {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  50% {
+    transform: translateX(4px) rotate(3deg);
+  }
+}
+@keyframes push-left {
+  0%,
+  100% {
+    transform: translateX(0) rotate(0);
+  }
+  50% {
+    transform: translateX(-4px) rotate(-3deg);
+  }
+}
 @keyframes rock {
   0%,
   100% {
@@ -507,6 +536,7 @@ html .btn.btn:disabled::after {
 
 @media (prefers-reduced-motion: reduce) {
   .wichtel-rock,
+  .wichtel-push,
   .present-breathe,
   .animate-bob,
   .animate-glow {
