@@ -62,7 +62,7 @@ const ChristmasTree = memo(
   }) => {
     const count = Math.min(ornaments, DOOR_COUNT)
     return (
-      <div className={clsx("relative aspect-[941/1070]", className)}>
+      <div className={clsx("relative aspect-941/1070", className)}>
         <Image
           src={starTree}
           alt=""

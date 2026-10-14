@@ -17,14 +17,14 @@ const LINKS = [
 const Navbar = memo(() => {
   const pathname = usePathname()
   return (
-    <nav className="order-last basis-full sm:order-none sm:basis-auto">
+    <nav className="order-last basis-full sm:order-0 sm:basis-auto">
       <ul className="flex items-center justify-center gap-1 sm:justify-end">
         {LINKS.map((link) => (
           <li key={link.href}>
             <Link
               href={link.href}
               aria-current={pathname === link.href ? "page" : undefined}
-              className="block rounded-full px-3 py-1.5 text-base text-candle/85 hover:text-candle focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/60 aria-[current=page]:text-candle aria-[current=page]:underline aria-[current=page]:decoration-gold aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
+              className="block rounded-full px-3 py-1.5 text-base text-candle/85 hover:text-candle focus-visible:ring-4 focus-visible:ring-gold/60 focus-visible:outline-hidden aria-[current=page]:text-candle aria-[current=page]:underline aria-[current=page]:decoration-gold aria-[current=page]:decoration-2 aria-[current=page]:underline-offset-8"
             >
               {link.text}
             </Link>

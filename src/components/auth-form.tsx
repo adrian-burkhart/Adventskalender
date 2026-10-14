@@ -36,7 +36,7 @@ export function AuthField({
       <input
         id={id}
         name={id}
-        className="w-full rounded-lg border border-gold/50 bg-black/30 px-4 py-3 text-base text-white caret-white outline-none placeholder:text-white/60 hover:border-gold focus:border-gold focus:ring-2 focus:ring-gold/40"
+        className="w-full rounded-lg border border-gold/50 bg-black/30 px-4 py-3 text-base text-white caret-white outline-hidden placeholder:text-white/60 hover:border-gold focus:border-gold focus:ring-2 focus:ring-gold/40"
         {...rest}
       />
     </div>

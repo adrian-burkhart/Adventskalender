@@ -124,7 +124,7 @@ const QuestionStep = memo(
           />
         </div>
         <div className="flex w-full flex-col items-center gap-4 md:order-1">
-          <h1 className="card w-full px-5 py-4 text-center font-body text-xl font-semibold not-italic">
+          <h1 className="w-full card px-5 py-4 text-center font-body text-xl font-semibold not-italic">
             {step.question}
           </h1>
           <form
@@ -136,7 +136,7 @@ const QuestionStep = memo(
               {step.options.map((option, i) => (
                 <label
                   key={i}
-                  className="flex min-h-[3rem] cursor-pointer items-center gap-3 rounded-2xl border-2 border-gold/40 bg-black/30 px-4 py-2 text-base transition hover:border-gold hover:bg-black/40 has-[:checked]:border-gold has-[:checked]:bg-gold has-[:checked]:text-pine-950 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-gold/60"
+                  className="flex min-h-12 cursor-pointer items-center gap-3 rounded-2xl border-2 border-gold/40 bg-black/30 px-4 py-2 text-base transition hover:border-gold hover:bg-black/40 has-checked:border-gold has-checked:bg-gold has-checked:text-pine-950 has-focus-visible:ring-4 has-focus-visible:ring-gold/60"
                 >
                   <input
                     value={option}

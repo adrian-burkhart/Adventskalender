@@ -81,7 +81,7 @@ export default function DriftingWichtel({
     <div
       ref={ref}
       aria-hidden
-      className="pointer-events-none fixed left-0 top-0 -z-[1] opacity-0 transition-opacity duration-500"
+      className="pointer-events-none fixed top-0 left-0 z-[-1] opacity-0 transition-opacity duration-500"
       style={{ transformOrigin: "50% 15%" }}
     >
       <Image src={parachuteWichtel} alt="" className="h-auto w-full" />

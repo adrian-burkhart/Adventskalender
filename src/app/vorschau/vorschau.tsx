@@ -60,7 +60,7 @@ export default function Vorschau() {
   return (
     <Layout>
       <div className="flex w-full max-w-4xl flex-col gap-14 px-1">
-        <header className="card mx-auto max-w-2xl px-6 py-5 text-center">
+        <header className="mx-auto max-w-2xl card px-6 py-5 text-center">
           <h1 className="text-4xl">Vorschau</h1>
           <p className="mt-3 text-lg">
             Alles, was man sonst erst nach dem Beantworten eines Türchens sieht,
@@ -171,7 +171,7 @@ function CountdownDemo() {
     () => Date.now() + QUESTION_SECONDS * 1000,
   )
   return (
-    <div className="card mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 py-6">
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 card px-4 py-6">
       <Countdown
         key={deadline}
         deadline={deadline}
@@ -197,7 +197,7 @@ function AnticipationDemo() {
   const [round, setRound] = useState(0)
   const [done, setDone] = useState(false)
   return (
-    <div className="card mx-auto flex w-full max-w-md flex-col items-center gap-2 px-4 py-6">
+    <div className="mx-auto flex w-full max-w-md flex-col items-center gap-2 card px-4 py-6">
       {done ? (
         <div className="flex h-80 flex-col items-center justify-center gap-4 text-center">
           <p className="text-lg">Jetzt käme das Ergebnis.</p>
@@ -263,7 +263,7 @@ function TreeSection() {
       title="Weihnachtsbaum"
       intro="Für jedes beantwortete Türchen hängt etwas am Baum, egal ob richtig oder falsch: meist eine Kugel, jedes dritte Mal ein Stern."
     >
-      <div className="card mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 py-6">
+      <div className="mx-auto flex w-full max-w-md flex-col items-center gap-4 card px-4 py-6">
         <ChristmasTree ornaments={count} className="w-64" />
         <label className="flex w-full flex-col items-center gap-2 text-base">
           Beantwortete Türchen: {count}

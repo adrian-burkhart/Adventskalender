@@ -35,7 +35,7 @@ const Result = memo(
         >
           <Headline result={result} doorNumber={doorNumber} />
         </h2>
-        <div className="card flex w-full flex-col gap-3 px-5 py-5 text-lg">
+        <div className="flex w-full flex-col gap-3 card px-5 py-5 text-lg">
           <Explanation result={result} />
           <Standing result={result} />
         </div>
@@ -118,7 +118,7 @@ function Standing({ result }: { result: ResultData }) {
 function SolutionPicture({ result }: { result: ResultData }) {
   if (!result.image) return null
   return (
-    <div className="rotate-1 rounded-sm bg-white p-2 pb-6 shadow-lg">
+    <div className="rotate-1 rounded-xs bg-white p-2 pb-6 shadow-lg">
       <Image
         width="0"
         height="0"
