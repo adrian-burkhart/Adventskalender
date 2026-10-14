@@ -33,6 +33,7 @@ const config: Config = {
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
+        door: ["var(--font-cochin)", "Georgia", "serif"],
         body: ["var(--font-body)", "Georgia", "serif"],
       },
       animation: {

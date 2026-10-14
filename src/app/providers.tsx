@@ -5,6 +5,7 @@ import type { AppData } from "@/lib/app-data"
 import { AuthProvider } from "@/lib/auth-context"
 import { AppDataProvider } from "@/lib/context"
 import { DesignProvider } from "@/lib/design-variants"
+import Snowfall from "@/components/snowfall"
 import { FeatureFlagProvider } from "@/lib/feature-flags"
 
 export default function Providers({
@@ -18,7 +19,10 @@ export default function Providers({
     <AuthProvider initialUser={initial?.user ?? null}>
       <FeatureFlagProvider>
         <AppDataProvider initial={initial}>
-          <DesignProvider>{children}</DesignProvider>
+          <DesignProvider>
+            <Snowfall />
+            {children}
+          </DesignProvider>
         </AppDataProvider>
       </FeatureFlagProvider>
     </AuthProvider>

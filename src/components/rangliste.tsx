@@ -9,10 +9,8 @@ import Image from "next/image"
 import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import { ranks } from "@/lib/ranking"
-import { useDesign, type DesignChoice } from "@/lib/design-variants"
+import ChristmasTree from "./christmas-tree"
 import Loading from "./loading"
-
-export type RanglisteVariant = DesignChoice<"rangliste">
 
 const Rangliste = memo(
   ({
@@ -102,16 +100,15 @@ export interface BoardProps {
   myId: string | null
   /** Doors open so far in that year. */
   unlocked: number
-  /** Overrides the chosen design (for /vorschau). */
-  variant?: RanglisteVariant
 }
 
-export function Board({ variant, ...props }: BoardProps) {
-  const chosen = useDesign("rangliste")
-  return (variant ?? chosen) === "klassisch" ? (
-    <ClassicBoard {...props} />
-  ) : (
-    <FamilyBoard {...props} />
+/** What everyone did together, then the list with everyone's tree. */
+export function Board(props: BoardProps) {
+  return (
+    <div className="flex w-full max-w-xl flex-col items-center gap-8">
+      <Together {...props} />
+      <List {...props} />
+    </div>
   )
 }
 
@@ -142,7 +139,7 @@ function Medal({ rank, size = 36 }: { rank: number; size?: number }) {
         textAnchor="middle"
         fontSize="16"
         fill="#3b2a1a"
-        className="font-display"
+        className="font-door"
       >
         {rank}
       </text>
@@ -150,19 +147,17 @@ function Medal({ rank, size = 36 }: { rank: number; size?: number }) {
   )
 }
 
-// --- Version 1: the familiar list, improved ----------------------------------
-
-function ClassicBoard({ entries, myId }: Omit<BoardProps, "variant">) {
+function List({ entries, myId }: BoardProps) {
   const places = ranks(entries)
   return (
-    <ol className="flex w-full max-w-md flex-col gap-3">
+    <ol className="flex w-full flex-col gap-3">
       {entries.map((entry, i) => {
         const isMe = !!myId && entry.player_id === myId
         return (
           <li
             key={entry.player_id ?? `alt-${i}`}
             className={clsx(
-              "flex items-center gap-3 rounded-2xl border-2 px-3 py-2 shadow-md",
+              "flex items-center gap-3 rounded-2xl border-2 py-2 pl-3 pr-2 shadow-md",
               isMe
                 ? "border-gold bg-gold/15"
                 : "border-transparent bg-black/40",
@@ -172,7 +167,7 @@ function ClassicBoard({ entries, myId }: Omit<BoardProps, "variant">) {
               {places[i] <= 3 && entry.score > 0 ? (
                 <Medal rank={places[i]} />
               ) : (
-                <span className="font-display text-2xl">{places[i]}.</span>
+                <span className="font-door text-2xl">{places[i]}.</span>
               )}
             </div>
             <div className="flex min-w-0 flex-1 flex-col">
@@ -185,6 +180,10 @@ function ClassicBoard({ entries, myId }: Omit<BoardProps, "variant">) {
               </div>
               <div className="text-base">Punkte: {entry.score}</div>
             </div>
+            <ChristmasTree
+              ornaments={entry.doors}
+              className="w-16 shrink-0 sm:w-20"
+            />
           </li>
         )
       })}
@@ -192,214 +191,58 @@ function ClassicBoard({ entries, myId }: Omit<BoardProps, "variant">) {
   )
 }
 
-// --- Version 2: the family's Rangliste ---------------------------------------
-
-function FamilyBoard({ entries, myId, unlocked }: Omit<BoardProps, "variant">) {
-  const places = ranks(entries)
+function Together({ entries, unlocked }: BoardProps) {
   const playing = entries.filter((e) => e.doors > 0 || e.score > 0)
-  const waiting = entries.filter((e) => e.doors === 0 && e.score === 0)
   const totalDoors = playing.reduce((sum, e) => sum + e.doors, 0)
   const totalPoints = playing.reduce((sum, e) => sum + e.score, 0)
   const possible = playing.length * unlocked
 
-  const podium = [1, 2, 3].map((place) =>
-    entries.filter((e, i) => places[i] === place && e.score > 0),
-  )
-  const rest = entries
-    .map((entry, i) => ({ entry, place: places[i] }))
-    .filter(
-      ({ entry, place }) =>
-        (place > 3 || entry.score === 0) &&
-        (entry.doors > 0 || entry.score > 0),
-    )
-
   return (
-    <div className="flex w-full max-w-2xl flex-col items-center gap-8">
-      {/* What everyone has done together. */}
-      <section className="card w-full px-5 py-5 text-center">
-        <h2 className="text-2xl">Gemeinsam geschafft</h2>
-        <div className="mt-4 grid grid-cols-3 gap-2">
-          <Stat
-            value={playing.length}
-            label={playing.length === 1 ? "Mitspieler" : "Mitspielende"}
-          />
-          <Stat value={totalDoors} label="Türchen geöffnet" />
-          <Stat value={totalPoints} label="Punkte gesammelt" />
-        </div>
-        {possible > 0 && (
-          <div className="mt-5">
+    <section className="card w-full px-5 py-5 text-center">
+      <h2 className="text-2xl">Gemeinsam geschafft</h2>
+      <div className="mt-4 grid grid-cols-3 gap-2">
+        <Stat
+          value={playing.length}
+          label={playing.length === 1 ? "Mitspieler" : "Mitspielende"}
+        />
+        <Stat value={totalDoors} label="Türchen geöffnet" />
+        <Stat value={totalPoints} label="Punkte gesammelt" />
+      </div>
+      {possible > 0 && (
+        <div className="mt-5">
+          <div
+            className="h-4 w-full overflow-hidden rounded-full bg-black/40"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={possible}
+            aria-valuenow={totalDoors}
+            aria-label="Gemeinsam geöffnete Türchen"
+          >
             <div
-              className="h-4 w-full overflow-hidden rounded-full bg-black/40"
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={possible}
-              aria-valuenow={totalDoors}
-              aria-label="Gemeinsam geöffnete Türchen"
-            >
-              <div
-                className="h-full rounded-full bg-gradient-to-r from-berry via-gold to-candle"
-                style={{
-                  width: `${Math.min(100, (totalDoors / possible) * 100)}%`,
-                }}
-              />
-            </div>
-            <p className="mt-2 text-base text-candle/85">
-              {totalDoors} von {possible} möglichen Türchen sind schon offen.
-            </p>
+              className="h-full rounded-full bg-gradient-to-r from-berry via-gold to-candle"
+              style={{
+                width: `${Math.min(100, (totalDoors / possible) * 100)}%`,
+              }}
+            />
           </div>
-        )}
-      </section>
-
-      {/* The podium: the middle step is the highest. */}
-      {podium[0].length > 0 && (
-        <section className="w-full" aria-label="Die ersten drei Plätze">
-          <div className="grid grid-cols-3 items-end gap-2 sm:gap-4">
-            {[1, 0, 2].map((index) => (
-              <Step
-                key={index}
-                place={index + 1}
-                entries={podium[index]}
-                myId={myId}
-                height={["h-32", "h-24", "h-16"][index]}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {rest.length > 0 && (
-        <ol className="flex w-full flex-col gap-2">
-          {rest.map(({ entry, place }, i) => {
-            const isMe = !!myId && entry.player_id === myId
-            return (
-              <li
-                key={entry.player_id ?? `alt-${i}`}
-                className={clsx(
-                  "flex items-center gap-3 rounded-2xl border-2 px-4 py-2",
-                  isMe
-                    ? "border-gold bg-gold/15"
-                    : "border-transparent bg-black/35",
-                )}
-              >
-                <span className="w-8 shrink-0 font-display text-2xl">
-                  {place}.
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="truncate text-lg text-white">
-                    {entry.name}
-                    {isMe && <span className="ml-2 text-candle">(Du)</span>}
-                  </div>
-                  <DoorBar doors={entry.doors} unlocked={unlocked} />
-                </div>
-                <div className="text-right">
-                  <div className="font-display text-2xl leading-none">
-                    {entry.score}
-                  </div>
-                  <div className="text-sm text-candle/80">Punkte</div>
-                </div>
-              </li>
-            )
-          })}
-        </ol>
-      )}
-
-      {waiting.length > 0 && (
-        <section className="card w-full px-5 py-4 text-center">
-          <h2 className="text-xl">Noch nicht dabei</h2>
-          <p className="mt-1 text-base text-candle/85">
-            Vielleicht magst du sie ans Türchen erinnern?
+          <p className="mt-2 text-base text-candle/85">
+            {totalDoors} von {possible} möglichen Türchen sind schon offen.
           </p>
-          <ul className="mt-3 flex flex-wrap justify-center gap-2">
-            {waiting.map((entry, i) => (
-              <li
-                key={entry.player_id ?? `wait-${i}`}
-                className="rounded-full border border-gold/40 bg-black/30 px-3 py-1 text-base"
-              >
-                {entry.name}
-              </li>
-            ))}
-          </ul>
-        </section>
+        </div>
       )}
-    </div>
+    </section>
   )
 }
 
 function Stat({ value, label }: { value: number; label: string }) {
   return (
     <div className="flex flex-col items-center">
-      <span className="font-display text-3xl text-candle sm:text-4xl">
+      <span className="font-door text-3xl text-candle sm:text-4xl">
         {value}
       </span>
       <span className="text-sm leading-tight text-candle/85 sm:text-base">
         {label}
       </span>
-    </div>
-  )
-}
-
-/** Doors opened, as a little bar under the name. */
-function DoorBar({ doors, unlocked }: { doors: number; unlocked: number }) {
-  const max = Math.max(unlocked, doors, 1)
-  return (
-    <div className="mt-1 flex items-center gap-2">
-      <div className="h-2 flex-1 overflow-hidden rounded-full bg-black/40">
-        <div
-          className="h-full rounded-full bg-[#9be3ad]"
-          style={{ width: `${(doors / max) * 100}%` }}
-        />
-      </div>
-      <span className="shrink-0 text-sm text-[#9be3ad]">{doors} Türchen</span>
-    </div>
-  )
-}
-
-function Step({
-  place,
-  entries,
-  myId,
-  height,
-}: {
-  place: number
-  entries: LeaderboardEntry[]
-  myId: string | null
-  height: string
-}) {
-  return (
-    <div className="flex flex-col items-center gap-2 text-center">
-      {entries.length > 0 && (
-        <>
-          <Medal rank={place} size={place === 1 ? 48 : 38} />
-          <ul className="flex flex-col gap-0.5">
-            {entries.map((entry, i) => (
-              <li
-                key={entry.player_id ?? `p-${i}`}
-                className={clsx(
-                  "break-words text-base font-semibold leading-tight sm:text-lg",
-                  myId && entry.player_id === myId
-                    ? "text-candle underline decoration-gold underline-offset-4"
-                    : "text-white",
-                )}
-              >
-                {entry.name}
-              </li>
-            ))}
-          </ul>
-          <span className="text-base">{entries[0].score} Punkte</span>
-        </>
-      )}
-      <div
-        className={clsx(
-          "w-full rounded-t-xl border-2 border-b-0 border-gold/50 bg-gradient-to-b from-berry to-berry-dark shadow-lg",
-          height,
-          // Empty when players share the place above (1, 2, 2, 4).
-          entries.length === 0 && "opacity-40",
-        )}
-      >
-        <span className="mt-2 block font-display text-3xl text-candle-soft">
-          {place}
-        </span>
-      </div>
     </div>
   )
 }

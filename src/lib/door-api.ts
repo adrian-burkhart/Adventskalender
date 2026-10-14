@@ -55,14 +55,7 @@ export type DoorResponse =
       /** Place in this year's Rangliste after the answer; ties share one. */
       rank: number | null
       playerCount: number | null
-      /** This year's answered doors, for the tree on the result screen. */
-      season: SeasonDoor[]
     }
-
-export interface SeasonDoor {
-  door: number
-  correct: boolean
-}
 
 function reply(data: unknown, status = 200) {
   return NextResponse.json(data, {
@@ -317,44 +310,25 @@ async function recordAnswer(
 }
 
 /**
- * The player's place in the year's Rangliste and their answered doors, for
- * the result screen. Ties share a place. Missing data leaves them empty;
- * the result still shows.
+ * The player's place in the year's Rangliste, for the result screen. Ties
+ * share a place. If the Rangliste can't be loaded, the result still shows.
  */
-async function standing(ctx: DoorContext): Promise<{
-  rank: number | null
-  playerCount: number | null
-  season: SeasonDoor[]
-}> {
-  const [board, answers] = await Promise.all([
-    ctx.supabase.rpc("leaderboard", { p_year: ctx.year }),
-    ctx.supabase
-      .from("answers")
-      .select("door, is_correct")
-      .eq("player_id", ctx.user.id)
-      .eq("year", ctx.year)
-      .not("answered_at", "is", null)
-      .order("door"),
-  ])
-  if (board.error) console.error("standing leaderboard", board.error)
-  if (answers.error) console.error("standing answers", answers.error)
+async function standing(
+  ctx: DoorContext,
+): Promise<{ rank: number | null; playerCount: number | null }> {
+  const { data, error } = await ctx.supabase.rpc("leaderboard", {
+    p_year: ctx.year,
+  })
+  if (error) console.error("standing", error)
 
   // Only players who took part this year; the Rangliste also lists the rest.
   const entries = (
-    (board.data ?? []) as {
-      player_id: string | null
-      score: number
-      doors: number
-    }[]
+    (data ?? []) as { player_id: string | null; score: number; doors: number }[]
   ).filter((entry) => entry.score > 0 || entry.doors > 0)
   const mine = entries.find((entry) => entry.player_id === ctx.user.id)
   return {
     rank: mine ? rankOf(mine.score, entries) : null,
     playerCount: entries.length > 0 ? entries.length : null,
-    season: (answers.data ?? []).map((row) => ({
-      door: row.door as number,
-      correct: row.is_correct === true,
-    })),
   }
 }
 

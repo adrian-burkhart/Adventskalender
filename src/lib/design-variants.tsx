@@ -11,69 +11,93 @@ import {
 } from "react"
 import { getValueFromStorage, setValueInStorage } from "./storage"
 
-// Design proposals that are being tried out on staging. Each part of the
-// door has a few variants; /vorschau shows them all and lets you pick which
-// one the real door uses on this device. Once one is chosen for good, the
+// Design proposals that are being tried out on staging. Each part has a few
+// variants; /vorschau shows them all and lets you pick which one the real
+// app uses on this device. Once one is chosen for good, the
 // others and this switch can go.
 
 export const DESIGN_OPTIONS = {
-  countdown: [
-    { id: "kerze", name: "Kerze", hint: "Eine Kerze brennt herunter." },
+  font: [
     {
-      id: "kranz",
-      name: "Adventskranz",
-      hint: "Ein goldener Ring um einen Tannenkranz schließt sich.",
+      id: "cochin",
+      name: "Cochin (bisher)",
+      hint: "Die bisherige festliche Kursive.",
     },
     {
-      id: "lichterkette",
-      name: "Lichterkette",
-      hint: "Jede Sekunde geht ein Lämpchen aus.",
+      id: "fraunces",
+      name: "Fraunces",
+      hint: "Eine weiche, warme Buchschrift mit runden Formen.",
+    },
+    {
+      id: "gotisch",
+      name: "Grenze Gotisch",
+      hint: "Eine leichte Fraktur wie auf Schildern vom Weihnachtsmarkt.",
+    },
+    {
+      id: "berge",
+      name: "Mountains of Christmas",
+      hint: "Verspielt und ein bisschen von Hand gezeichnet.",
+    },
+    {
+      id: "pinsel",
+      name: "Caveat Brush",
+      hint: "Wie mit dem Pinsel geschrieben, passend zu den Bildern.",
+    },
+  ],
+  buttons: [
+    {
+      id: "schlicht",
+      name: "Schlicht (bisher)",
+      hint: "Rot mit goldenem Rand.",
+    },
+    {
+      id: "kugel",
+      name: "Christbaumkugel",
+      hint: "Goldgelb mit grünem Rand wie der gemalte Play-Knopf.",
+    },
+    {
+      id: "girlande",
+      name: "Tannengirlande",
+      hint: "Rot mit weichem Tannenrand und Lichtern wie der „Bereit“-Knopf.",
+    },
+  ],
+  snow: [
+    {
+      id: "punkte",
+      name: "Pünktchen (bisher)",
+      hint: "Kleine weiße Punkte, die langsam fallen.",
+    },
+    {
+      id: "kristalle",
+      name: "Schneekristalle",
+      hint: "Echte sechsarmige Flocken, die sich beim Fallen sanft drehen.",
+    },
+    {
+      id: "gemalt",
+      name: "Gemalte Flocken",
+      hint: "Weiche, verschwommene Flocken in drei Tiefen, wie im Bild auf der Startseite.",
+    },
+    {
+      id: "gemischt",
+      name: "Gemischt",
+      hint: "Weiche Flocken im Hintergrund, ein paar Kristalle ganz vorne.",
     },
   ],
   present: [
     {
-      id: "schleife",
-      name: "Schleife aufziehen",
-      hint: "Ein Tipp löst die Schleife, der Deckel fliegt auf und Licht strömt heraus.",
+      id: "deckel",
+      name: "Deckel heben",
+      hint: "Ein Tipp, der Deckel hebt sich, warmes Licht und ein paar Flocken steigen auf.",
     },
     {
       id: "schuetteln",
       name: "Dreimal schütteln",
-      hint: "Jeder Tipp schüttelt stärker, bis das Geschenk beim dritten Mal aufspringt.",
+      hint: "Jeder Tipp wackelt etwas mehr, beim dritten springt der Deckel auf.",
     },
     {
-      id: "auspacken",
-      name: "Auspacken",
-      hint: "Ein Tipp reißt das Papier auf, darunter steigt ein leuchtender Stern auf.",
-    },
-  ],
-  result: [
-    {
-      id: "karte",
-      name: "Weihnachtskarte",
-      hint: "Das Ergebnis steht auf einer Karte mit Wachssiegel.",
-    },
-    {
-      id: "baum",
-      name: "Dein Weihnachtsbaum",
-      hint: "Jede Antwort hängt etwas an deinen Baum: richtig eine Kugel, falsch einen Strohstern.",
-    },
-    {
-      id: "lebkuchen",
-      name: "Lebkuchenherz",
-      hint: "Wie auf dem Weihnachtsmarkt: ein Lebkuchenherz mit Zuckerguss.",
-    },
-  ],
-  rangliste: [
-    {
-      id: "klassisch",
-      name: "Klassisch, verbessert",
-      hint: "Die bekannte Liste mit gemeinsamen Plätzen, Medaillen und dir hervorgehoben.",
-    },
-    {
-      id: "familie",
-      name: "Familienrangliste",
-      hint: "Siegertreppchen, was die Familie gemeinsam geschafft hat und wer noch fehlt.",
+      id: "saeckchen",
+      name: "Wichtelsäckchen",
+      hint: "Ein Jutesäckchen mit Schleife. Ein Tipp löst die Schleife, der Stern kommt heraus.",
     },
   ],
 } as const
@@ -84,10 +108,10 @@ export type DesignChoice<P extends DesignPart> =
 type Choices = { [P in DesignPart]: DesignChoice<P> }
 
 const DEFAULTS: Choices = {
-  countdown: "kerze",
-  present: "schleife",
-  result: "karte",
-  rangliste: "familie",
+  font: "cochin",
+  buttons: "schlicht",
+  snow: "punkte",
+  present: "deckel",
 }
 
 const STORAGE_KEY = "DESIGN_VARIANTS"
@@ -123,6 +147,12 @@ export function DesignProvider({ children }: { children: ReactNode }) {
     },
     [],
   )
+
+  // Fonts and buttons are styled in CSS by these attributes on <html>.
+  useEffect(() => {
+    document.documentElement.dataset.font = choices.font
+    document.documentElement.dataset.buttons = choices.buttons
+  }, [choices.font, choices.buttons])
 
   const value = useMemo(() => ({ choices, choose }), [choices, choose])
   return (

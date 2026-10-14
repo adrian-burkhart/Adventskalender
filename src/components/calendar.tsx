@@ -14,6 +14,7 @@ import { useDoors, DoorState, type InitialDoors } from "@/lib/hooks"
 import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import Loading from "./loading"
+import ChristmasTree from "./christmas-tree"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
 
@@ -133,20 +134,10 @@ const CalendarDoor = memo(
         </div>
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-[38%] text-center font-display text-5xl text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl"
+          className="pointer-events-none absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl"
         >
           {doorNumber}
         </span>
-        {isToday && !isAnswered && (
-          <span className="pointer-events-none absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border-2 border-gold bg-pine-900 px-3 py-0.5 text-sm font-semibold text-candle shadow-md">
-            Heute
-          </span>
-        )}
-        {isMissed && (
-          <span className="pointer-events-none absolute -bottom-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full border-2 border-gold/70 bg-berry px-3 py-0.5 text-sm font-semibold text-candle-soft shadow-md">
-            Nachholen
-          </span>
-        )}
         {status && <span className="sr-only">({status})</span>}
       </button>
     )
@@ -226,33 +217,46 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
     return <div>Keine Fragen für dieses Jahr</div>
   }
 
+  const answered = doorStates.filter((state) => state === "answered").length
+
   return (
-    <ol className="grid w-full max-w-5xl grid-cols-2 gap-x-4 gap-y-7 px-1 sm:grid-cols-3 sm:gap-x-6 sm:gap-y-9 lg:grid-cols-4">
-      {doorStates.map((doorState, i) => {
-        const doorNumber = i + 1
-        const isToday = today === doorNumber
-        // An earlier door that can still be answered.
-        const isMissed =
-          !isToday &&
-          (doorState === "closed" || doorState === "open") &&
-          (today === null || doorNumber < today)
-        return (
-          <li key={doorNumber}>
-            <CalendarDoor
-              doorNumber={doorNumber}
-              doorState={doorState}
-              variant={doorNumber % 4 < 2 ? "closed-one" : "closed-two"}
-              isToday={isToday}
-              isMissed={isMissed}
-              isOpening={openingDoor === doorNumber}
-              isBusy={openingDoor !== null && openingDoor !== doorNumber}
-              onOpen={handleOpen}
-              onLocked={handleLocked}
-            />
-          </li>
-        )
-      })}
-    </ol>
+    <div className="flex w-full flex-col items-center gap-10">
+      <section className="flex flex-col items-center gap-2 text-center">
+        <h2 className="text-2xl">Dein Weihnachtsbaum</h2>
+        <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
+        <p className="max-w-xs text-base text-candle/85">
+          {answered === 0
+            ? "Für jedes Türchen, das du beantwortest, hängt etwas an deinem Baum."
+            : `Für jedes beantwortete Türchen hängt etwas an deinem Baum: schon ${answered === 1 ? "ein Stück" : `${answered} Stück`}.`}
+        </p>
+      </section>
+      <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
+        {doorStates.map((doorState, i) => {
+          const doorNumber = i + 1
+          const isToday = today === doorNumber
+          // An earlier door that can still be answered.
+          const isMissed =
+            !isToday &&
+            (doorState === "closed" || doorState === "open") &&
+            (today === null || doorNumber < today)
+          return (
+            <li key={doorNumber}>
+              <CalendarDoor
+                doorNumber={doorNumber}
+                doorState={doorState}
+                variant={doorNumber % 4 < 2 ? "closed-one" : "closed-two"}
+                isToday={isToday}
+                isMissed={isMissed}
+                isOpening={openingDoor === doorNumber}
+                isBusy={openingDoor !== null && openingDoor !== doorNumber}
+                onOpen={handleOpen}
+                onLocked={handleLocked}
+              />
+            </li>
+          )
+        })}
+      </ol>
+    </div>
   )
 })
 
