@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react"
 import AudioPlayer from "./audio-player"
 import Button, { ButtonLink } from "./button"
 import Countdown from "./door/countdown"
-import Present from "./door/present"
+import Anticipation from "./door/anticipation"
 import ResultView from "./door/result"
 import ReadyButton from "./ready-button"
 import { apiFetch } from "@/lib/api-client"
@@ -153,14 +153,44 @@ const QuestionStep = memo(
   },
 )
 
-/** The present waits for a tap, then the result shows. */
+/**
+ * The outro audio starts with a jingle; while it plays, something builds up
+ * to the result, which shows when the jingle ends.
+ */
 const OutroStep = memo(
   ({ result, doorNumber }: { result: Result; doorNumber: number }) => {
-    const [isOpen, setIsOpen] = useState(false)
-    return isOpen ? (
-      <ResultView result={result} doorNumber={doorNumber} />
-    ) : (
-      <Present onOpened={() => setIsOpen(true)} />
+    const [started, setStarted] = useState(false)
+    const [revealed, setRevealed] = useState(false)
+
+    // Without outro audio, or when the browser holds it back, start anyway.
+    useEffect(() => {
+      const timer = setTimeout(
+        () => setStarted(true),
+        result.outroAudio ? 1500 : 0,
+      )
+      return () => clearTimeout(timer)
+    }, [result.outroAudio])
+
+    return (
+      <div className="flex w-full flex-col items-center gap-6">
+        {result.outroAudio && (
+          <AudioPlayer
+            smallButton
+            autoPlay
+            url={result.outroAudio}
+            onPlaying={() => setStarted(true)}
+          />
+        )}
+        {revealed ? (
+          <ResultView result={result} doorNumber={doorNumber} />
+        ) : (
+          <Anticipation
+            isCorrect={result.isCorrect}
+            started={started}
+            onDone={() => setRevealed(true)}
+          />
+        )}
+      </div>
     )
   },
 )

@@ -41,6 +41,7 @@ export const PlayPauseButton = memo(
 const AudioPlayer = memo(
   ({
     onEnded,
+    onPlaying,
     smallButton = false,
     label,
     autoPlay = false,
@@ -49,6 +50,8 @@ const AudioPlayer = memo(
   }: {
     autoPlay?: boolean
     onEnded?: () => void
+    /** When the sound actually starts (autoplay can be held back). */
+    onPlaying?: () => void
     label?: string
     smallButton?: boolean
     url: string
@@ -84,6 +87,11 @@ const AudioPlayer = memo(
         <audio
           autoPlay={autoPlay}
           onEnded={handleEnded}
+          onPlaying={() => {
+            setIsPlaying(true)
+            onPlaying?.()
+          }}
+          onPause={() => setIsPlaying(false)}
           src={url}
           ref={audioRef}
         />

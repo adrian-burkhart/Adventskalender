@@ -1,12 +1,18 @@
 "use client"
 
 import clsx from "clsx"
-import { useState, useSyncExternalStore, type ReactNode } from "react"
+import {
+  useState,
+  useSyncExternalStore,
+  type CSSProperties,
+  type ReactNode,
+} from "react"
 import Layout from "@/components/layout"
-import Button from "@/components/button"
 import Loading from "@/components/loading"
 import Countdown, { type CountdownVariant } from "@/components/door/countdown"
-import Present, { type PresentVariant } from "@/components/door/present"
+import Anticipation, {
+  type AnticipationVariant,
+} from "@/components/door/anticipation"
 import Result, { type ResultData } from "@/components/door/result"
 import ChristmasTree from "@/components/christmas-tree"
 import { Board } from "@/components/rangliste"
@@ -48,6 +54,24 @@ const demoEntries: LeaderboardEntry[] = [
   { player_id: "g", name: "Onkel Bernd", score: 0, doors: 0 },
 ]
 
+/** How each heading font looks, also when another one is chosen. */
+const FONT_PREVIEW: Record<string, CSSProperties> = {
+  fraunces: {
+    fontFamily: "var(--font-fraunces)",
+    fontWeight: 600,
+    fontVariationSettings: '"SOFT" 50',
+  },
+  "fraunces-weich": {
+    fontFamily: "var(--font-fraunces)",
+    fontWeight: 600,
+    fontStyle: "italic",
+    fontVariationSettings: '"SOFT" 100, "WONK" 1',
+  },
+  young: { fontFamily: "var(--font-young)" },
+  dmserif: { fontFamily: "var(--font-dmserif)" },
+  bree: { fontFamily: "var(--font-bree)" },
+}
+
 const subscribe = () => () => {}
 
 export default function Vorschau() {
@@ -71,9 +95,9 @@ export default function Vorschau() {
         <header className="card mx-auto max-w-2xl px-6 py-5 text-center">
           <h1 className="text-4xl">Design-Vorschau</h1>
           <p className="mt-3 text-lg">
-            Bei Schrift, Knöpfen, Schnee und Geschenk gibt es mehrere
-            Vorschläge. Tippe auf „Verwenden“, dann zeigt die ganze App auf
-            diesem Gerät genau diesen Vorschlag, auch die echten Türchen.
+            Bei Schrift, Countdown und dem Moment vor dem Ergebnis gibt es
+            mehrere Vorschläge. Tippe auf „Verwenden“, dann zeigt die ganze App
+            auf diesem Gerät genau diesen Vorschlag, auch die echten Türchen.
           </p>
           <p className="mt-2 text-base text-candle/80">
             Auf Staging ist heute der 10. Dezember 2025: Die Türchen 1 bis 10
@@ -82,9 +106,7 @@ export default function Vorschau() {
           <nav className="mt-4 flex flex-wrap justify-center gap-2 text-base">
             {[
               ["#schrift", "Schrift"],
-              ["#knoepfe", "Knöpfe"],
-              ["#schnee", "Schnee"],
-              ["#geschenk", "Geschenk"],
+              ["#geschenk", "Vor dem Ergebnis"],
               ["#countdown", "Countdown"],
               ["#ergebnis", "Ergebnis"],
               ["#baum", "Baum"],
@@ -108,10 +130,7 @@ export default function Vorschau() {
         >
           <Tiles part="font">
             {(id) => (
-              <div
-                className="text-center"
-                style={{ fontFamily: `var(--font-${id})` }}
-              >
+              <div className="text-center" style={FONT_PREVIEW[id]}>
                 <div className="text-4xl text-candle">Hallo Oma Gerda!</div>
                 <div className="mt-2 text-3xl text-candle">
                   Gemeinsam geschafft
@@ -122,40 +141,13 @@ export default function Vorschau() {
         </Section>
 
         <Section
-          id="knoepfe"
-          title="Knöpfe"
-          intro="Angelehnt an die gemalten Bilder: der Play-Knopf mit dem Weihnachtsmann und der „Bereit“-Knopf mit der Tannengirlande."
-        >
-          <Tiles part="buttons">
-            {(id) => (
-              <div
-                className={clsx(
-                  `preview-${id}`,
-                  "flex flex-col items-center gap-4 py-2",
-                )}
-              >
-                <Button>Zurück zum Kalender</Button>
-                <Button quiet>Zur Rangliste</Button>
-                <Button disabled>Bestätigen</Button>
-              </div>
-            )}
-          </Tiles>
-        </Section>
-
-        <Section
-          id="schnee"
-          title="Schnee"
-          intro="Der Schnee fällt hinter der ganzen Seite. Tippe auf „Verwenden“ und schau dir den Hintergrund an."
-        >
-          <Tiles part="snow">{() => null}</Tiles>
-        </Section>
-
-        <Section
           id="geschenk"
-          title="Geschenk"
-          intro="Erscheint nach dem Antworten und öffnet sich erst, wenn man darauf tippt. Weich gemalt, ohne Glitzerstrahlen."
+          title="Vor dem Ergebnis"
+          intro="Läuft von selbst, während der Jingle am Anfang der Auflösung spielt (etwa 7 Sekunden), und endet genau mit ihm. Dann kommt das Ergebnis. Die Schneekugel zeigt abwechselnd den jubelnden und den schulterzuckenden Wichtel."
         >
-          <Tiles part="present">{(id) => <PresentDemo variant={id} />}</Tiles>
+          <Tiles part="present">
+            {(id) => <AnticipationDemo variant={id} />}
+          </Tiles>
         </Section>
 
         <Section
@@ -232,7 +224,7 @@ function Tiles<P extends DesignPart>({
             key={id}
             className={clsx(
               "card flex flex-col items-center gap-4 px-4 py-5",
-              active && "!border-2 !border-gold",
+              active && "card-glow",
             )}
           >
             <header className="text-center">
@@ -303,28 +295,30 @@ function CountdownDemo({ variant }: { variant: string }) {
   )
 }
 
-function PresentDemo({ variant }: { variant: string }) {
+function AnticipationDemo({ variant }: { variant: string }) {
   const [round, setRound] = useState(0)
-  const [opened, setOpened] = useState(false)
-  return opened ? (
-    <div className="flex h-72 flex-col items-center justify-center gap-4 text-center sm:h-80">
+  const [done, setDone] = useState(false)
+  return done ? (
+    <div className="flex h-80 flex-col items-center justify-center gap-4 text-center">
       <p className="text-lg">Jetzt käme das Ergebnis.</p>
       <button
         type="button"
         className="text-base underline underline-offset-4"
         onClick={() => {
-          setOpened(false)
+          setDone(false)
           setRound(round + 1)
         }}
       >
-        Nochmal einpacken
+        Nochmal abspielen
       </button>
     </div>
   ) : (
-    <Present
+    <Anticipation
       key={round}
-      variant={variant as PresentVariant}
-      onOpened={() => setOpened(true)}
+      variant={variant as AnticipationVariant}
+      isCorrect={round % 2 === 0}
+      started
+      onDone={() => setDone(true)}
     />
   )
 }

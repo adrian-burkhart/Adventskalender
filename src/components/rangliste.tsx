@@ -164,10 +164,8 @@ function List({ entries, myId }: BoardProps) {
           <li
             key={entry.player_id ?? `alt-${i}`}
             className={clsx(
-              "flex items-center gap-3 rounded-2xl border-2 py-2 pl-3 pr-2 shadow-md",
-              isMe
-                ? "border-gold bg-gold/15"
-                : "border-transparent bg-black/40",
+              "card flex items-center gap-3 py-2 pl-3 pr-2",
+              isMe ? "card-glow bg-gold/15" : "bg-black/40",
             )}
           >
             <div className="flex w-10 shrink-0 justify-center">
@@ -216,28 +214,128 @@ function Together({ entries, unlocked }: BoardProps) {
         <Stat value={totalPoints} label="Punkte gesammelt" />
       </div>
       {possible > 0 && (
-        <div className="mt-5">
-          <div
-            className="h-4 w-full overflow-hidden rounded-full bg-black/40"
-            role="progressbar"
-            aria-valuemin={0}
-            aria-valuemax={possible}
-            aria-valuenow={totalDoors}
-            aria-label="Gemeinsam geöffnete Türchen"
-          >
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-berry via-gold to-candle"
-              style={{
-                width: `${Math.min(100, (totalDoors / possible) * 100)}%`,
-              }}
-            />
-          </div>
+        <div className="mt-4">
+          <LightGarland done={totalDoors} total={possible} />
           <p className="mt-2 text-base text-candle/85">
             {totalDoors} von {possible} möglichen Türchen sind schon offen.
           </p>
         </div>
       )}
     </section>
+  )
+}
+
+const BULBS_PER_SWAG = 10
+const SWAGS = 2
+const LIGHT_COLORS = ["#ffd166", "#ff7b6b", "#9be3ad", "#ffb37a", "#a8d8ff"]
+
+/**
+ * A fir garland with fairy lights for what the family has done together:
+ * as many lights are on as doors are open, the rest wait in the dark.
+ */
+function LightGarland({ done, total }: { done: number; total: number }) {
+  const count = BULBS_PER_SWAG * SWAGS
+  const lit = Math.round((Math.min(done, total) / total) * count)
+  // Two swags hanging between three points.
+  const swags = [
+    { from: [6, 12], dip: [83, 44], to: [160, 12] },
+    { from: [160, 12], dip: [237, 44], to: [314, 12] },
+  ]
+  const point = (swag: (typeof swags)[number], t: number): [number, number] => {
+    const { from, dip, to } = swag
+    // The control point that makes the curve pass through the dip.
+    const cy = dip[1] * 2 - (from[1] + to[1]) / 2
+    const x = (1 - t) ** 2 * from[0] + 2 * (1 - t) * t * dip[0] + t ** 2 * to[0]
+    const y = (1 - t) ** 2 * from[1] + 2 * (1 - t) * t * cy + t ** 2 * to[1]
+    return [x, y]
+  }
+  const garland = swags
+    .map(
+      ({ from, dip, to }, i) =>
+        `${i === 0 ? `M${from[0]} ${from[1]}` : ""} Q${dip[0]} ${dip[1] * 2 - (from[1] + to[1]) / 2} ${to[0]} ${to[1]}`,
+    )
+    .join(" ")
+
+  return (
+    <svg
+      viewBox="0 0 320 64"
+      className="w-full"
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-valuenow={done}
+      aria-label="Gemeinsam geöffnete Türchen"
+    >
+      <defs>
+        <filter id="garland-soft" x="-5%" y="-30%" width="110%" height="160%">
+          <feGaussianBlur stdDeviation="0.6" />
+        </filter>
+      </defs>
+      {/* The fir garland, with a few berries where it hangs. */}
+      <g filter="url(#garland-soft)">
+        <path
+          d={garland}
+          stroke="#24502a"
+          strokeWidth="10"
+          fill="none"
+          strokeLinecap="round"
+        />
+        <path
+          d={garland}
+          stroke="#3f8a4a"
+          strokeWidth="8"
+          fill="none"
+          strokeDasharray="1.5 3"
+          strokeLinecap="round"
+        />
+        <path
+          d={garland}
+          stroke="#5fae62"
+          strokeWidth="4"
+          fill="none"
+          strokeDasharray="1 4"
+          strokeLinecap="round"
+          opacity="0.7"
+        />
+      </g>
+      {[6, 160, 314].map((x) => (
+        <g key={x}>
+          <circle cx={x - 3} cy="11" r="3" fill="#c62f2f" />
+          <circle cx={x + 3} cy="13" r="3" fill="#a52424" />
+        </g>
+      ))}
+      {swags.flatMap((swag, s) =>
+        Array.from({ length: BULBS_PER_SWAG }, (_, i) => {
+          const index = s * BULBS_PER_SWAG + i
+          const [x, y] = point(swag, (i + 0.5) / BULBS_PER_SWAG)
+          const on = index < lit
+          const color = LIGHT_COLORS[index % LIGHT_COLORS.length]
+          return (
+            <g key={index} transform={`rotate(${i % 2 ? 8 : -8} ${x} ${y})`}>
+              <rect
+                x={x - 2.5}
+                y={y + 2}
+                width="5"
+                height="4"
+                rx="1"
+                fill="#2b2b2b"
+              />
+              <ellipse
+                cx={x}
+                cy={y + 11}
+                rx="4.5"
+                ry="6.5"
+                fill={on ? color : "#3f4a44"}
+                opacity={on ? 1 : 0.75}
+                style={
+                  on ? { filter: `drop-shadow(0 0 4px ${color})` } : undefined
+                }
+              />
+            </g>
+          )
+        }),
+      )}
+    </svg>
   )
 }
 

@@ -1,11 +1,9 @@
 "use client"
 
 import Image from "next/image"
-import { memo, useEffect } from "react"
+import { memo } from "react"
 import { ButtonLink } from "@/components/button"
-import AudioPlayer from "@/components/audio-player"
 import type { DoorResponse } from "@/lib/door-api"
-import { warmChord } from "@/lib/chime"
 import solutionImage from "../../../public/images/solution.webp"
 import shrugImage from "../../../public/images/shrug.webp"
 
@@ -21,15 +19,8 @@ export type ResultData = Omit<
  */
 const Result = memo(
   ({ result, doorNumber }: { result: ResultData; doorNumber: number }) => {
-    useEffect(() => {
-      if (result.isCorrect) warmChord()
-    }, [result.isCorrect])
-
     return (
       <div className="flex w-full max-w-md flex-col items-center gap-6 text-center">
-        {result.outroAudio && (
-          <AudioPlayer smallButton url={result.outroAudio} autoPlay />
-        )}
         <Image
           src={result.isCorrect ? solutionImage : shrugImage}
           alt=""

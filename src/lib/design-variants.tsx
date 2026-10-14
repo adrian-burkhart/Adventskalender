@@ -19,68 +19,29 @@ import { getValueFromStorage, setValueInStorage } from "./storage"
 export const DESIGN_OPTIONS = {
   font: [
     {
-      id: "cochin",
-      name: "Cochin (bisher)",
-      hint: "Die bisherige festliche Kursive.",
-    },
-    {
       id: "fraunces",
       name: "Fraunces",
-      hint: "Eine weiche, warme Buchschrift mit runden Formen.",
+      hint: "Eure Wahl: weich und warm, mit runden Formen.",
     },
     {
-      id: "gotisch",
-      name: "Grenze Gotisch",
-      hint: "Eine leichte Fraktur wie auf Schildern vom Weihnachtsmarkt.",
+      id: "fraunces-weich",
+      name: "Fraunces, kursiv und weich",
+      hint: "Dieselbe Schrift, schräg und mit ganz weichen Ecken.",
     },
     {
-      id: "berge",
-      name: "Mountains of Christmas",
-      hint: "Verspielt und ein bisschen von Hand gezeichnet.",
+      id: "young",
+      name: "Young Serif",
+      hint: "Kräftig und gemütlich, ein bisschen altmodisch.",
     },
     {
-      id: "pinsel",
-      name: "Caveat Brush",
-      hint: "Wie mit dem Pinsel geschrieben, passend zu den Bildern.",
-    },
-  ],
-  buttons: [
-    {
-      id: "schlicht",
-      name: "Schlicht (bisher)",
-      hint: "Rot mit goldenem Rand.",
+      id: "dmserif",
+      name: "DM Serif Display",
+      hint: "Feiner und eleganter, mit starkem Kontrast.",
     },
     {
-      id: "kugel",
-      name: "Christbaumkugel",
-      hint: "Goldgelb mit grünem Rand wie der gemalte Play-Knopf.",
-    },
-    {
-      id: "girlande",
-      name: "Tannengirlande",
-      hint: "Rot mit weichem Tannenrand und Lichtern wie der „Bereit“-Knopf.",
-    },
-  ],
-  snow: [
-    {
-      id: "punkte",
-      name: "Pünktchen (bisher)",
-      hint: "Kleine weiße Punkte, die langsam fallen.",
-    },
-    {
-      id: "kristalle",
-      name: "Schneekristalle",
-      hint: "Echte sechsarmige Flocken, die sich beim Fallen sanft drehen.",
-    },
-    {
-      id: "gemalt",
-      name: "Gemalte Flocken",
-      hint: "Weiche, verschwommene Flocken in drei Tiefen, wie im Bild auf der Startseite.",
-    },
-    {
-      id: "gemischt",
-      name: "Gemischt",
-      hint: "Weiche Flocken im Hintergrund, ein paar Kristalle ganz vorne.",
+      id: "bree",
+      name: "Bree Serif",
+      hint: "Rund und freundlich, wie von Hand gesetzt.",
     },
   ],
   countdown: [
@@ -97,19 +58,19 @@ export const DESIGN_OPTIONS = {
   ],
   present: [
     {
-      id: "deckel",
-      name: "Deckel heben",
-      hint: "Ein Tipp, der Deckel hebt sich, warmes Licht und ein paar Flocken steigen auf.",
+      id: "wichtel",
+      name: "Wichtel bringt ein Geschenk",
+      hint: "Ein Wichtel trägt ein Geschenk herein, es wackelt immer mehr und springt am Ende des Jingles auf.",
     },
     {
-      id: "schuetteln",
-      name: "Dreimal schütteln",
-      hint: "Jeder Tipp wackelt etwas mehr, beim dritten springt der Deckel auf.",
+      id: "geschenk",
+      name: "Geschenk öffnet sich",
+      hint: "Das gemalte Geschenk wackelt zum Jingle und öffnet sich am Ende von selbst.",
     },
     {
-      id: "saeckchen",
-      name: "Wichtelsäckchen",
-      hint: "Ein Jutesäckchen mit Schleife. Ein Tipp löst die Schleife, der Stern kommt heraus.",
+      id: "schneekugel",
+      name: "Schneekugel",
+      hint: "Eine Schneekugel wird geschüttelt. Wenn sich der Schnee legt, sieht man den Wichtel jubeln oder mit den Schultern zucken.",
     },
   ],
 } as const
@@ -120,10 +81,8 @@ export type DesignChoice<P extends DesignPart> =
 type Choices = { [P in DesignPart]: DesignChoice<P> }
 
 const DEFAULTS: Choices = {
-  font: "cochin",
-  buttons: "schlicht",
-  snow: "punkte",
-  present: "deckel",
+  font: "fraunces",
+  present: "wichtel",
   countdown: "bild",
 }
 
@@ -161,11 +120,10 @@ export function DesignProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  // Fonts and buttons are styled in CSS by these attributes on <html>.
+  // The heading font is chosen in CSS by this attribute on <html>.
   useEffect(() => {
     document.documentElement.dataset.font = choices.font
-    document.documentElement.dataset.buttons = choices.buttons
-  }, [choices.font, choices.buttons])
+  }, [choices.font])
 
   const value = useMemo(() => ({ choices, choose }), [choices, choose])
   return (

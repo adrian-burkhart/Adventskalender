@@ -1,45 +1,46 @@
 import {
-  Caveat_Brush,
+  Bree_Serif,
+  DM_Serif_Display,
   Fraunces,
-  Grenze_Gotisch,
   Lora,
-  Mountains_of_Christmas,
+  Young_Serif,
 } from "next/font/google"
 import localFont from "next/font/local"
 
-/** Door numbers, and the headings until another font is chosen. */
+/** The door numbers. */
 export const cochinFont = localFont({
   src: "../../public/Cochin Bold Italic.otf",
   display: "swap",
   variable: "--font-cochin",
 })
 
-// Heading fonts on trial on staging (see /vorschau). Only the chosen one
-// stays.
+// Heading fonts on trial on staging (see /vorschau): Fraunces and fonts
+// like it. Only the chosen one stays.
 const fraunces = Fraunces({
   subsets: ["latin"],
   display: "swap",
-  weight: ["600"],
   style: ["normal", "italic"],
+  axes: ["SOFT", "WONK", "opsz"],
   variable: "--font-fraunces",
 })
-const gotisch = Grenze_Gotisch({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["600"],
-  variable: "--font-gotisch",
-})
-const berge = Mountains_of_Christmas({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["700"],
-  variable: "--font-berge",
-})
-const pinsel = Caveat_Brush({
+const young = Young_Serif({
   subsets: ["latin"],
   display: "swap",
   weight: ["400"],
-  variable: "--font-pinsel",
+  variable: "--font-young",
+})
+const dmSerif = DM_Serif_Display({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400"],
+  style: ["normal", "italic"],
+  variable: "--font-dmserif",
+})
+const bree = Bree_Serif({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400"],
+  variable: "--font-bree",
 })
 
 /** Body text: a warm, easy-to-read serif. */
@@ -52,9 +53,9 @@ export const bodyFont = Lora({
 export const fontVariables = [
   cochinFont,
   fraunces,
-  gotisch,
-  berge,
-  pinsel,
+  young,
+  dmSerif,
+  bree,
   bodyFont,
 ]
   .map((font) => font.variable)

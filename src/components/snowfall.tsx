@@ -1,9 +1,6 @@
 "use client"
 
 import { memo, useSyncExternalStore, type CSSProperties } from "react"
-import { useDesign, type DesignChoice } from "@/lib/design-variants"
-
-export type SnowVariant = DesignChoice<"snow">
 
 const subscribe = () => () => {}
 
@@ -52,21 +49,16 @@ function flakes(
   })
 }
 
-// Soft, painted-looking flakes in three depths.
-const SOFT_BACK = flakes(50, 7, [3, 5], [28, 40], [0.45, 0.7], 0.5)
-const SOFT_MIDDLE = flakes(30, 11, [7, 11], [18, 26], [0.7, 0.9], 0.8)
-const SOFT_FRONT = flakes(8, 23, [18, 28], [12, 18], [0.45, 0.65], 2.5)
-// Crystal flakes.
-const CRYSTALS = flakes(26, 5, [12, 26], [16, 30], [0.65, 0.95], 0)
-const FEW_CRYSTALS = flakes(7, 31, [18, 28], [14, 22], [0.75, 0.95], 0)
+// Small snow crystals at different depths: the nearer, the larger and the
+// faster.
+const FAR = flakes(30, 5, [4, 6], [26, 38], [0.45, 0.65], 0)
+const NEAR = flakes(22, 31, [7, 10], [18, 28], [0.7, 0.95], 0)
 
 /**
  * Snow behind the page. Rendered in the browser only: it's decoration and
  * the server doesn't need to send it.
  */
-const Snowfall = memo(({ variant }: { variant?: SnowVariant }) => {
-  const chosen = useDesign("snow")
-  const which = variant ?? chosen
+const Snowfall = memo(() => {
   const mounted = useSyncExternalStore(
     subscribe,
     () => true,
@@ -76,23 +68,12 @@ const Snowfall = memo(({ variant }: { variant?: SnowVariant }) => {
 
   return (
     <div aria-hidden className="snowfall">
-      {which === "punkte" && <div className="snow-dots" />}
-      {(which === "gemalt" || which === "gemischt") && (
-        <>
-          {SOFT_BACK.map((flake, i) => (
-            <SoftFlake key={`b${i}`} flake={flake} />
-          ))}
-          {SOFT_MIDDLE.map((flake, i) => (
-            <SoftFlake key={`m${i}`} flake={flake} />
-          ))}
-        </>
-      )}
-      {which === "gemalt" &&
-        SOFT_FRONT.map((flake, i) => <SoftFlake key={`f${i}`} flake={flake} />)}
-      {which === "kristalle" &&
-        CRYSTALS.map((flake, i) => <Crystal key={i} flake={flake} />)}
-      {which === "gemischt" &&
-        FEW_CRYSTALS.map((flake, i) => <Crystal key={i} flake={flake} />)}
+      {FAR.map((flake, i) => (
+        <Crystal key={`f${i}`} flake={flake} />
+      ))}
+      {NEAR.map((flake, i) => (
+        <Crystal key={`n${i}`} flake={flake} />
+      ))}
     </div>
   )
 })
@@ -109,17 +90,6 @@ function style(flake: Flake): CSSProperties {
     "--top": `${flake.top}%`,
     "--sway": `${flake.sway}px`,
   } as CSSProperties
-}
-
-function SoftFlake({ flake }: { flake: Flake }) {
-  return (
-    <span className="flake" style={style(flake)}>
-      <span
-        className="flake-sway flake-soft"
-        style={{ animationDuration: `${flake.duration / 3}s` }}
-      />
-    </span>
-  )
 }
 
 function Crystal({ flake }: { flake: Flake }) {
@@ -139,14 +109,12 @@ function Crystal({ flake }: { flake: Flake }) {
               key={angle}
               transform={`rotate(${angle})`}
               stroke="white"
-              strokeWidth="1.3"
+              strokeWidth="2.2"
               strokeLinecap="round"
             >
               <line x1="0" y1="0" x2="0" y2="-11" />
               <line x1="0" y1="-6" x2="-3" y2="-9" />
               <line x1="0" y1="-6" x2="3" y2="-9" />
-              <line x1="0" y1="-3" x2="-2" y2="-4.5" />
-              <line x1="0" y1="-3" x2="2" y2="-4.5" />
             </g>
           ))}
           <circle r="1.6" fill="white" />

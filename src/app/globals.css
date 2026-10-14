@@ -4,7 +4,10 @@
 
 @layer base {
   html {
-    --font-display: var(--font-cochin);
+    /* Until the chosen font is applied in the browser. */
+    --font-display: var(--font-fraunces);
+    --display-weight: 600;
+    --display-variation: "SOFT" 50;
     /* A little larger than the default: many players read without glasses. */
     font-size: 112.5%;
   }
@@ -40,21 +43,38 @@
 
   html[data-font="fraunces"] {
     --font-display: var(--font-fraunces);
+    --display-weight: 600;
+    --display-variation: "SOFT" 50;
   }
-  html[data-font="gotisch"] {
-    --font-display: var(--font-gotisch);
+  html[data-font="fraunces-weich"] {
+    --font-display: var(--font-fraunces);
+    --display-weight: 600;
+    --display-style: italic;
+    --display-variation: "SOFT" 100, "WONK" 1;
   }
-  html[data-font="berge"] {
-    --font-display: var(--font-berge);
+  html[data-font="young"] {
+    --font-display: var(--font-young);
+    --display-weight: 400;
+    --display-variation: normal;
   }
-  html[data-font="pinsel"] {
-    --font-display: var(--font-pinsel);
+  html[data-font="dmserif"] {
+    --font-display: var(--font-dmserif);
+    --display-weight: 400;
+    --display-variation: normal;
+  }
+  html[data-font="bree"] {
+    --font-display: var(--font-bree);
+    --display-weight: 400;
+    --display-variation: normal;
   }
 
   h1,
   h2,
   h3 {
     font-family: theme("fontFamily.display");
+    font-weight: var(--display-weight, 400);
+    font-style: var(--display-style, normal);
+    font-variation-settings: var(--display-variation, normal);
     color: theme("colors.candle.DEFAULT");
     line-height: 1.2;
   }
@@ -62,197 +82,63 @@
 
 @layer components {
   /* A warm, slightly transparent card, like a window at night. */
+  /* A warm, slightly transparent card, like a window at night. Its edge is
+     a soft glow instead of a sharp line. */
   .card {
-    @apply rounded-2xl border border-gold/25 bg-black/35 shadow-[0_8px_30px_rgb(0_0_0/0.35)] backdrop-blur-[2px];
+    @apply rounded-2xl bg-black/35 backdrop-blur-[2px];
+    box-shadow:
+      0 0 16px 1px rgb(233 196 106 / 0.12),
+      inset 0 0 18px rgb(233 196 106 / 0.08),
+      0 8px 30px rgb(0 0 0 / 0.35);
   }
 
+  /* A card that stands out (your own row, the chosen proposal). */
+  .card-glow {
+    box-shadow:
+      0 0 22px 4px rgb(233 196 106 / 0.35),
+      inset 0 0 22px rgb(233 196 106 / 0.18),
+      0 8px 30px rgb(0 0 0 / 0.35);
+  }
+
+  /* Like the painted play button: a golden bauble with a green rim. */
   .btn {
-    @apply inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-full border-2 border-gold/70 bg-berry px-6 py-2 text-center font-body text-lg font-semibold text-candle-soft shadow-[0_3px_0_theme(colors.berry.dark),0_6px_16px_rgb(0_0_0/0.35)] transition hover:bg-berry-light focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/60 active:translate-y-[2px] active:shadow-[0_1px_0_theme(colors.berry.dark)] disabled:pointer-events-none disabled:border-white/20 disabled:bg-stone-600 disabled:text-white/70 disabled:shadow-none;
+    @apply relative inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-full px-6 py-2 text-center font-body text-lg font-bold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-candle/70 active:translate-y-[2px];
+    border: 5px solid #3f7a2a;
+    background: radial-gradient(
+      circle at 32% 28%,
+      #fbd56b 0%,
+      #e39a1c 55%,
+      #b86d0c 100%
+    );
+    color: #8e1d1d;
+    text-shadow: 0 1px 0 rgb(255 230 160 / 0.6);
+    box-shadow:
+      0 0 10px 2px rgb(110 170 60 / 0.55),
+      inset 0 3px 8px rgb(255 245 200 / 0.7),
+      inset 0 -5px 10px rgb(120 60 0 / 0.45);
+  }
+  .btn:hover {
+    background: radial-gradient(
+      circle at 32% 28%,
+      #ffe08a 0%,
+      #eda72a 55%,
+      #c47710 100%
+    );
+  }
+  /* Not ready yet (no answer picked): the same bauble, pale and quiet. */
+  .btn:disabled {
+    @apply pointer-events-none;
+    opacity: 0.5;
+    filter: saturate(0.55);
+    box-shadow:
+      inset 0 3px 8px rgb(255 245 200 / 0.5),
+      inset 0 -5px 10px rgb(120 60 0 / 0.3);
   }
 
   .btn-quiet {
-    @apply inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-full border-2 border-gold/50 bg-transparent px-6 py-2 text-center font-body text-lg text-candle transition hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/60;
-  }
-}
-
-/* Button proposals (see /vorschau), chosen with data-buttons on <html>.
-   .preview-* shows one proposal inside /vorschau, whatever is chosen. */
-html .preview-schlicht .btn.btn {
-  margin: 0;
-  border: 2px solid rgb(233 196 106 / 0.7);
-  background: theme("colors.berry.DEFAULT");
-  color: theme("colors.candle.soft");
-  font-family: theme("fontFamily.body");
-  font-size: 1.125rem;
-  text-shadow: none;
-  box-shadow:
-    0 3px 0 theme("colors.berry.dark"),
-    0 6px 16px rgb(0 0 0 / 0.35);
-}
-html .preview-schlicht .btn.btn::after {
-  content: none;
-}
-html[data-buttons="kugel"] .btn,
-html .preview-kugel .btn.btn {
-  position: relative;
-  border: 5px solid #3f7a2a;
-  background: radial-gradient(
-    circle at 32% 28%,
-    #fbd56b 0%,
-    #e39a1c 55%,
-    #b86d0c 100%
-  );
-  color: #8e1d1d;
-  font-weight: 700;
-  text-shadow: 0 1px 0 rgb(255 230 160 / 0.6);
-  box-shadow:
-    0 0 10px 2px rgb(110 170 60 / 0.55),
-    inset 0 3px 8px rgb(255 245 200 / 0.7),
-    inset 0 -5px 10px rgb(120 60 0 / 0.45);
-}
-html[data-buttons="kugel"] .btn:hover,
-html .preview-kugel .btn.btn:hover {
-  background: radial-gradient(
-    circle at 32% 28%,
-    #ffe08a 0%,
-    #eda72a 55%,
-    #c47710 100%
-  );
-}
-html[data-buttons="kugel"] .btn:active,
-html .preview-kugel .btn.btn:active {
-  transform: translateY(2px);
-}
-html[data-buttons="kugel"] .btn-quiet,
-html .preview-kugel .btn-quiet.btn-quiet {
-  border: 4px solid #3f7a2a;
-  box-shadow: 0 0 8px 1px rgb(110 170 60 / 0.45);
-}
-
-html[data-buttons="girlande"] .btn,
-html .preview-girlande .btn.btn {
-  position: relative;
-  margin: 8px;
-  border: none;
-  background: radial-gradient(
-    ellipse at 50% 35%,
-    #e35b45 0%,
-    #b8291f 70%,
-    #8e1d1d 100%
-  );
-  color: #fdf6c8;
-  font-family: theme("fontFamily.display");
-  font-size: 1.25rem;
-  text-shadow: 0 0 6px rgb(254 240 138 / 0.6);
-  box-shadow:
-    0 0 0 3px #2d5e2a,
-    0 0 6px 6px rgb(45 94 42 / 0.9),
-    0 0 18px 10px rgb(45 94 42 / 0.45),
-    inset 0 2px 6px rgb(255 200 170 / 0.4);
-}
-/* Little lights in the fir edge. */
-html[data-buttons="girlande"] .btn::after,
-html .preview-girlande .btn.btn::after {
-  content: "";
-  position: absolute;
-  inset: -9px;
-  border-radius: inherit;
-  pointer-events: none;
-  background:
-    radial-gradient(
-        circle,
-        #fff6b0 0 2px,
-        rgb(255 220 90 / 0.5) 3px,
-        transparent 6px
-      )
-      6% 18% / 14px 14px no-repeat,
-    radial-gradient(
-        circle,
-        #ffb3a0 0 2px,
-        rgb(255 120 90 / 0.5) 3px,
-        transparent 6px
-      )
-      28% 100% / 14px 14px no-repeat,
-    radial-gradient(
-        circle,
-        #fff6b0 0 2px,
-        rgb(255 220 90 / 0.5) 3px,
-        transparent 6px
-      )
-      52% 0% / 14px 14px no-repeat,
-    radial-gradient(
-        circle,
-        #fff6b0 0 2px,
-        rgb(255 220 90 / 0.5) 3px,
-        transparent 6px
-      )
-      76% 100% / 14px 14px no-repeat,
-    radial-gradient(
-        circle,
-        #ffb3a0 0 2px,
-        rgb(255 120 90 / 0.5) 3px,
-        transparent 6px
-      )
-      96% 30% / 14px 14px no-repeat,
-    radial-gradient(
-        circle,
-        #fff6b0 0 2px,
-        rgb(255 220 90 / 0.5) 3px,
-        transparent 6px
-      )
-      2% 85% / 14px 14px no-repeat;
-}
-html[data-buttons="girlande"] .btn:hover,
-html .preview-girlande .btn.btn:hover {
-  background: radial-gradient(
-    ellipse at 50% 35%,
-    #ec6b54 0%,
-    #c4342a 70%,
-    #9b2020 100%
-  );
-}
-html[data-buttons="girlande"] .btn-quiet,
-html .preview-girlande .btn-quiet.btn-quiet {
-  border: none;
-  box-shadow:
-    0 0 0 3px #2d5e2a,
-    0 0 6px 5px rgb(45 94 42 / 0.8);
-}
-
-/* Disabled looks the same in every proposal. */
-html[data-buttons] .btn:disabled,
-html .btn.btn:disabled {
-  border-color: rgb(255 255 255 / 0.2);
-  background: theme("colors.stone.600");
-  color: rgb(255 255 255 / 0.7);
-  text-shadow: none;
-  box-shadow: none;
-}
-html[data-buttons] .btn:disabled::after,
-html .btn.btn:disabled::after {
-  content: none;
-}
-
-@keyframes snow {
-  from {
-    background-position:
-      0 0,
-      0 0,
-      0 0,
-      0 0,
-      0 0,
-      0 0,
-      0 0;
-  }
-  to {
-    background-position:
-      40px 300px,
-      -30px 300px,
-      20px 600px,
-      -20px 300px,
-      30px 600px,
-      -10px 300px,
-      10px 600px;
+    @apply inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-full bg-transparent px-6 py-2 text-center font-body text-lg text-candle transition hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-candle/70;
+    border: 4px solid #3f7a2a;
+    box-shadow: 0 0 8px 1px rgb(110 170 60 / 0.45);
   }
 }
 
@@ -264,37 +150,6 @@ html .btn.btn:disabled::after {
   z-index: -1;
   overflow: hidden;
   pointer-events: none;
-}
-
-/* The first snow: small dots, two layers drifting at different speeds. */
-.snow-dots {
-  position: absolute;
-  inset: -20px 0 0 0;
-  opacity: 0.55;
-  background-image:
-    radial-gradient(2px 2px at 20px 30px, #fff 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 90px 120px, #fff 50%, transparent 51%),
-    radial-gradient(2.5px 2.5px at 160px 60px, #fff 50%, transparent 51%),
-    radial-gradient(1.5px 1.5px at 230px 180px, #fff 50%, transparent 51%),
-    radial-gradient(2px 2px at 60px 210px, #fff 50%, transparent 51%),
-    radial-gradient(1px 1px at 130px 250px, #fff 50%, transparent 51%),
-    radial-gradient(3px 3px at 270px 90px, #fff 50%, transparent 51%);
-  background-size:
-    300px 300px,
-    300px 300px,
-    300px 300px,
-    300px 300px,
-    300px 300px,
-    300px 300px,
-    300px 300px;
-  animation: snow 40s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .snow-dots {
-    animation: none;
-    opacity: 0.3;
-  }
 }
 
 .flake {
@@ -310,15 +165,6 @@ html .btn.btn:disabled::after {
   width: 100%;
   height: 100%;
   animation: flake-sway ease-in-out infinite alternate;
-}
-.flake-soft {
-  border-radius: 9999px;
-  background: radial-gradient(
-    circle,
-    #fff 0 35%,
-    rgb(255 255 255 / 0.6) 55%,
-    transparent 72%
-  );
 }
 .flake-spin {
   animation: flake-spin linear infinite;
@@ -404,106 +250,126 @@ html .btn.btn:disabled::after {
   }
 }
 
-/* --- Present ------------------------------------------------------------- */
+/* --- Before the result ---------------------------------------------------
+   Runs on its own while the jingle plays (7 s). Everything waits until
+   .anticipation-playing is set, when the outro audio starts. */
 
-.present-breathe {
-  animation: breathe 3s ease-in-out infinite;
-}
-.present-wobble-1 {
-  animation: wobble 0.5s ease-in-out;
-}
-.present-wobble-2 {
-  animation: wobble-more 0.6s ease-in-out;
-}
-.present-opening .present-lid {
-  transform-box: fill-box;
-  transform-origin: 20% 100%;
-  animation: lid-lift 1.1s 0.1s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
-}
-.present-opening .sack-bow {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: bow-loosen 0.9s ease-in forwards;
-}
-.present-star {
-  translate: -50% 0;
-  animation: star-rise 1.6s 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-  filter: drop-shadow(0 0 8px rgb(254 240 138 / 0.6));
-}
-.rising-flake {
-  position: absolute;
-  left: calc(50% + var(--x));
-  top: 42%;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 9999px;
-  background: radial-gradient(
-    circle,
-    #fff 0 35%,
-    rgb(255 255 255 / 0.6) 55%,
-    transparent 72%
-  );
+.anticipation-carry {
   opacity: 0;
-  animation: flake-rise 2s var(--delay) ease-out forwards;
+}
+.anticipation-glow {
+  opacity: 0;
+}
+.anticipation-flake {
+  opacity: 0;
+}
+.anticipation-box,
+.anticipation-lid,
+.anticipation-shake {
+  transform-box: fill-box;
+}
+.anticipation-box,
+.anticipation-shake {
+  transform-origin: 50% 100%;
+}
+.anticipation-lid {
+  transform-origin: 20% 100%;
+}
+.anticipation-frost {
+  opacity: 0.85;
+}
+.globe-flake {
+  transform: translate(var(--x0), var(--y0));
 }
 
-@keyframes breathe {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-0.6deg);
+.anticipation-playing .anticipation-carry {
+  animation: carry-in 2.4s ease-out both;
+}
+.anticipation-playing .anticipation-steps {
+  animation: steps 0.4s ease-in-out 6 alternate;
+}
+.anticipation-playing .anticipation-box {
+  animation: wobble-grow 3.4s 2.6s ease-in-out both;
+}
+.anticipation-playing .anticipation-lid {
+  animation: lid-pop 0.9s 6s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
+}
+.anticipation-playing .anticipation-glow {
+  animation: glow-in 0.9s 6s ease-out forwards;
+}
+.anticipation-playing .anticipation-flake {
+  animation-name: flake-up;
+  animation-duration: 1.6s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+.anticipation-playing .anticipation-shake {
+  animation: globe-shake 1.4s ease-in-out;
+}
+.anticipation-playing .globe-flake {
+  animation: globe-snow 6.4s cubic-bezier(0.25, 0.6, 0.3, 1) forwards;
+}
+.anticipation-playing .anticipation-frost {
+  animation: frost-clear 3s 3.4s ease-out forwards;
+}
+
+@keyframes carry-in {
+  0% {
+    opacity: 0;
+    transform: translateX(-180px);
   }
-  50% {
-    transform: translateY(-4px) rotate(0.6deg);
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
   }
 }
-@keyframes wobble {
+@keyframes steps {
+  to {
+    transform: translateY(-4px) rotate(1.5deg);
+  }
+}
+/* Still at first, then the present wiggles more and more. */
+@keyframes wobble-grow {
   0%,
   100% {
     transform: rotate(0);
   }
-  25% {
+  15% {
+    transform: rotate(-2deg);
+  }
+  30% {
+    transform: rotate(2deg);
+  }
+  45% {
+    transform: rotate(-4deg);
+  }
+  60% {
+    transform: rotate(4deg) translateY(-2px);
+  }
+  72% {
+    transform: rotate(-6deg) translateY(-3px);
+  }
+  84% {
+    transform: rotate(6deg) translateY(-4px);
+  }
+  94% {
     transform: rotate(-3deg);
   }
-  75% {
-    transform: rotate(3deg);
-  }
 }
-@keyframes wobble-more {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  20%,
-  60% {
-    transform: rotate(-5deg) translateX(-3px);
-  }
-  40%,
-  80% {
-    transform: rotate(5deg) translateX(3px);
-  }
-}
-@keyframes lid-lift {
+@keyframes lid-pop {
   to {
-    transform: translate(6px, -44px) rotate(-12deg);
+    transform: translate(3px, -16px) rotate(-16deg);
   }
 }
-@keyframes bow-loosen {
+@keyframes glow-in {
   to {
-    transform: translateY(26px) rotate(12deg);
-    opacity: 0;
-  }
-}
-@keyframes star-rise {
-  from {
-    transform: translateY(70px) scale(0.4);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(-30px) scale(1);
     opacity: 1;
   }
 }
-@keyframes flake-rise {
+@keyframes flake-up {
   0% {
     opacity: 0;
     transform: translate(0, 0);
@@ -513,7 +379,40 @@ html .btn.btn:disabled::after {
   }
   100% {
     opacity: 0;
-    transform: translate(var(--drift), -150px);
+    transform: translate(var(--drift), -80px);
+  }
+}
+@keyframes globe-shake {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  15%,
+  55% {
+    transform: rotate(-6deg) translateX(-4px);
+  }
+  35%,
+  75% {
+    transform: rotate(6deg) translateX(4px);
+  }
+}
+@keyframes globe-snow {
+  0% {
+    transform: translate(var(--x0), var(--y0));
+  }
+  25% {
+    transform: translate(var(--x1), var(--y1));
+  }
+  55% {
+    transform: translate(var(--x2), var(--y2));
+  }
+  100% {
+    transform: translate(var(--x3), var(--y3));
+  }
+}
+@keyframes frost-clear {
+  to {
+    opacity: 0;
   }
 }
 
@@ -537,9 +436,21 @@ html .btn.btn:disabled::after {
 @media (prefers-reduced-motion: reduce) {
   .wichtel-rock,
   .wichtel-push,
-  .present-breathe,
+  .anticipation-playing *,
   .animate-bob,
   .animate-glow {
     animation: none !important;
+  }
+}
+/* Without motion: everyone in place, the snow globe already clear. */
+@media (prefers-reduced-motion: reduce) {
+  .anticipation-carry {
+    opacity: 1;
+  }
+  .anticipation-frost {
+    opacity: 0;
+  }
+  .globe-flake {
+    transform: translate(var(--x3), var(--y3));
   }
 }
