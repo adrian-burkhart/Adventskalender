@@ -224,11 +224,6 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
       <section className="flex flex-col items-center gap-2 text-center">
         <h2 className="text-2xl">Dein Weihnachtsbaum</h2>
         <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
-        <p className="max-w-xs text-base text-candle/85">
-          {answered === 0
-            ? "Für jedes Türchen, das du beantwortest, hängt etwas an deinem Baum."
-            : `Für jedes beantwortete Türchen hängt etwas an deinem Baum: schon ${answered === 1 ? "ein Stück" : `${answered} Stück`}.`}
-        </p>
       </section>
       <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
         {doorStates.map((doorState, i) => {

@@ -51,8 +51,8 @@ function flakes(
 
 // Small snow crystals at different depths: the nearer, the larger and the
 // faster.
-const FAR = flakes(30, 5, [4, 6], [26, 38], [0.45, 0.65], 0)
-const NEAR = flakes(22, 31, [7, 10], [18, 28], [0.7, 0.95], 0)
+const FAR = flakes(12, 5, [4, 6], [70, 100], [0.45, 0.65], 0)
+const NEAR = flakes(9, 31, [7, 10], [50, 70], [0.7, 0.95], 0)
 
 /**
  * Snow behind the page. Rendered in the browser only: it's decoration and
@@ -97,7 +97,7 @@ function Crystal({ flake }: { flake: Flake }) {
     <span className="flake" style={style(flake)}>
       <span
         className="flake-sway"
-        style={{ animationDuration: `${flake.duration / 3}s` }}
+        style={{ animationDuration: `${flake.duration / 6}s` }}
       >
         <svg
           viewBox="-12 -12 24 24"
