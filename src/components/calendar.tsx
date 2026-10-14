@@ -1,6 +1,7 @@
 "use client"
 
-import { memo, useState, useCallback, useEffect } from "react"
+import { memo, useState, useCallback, useEffect, useRef } from "react"
+import { useRouter } from "next/navigation"
 import { useSelectedYear } from "@/lib/context"
 import doorClosedOne from "../../public/images/door-closed-1.webp"
 import doorClosedTwo from "../../public/images/door-closed-2.webp"
@@ -12,7 +13,8 @@ import useSound from "use-sound"
 import { useDoors, DoorState, Year } from "@/lib/hooks"
 import localFont from "next/font/local"
 import clsx from "clsx"
-import { ERROR_TEXT, LOADING_TEXT } from "@/lib/texts"
+import { ERROR_TEXT } from "@/lib/texts"
+import Loading from "./loading"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
 
@@ -107,6 +109,7 @@ const CalendarDoor = memo(
     }, [doorState, variant])
 
     const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
+    const router = useRouter()
 
     const delayedNavigation = useCallback(() => {
       if (!enabledTestMode && doorState === "answered") {
@@ -127,13 +130,16 @@ const CalendarDoor = memo(
       }
 
       setImageUrl(doorOpen)
+      // Save the opening and load the door page while the door opens, so
+      // the question is there right after the animation.
+      const opened = openDoor()
+      router.prefetch(route)
       setTimeout(() => {
-        openDoor().then(() => {
-          window.location.href = route
-        })
+        opened.then(() => router.push(route))
       }, 6000)
     }, [
       route,
+      router,
       openDoor,
       playChristmas,
       enabledTestMode,
@@ -156,56 +162,77 @@ const CalendarDoor = memo(
   },
 )
 
-const Calendar = memo(() => {
-  const { selectedYear } = useSelectedYear()
-  const { doorStates, openDoor, loading, error } = useDoors(selectedYear)
+const Calendar = memo(
+  ({
+    initialDoors,
+  }: {
+    initialDoors?: { year: string; doors: DoorState[] }
+  }) => {
+    const { selectedYear } = useSelectedYear()
+    const { doorStates, openDoor, loading, error } = useDoors(
+      selectedYear,
+      initialDoors,
+    )
 
-  const [playOpen] = useSound("/sounds/opening-door.mp3")
-  const [playLocked] = useSound("/sounds/locked-door.mp3")
-  const [playChristmas] = useSound("/sounds/christmas.mp3")
-  const [playUpsi] = useSound("/sounds/upsi.mp3")
+    const [playOpen, { stop: stopOpen }] = useSound("/sounds/opening-door.mp3")
+    const [playLocked, { stop: stopLocked }] = useSound(
+      "/sounds/locked-door.mp3",
+    )
+    const [playChristmas, { stop: stopChristmas }] = useSound(
+      "/sounds/christmas.mp3",
+    )
+    const [playUpsi, { stop: stopUpsi }] = useSound("/sounds/upsi.mp3")
 
-  if (!selectedYear) {
-    return <div>Kein Jahr ausgewählt</div>
-  }
+    // Leaving the calendar ends its sounds, as the full page load used to.
+    const stopAll = useRef<() => void>(() => {})
+    useEffect(() => {
+      stopAll.current = () => {
+        stopOpen()
+        stopLocked()
+        stopChristmas()
+        stopUpsi()
+      }
+    }, [stopOpen, stopLocked, stopChristmas, stopUpsi])
+    useEffect(() => () => stopAll.current(), [])
 
-  if (loading) {
-    return <div>{LOADING_TEXT}</div>
-  }
+    if (error) {
+      return <div>{ERROR_TEXT}</div>
+    }
 
-  if (error) {
-    return <div>{ERROR_TEXT}</div>
-  }
+    if (!selectedYear || loading || !doorStates) {
+      return <Loading />
+    }
 
-  // Past years without content (2024) say so; the current year always shows
-  // its doors, which stay locked until December.
-  if (
-    !selectedYear.questionCount &&
-    Number(selectedYear.year) < new Date().getFullYear()
-  ) {
-    return <div>Keine Fragen für dieses Jahr</div>
-  }
+    // Past years without content (2024) say so; the current year always shows
+    // its doors, which stay locked until December.
+    if (
+      !selectedYear.questionCount &&
+      Number(selectedYear.year) < new Date().getFullYear()
+    ) {
+      return <div>Keine Fragen für dieses Jahr</div>
+    }
 
-  return (
-    <div className="grid grid-cols-2 items-center gap-4">
-      {doorStates.map((doorState, i) => {
-        return (
-          <CalendarDoor
-            key={i}
-            variant={(i + 1) % 4 < 2 ? "closed-one" : "closed-two"}
-            playOpen={playOpen}
-            selectedYear={selectedYear}
-            playLocked={playLocked}
-            playChristmas={playChristmas}
-            doorNumber={i + 1}
-            playUpsi={playUpsi}
-            openDoor={() => openDoor(i + 1)}
-            doorState={doorState}
-          />
-        )
-      })}
-    </div>
-  )
-})
+    return (
+      <div className="grid grid-cols-2 items-center gap-4">
+        {doorStates.map((doorState, i) => {
+          return (
+            <CalendarDoor
+              key={i}
+              variant={(i + 1) % 4 < 2 ? "closed-one" : "closed-two"}
+              playOpen={playOpen}
+              selectedYear={selectedYear}
+              playLocked={playLocked}
+              playChristmas={playChristmas}
+              doorNumber={i + 1}
+              playUpsi={playUpsi}
+              openDoor={() => openDoor(i + 1)}
+              doorState={doorState}
+            />
+          )
+        })}
+      </div>
+    )
+  },
+)
 
 export default Calendar

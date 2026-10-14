@@ -1,17 +1,25 @@
 import type { Metadata } from "next"
 import type { ReactNode } from "react"
 import Providers from "./providers"
+import { loadAppData } from "@/lib/app-data"
 import "./globals.css"
 
 export const metadata: Metadata = {
   title: "Adventskalender der Familie Haas",
 }
 
-export default function RootLayout({ children }: { children: ReactNode }) {
+export default async function RootLayout({
+  children,
+}: {
+  children: ReactNode
+}) {
+  // The player, their points and the years arrive with the HTML.
+  const appData = await loadAppData()
+
   return (
     <html lang="de">
       <body>
-        <Providers>{children}</Providers>
+        <Providers initial={appData}>{children}</Providers>
       </body>
     </html>
   )

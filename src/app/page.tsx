@@ -1,81 +1,34 @@
-"use client"
+import { redirect } from "next/navigation"
+import Home from "@/components/home"
+import { loadCalendarYears, loadDoorStates } from "@/lib/door-api"
+import { getSession } from "@/lib/session"
 
-import Layout from "@/components/layout"
-import Calendar from "@/components/calendar"
-import { memo, useEffect, useState } from "react"
-import { usePlayer } from "@/lib/hooks"
-import Image from "next/image"
-import title from "../../public/images/title.webp"
-import { DateTime, Duration } from "luxon"
-import { useSelectedYear } from "@/lib/context"
-import { LOADING_TEXT } from "@/lib/texts"
+// The calendar is rendered on the server with the player's doors, so the
+// page appears complete instead of loading piece by piece in the browser.
+export default async function Page() {
+  const { supabase, user } = await getSession()
+  if (!user) redirect("/login")
 
-const Home = memo(() => {
-  const { player, loading: isPlayerLoading } = usePlayer()
-  const { selectedYear } = useSelectedYear()
-  const [countdown, setCountdown] = useState<Duration | null>(null)
-  const calendarStarts = DateTime.fromISO(
-    `${selectedYear?.year ?? "2025"}-12-01T00:00:00.000Z`,
-  )
+  const initialDoors = await loadCalendarYears()
+    .then(async ({ currentYear }) => ({
+      year: currentYear,
+      doors: await loadDoorStates(
+        supabase,
+        user.id,
+        Number(currentYear),
+        false,
+      ),
+    }))
+    .catch((error) => {
+      // The calendar then loads the doors itself.
+      console.error("home doors", error)
+      return undefined
+    })
 
-  const calendarHasStarted = calendarStarts.diffNow().milliseconds < 0
+  // A server component renders once per request, so reading the clock here
+  // is stable.
+  // eslint-disable-next-line react-hooks/purity
+  const renderedAt = Date.now()
 
-  const updateCountdown = () => {
-    const duration = Duration.fromMillis(
-      calendarStarts.diffNow().milliseconds,
-    ).shiftTo("days", "hours", "minutes")
-    setCountdown(duration)
-  }
-
-  useEffect(() => {
-    updateCountdown()
-
-    const interval = setInterval(() => {
-      updateCountdown()
-    }, 60000)
-
-    return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedYear?.year])
-
-  if (isPlayerLoading) {
-    return <div>{LOADING_TEXT}</div>
-  }
-
-  return (
-    <Layout>
-      <main>
-        <div className="mt-24 flex flex-col items-center justify-center gap-4">
-          <div className="text-2xl text-yellow-200">
-            <Image
-              alt="Adventskalender der Familie Haas"
-              src={title}
-              priority
-              className="h-full w-full"
-            />
-          </div>
-          <div className="mb-4 flex flex-col items-center justify-center gap-2 text-center">
-            {player && player.name && <div>Hallo {player.name}!</div>}
-            {!calendarHasStarted && (
-              <div className="flex flex-col items-center justify-center gap-2 text-center">
-                <div>Schön, dass du schon hier bist!</div>
-                <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
-                <div>
-                  Bis dahin sind es noch:{" "}
-                  {countdown
-                    ? `${countdown.days} Tage, ${
-                        countdown.hours
-                      } Stunden und ${Math.round(countdown.minutes)} Minuten`
-                    : ""}
-                </div>
-              </div>
-            )}
-          </div>
-          {player && <Calendar />}
-        </div>
-      </main>
-    </Layout>
-  )
-})
-
-export default Home
+  return <Home initialDoors={initialDoors} renderedAt={renderedAt} />
+}

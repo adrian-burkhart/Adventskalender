@@ -8,11 +8,11 @@ import {
   SetStateAction,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react"
 
-import { useEffectOnce } from "./hooks"
 import { getValueFromStorage, setValueInStorage } from "./storage"
 
 export enum FeatureFlag {
@@ -110,6 +110,14 @@ export function useFeatureFlagMapResetter() {
     setFeatureFlagMapInStorage(() => ({}))
   }, [setFeatureFlagMap])
 }
+
+/* eslint-disable react-hooks/exhaustive-deps */
+function useEffectOnce(fn: () => void) {
+  useEffect(() => {
+    fn()
+  }, [])
+}
+/* eslint-enable react-hooks/exhaustive-deps */
 
 function useFeatureFlagMapInitialization(
   setFeatureFlagMap: Dispatch<SetStateAction<PartialFeatureFlagMap>>,

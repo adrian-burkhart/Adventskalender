@@ -1,5 +1,6 @@
 import "server-only"
 import { createClient } from "@sanity/client"
+import { unstable_cache } from "next/cache"
 
 // Content is read on the server only, so answers never reach the browser.
 // The token allows reading a private dataset; without it, only a public one.
@@ -28,7 +29,7 @@ export interface YearSummary {
   questionCount: number
 }
 
-export async function listYears(): Promise<YearSummary[]> {
+async function fetchYears(): Promise<YearSummary[]> {
   const years = await client.fetch<YearSummary[]>(
     `*[_type == "year" && defined(year)]{
       year,
@@ -40,7 +41,7 @@ export async function listYears(): Promise<YearSummary[]> {
     .sort((a, b) => a.year.localeCompare(b.year))
 }
 
-export async function getQuestion(
+async function fetchQuestion(
   year: string,
   door: number,
 ): Promise<QuestionContent | null> {
@@ -60,3 +61,16 @@ export async function getQuestion(
   if (!question?.question || !question.answer) return null
   return question
 }
+
+// Content changes rarely, so each server instance keeps it for a minute
+// instead of asking Sanity on every page load. Edits in the Studio show up
+// within that minute.
+const CONTENT_SECONDS = 60
+
+export const listYears = unstable_cache(fetchYears, ["sanity-years"], {
+  revalidate: CONTENT_SECONDS,
+})
+
+export const getQuestion = unstable_cache(fetchQuestion, ["sanity-question"], {
+  revalidate: CONTENT_SECONDS,
+})

@@ -5,14 +5,8 @@ import { PostgrestError } from "@supabase/supabase-js"
 import { useUser, useSupabaseClient } from "@/lib/auth-context"
 import type { DoorState } from "./doors"
 import { apiFetch } from "./api-client"
-
-/* eslint-disable react-hooks/exhaustive-deps */
-export function useEffectOnce(fn: () => void) {
-  useEffect(() => {
-    fn()
-  }, [])
-}
-/* eslint-enable react-hooks/exhaustive-deps */
+import { usePlayerContext, useScoresContext } from "./context"
+import { FeatureFlag, useFeatureFlag } from "./feature-flags"
 
 export interface Player {
   id: string
@@ -34,118 +28,68 @@ export interface YearScore {
   doors: number
 }
 
-/** Every player's points for one year, best first (computed in the DB). */
-export const useLeaderboard = (year: string | null) => {
+/**
+ * Every player's points for one year, best first (computed in the DB). The
+ * year the server rendered comes along as `initial`; other years load here.
+ */
+export const useLeaderboard = (
+  year: string | null,
+  initial?: { year: string; entries: LeaderboardEntry[] },
+) => {
   const supabaseClient = useSupabaseClient()
-  const user = useUser()
+  const userId = useUser()?.id
+  const seeded = !!initial && initial.year === year
 
-  const [data, setData] = useState<LeaderboardEntry[] | null>(null)
-  const [error, setError] = useState<PostgrestError | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
+  const [state, setState] = useState<{
+    year: string
+    entries?: LeaderboardEntry[]
+    error?: PostgrestError
+  } | null>(null)
 
   useEffect(() => {
-    if (!user || !year) return
+    if (!userId || !year || seeded) return
     let cancelled = false
 
     supabaseClient
       .rpc("leaderboard", { p_year: Number(year) })
       .then(({ data, error }) => {
         if (cancelled) return
-        if (error) setError(error)
-        else setData(data as LeaderboardEntry[])
-        setLoading(false)
+        setState(
+          error
+            ? { year, error }
+            : { year, entries: data as LeaderboardEntry[] },
+        )
       })
 
     return () => {
       cancelled = true
     }
-  }, [user, year, supabaseClient])
+  }, [userId, year, seeded, supabaseClient])
 
-  return { entries: data, loading, error }
-}
-
-/** Years that have points, for the leaderboard's year switch. */
-export const useScoreYears = () => {
-  const supabaseClient = useSupabaseClient()
-  const user = useUser()
-  const [years, setYears] = useState<number[]>([])
-
-  useEffect(() => {
-    if (!user) return
-    let cancelled = false
-
-    supabaseClient.rpc("score_years").then(({ data }) => {
-      if (!cancelled && data) setYears(data as number[])
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [user, supabaseClient])
-
-  return years
+  if (seeded) return { entries: initial.entries, loading: false, error: null }
+  const current = state?.year === year ? state : null
+  return {
+    entries: current?.entries ?? null,
+    loading: !current,
+    error: current?.error ?? null,
+  }
 }
 
 /** The logged-in player's points per year. */
 export const useMyScores = () => {
-  const supabaseClient = useSupabaseClient()
-  const user = useUser()
-
-  const [data, setData] = useState<YearScore[] | null>(null)
-  const [error, setError] = useState<PostgrestError | null>(null)
-
-  useEffect(() => {
-    if (!user) return
-    let cancelled = false
-
-    supabaseClient.rpc("my_scores").then(({ data, error }) => {
-      if (cancelled) return
-      if (error) setError(error)
-      else setData(data as YearScore[])
-    })
-
-    return () => {
-      cancelled = true
-    }
-  }, [user, supabaseClient])
-
-  return { scores: data, error }
+  const { scores } = useScoresContext()
+  return { scores }
 }
 
+/** The logged-in player (id, name). */
 export const usePlayer = () => {
-  const supabaseClient = useSupabaseClient()
-  const user = useUser()
-
-  const [data, setData] = useState<Player | null>(null)
-  const [error, setError] = useState<PostgrestError | null>(null)
-  const [loading, setLoading] = useState<boolean>(false)
-
-  useEffect(() => {
-    const loadData = async () => {
-      setLoading(true)
-      const { data, error } = await supabaseClient
-        .from("players")
-        .select("id, created_at, name")
-        .eq("id", user?.id)
-        .single()
-      setLoading(false)
-
-      if (error) {
-        setError(error)
-        return
-      }
-
-      setData(data)
-    }
-
-    if (user) loadData()
-  }, [user, supabaseClient])
-
-  return { player: data, loading, error }
+  const { player } = usePlayerContext()
+  return { player }
 }
 
 export const useUpdatePlayerName = () => {
   const supabaseClient = useSupabaseClient()
+  const { setPlayer } = usePlayerContext()
   const [error, setError] = useState<PostgrestError | null>(null)
   const [loading, setLoading] = useState<boolean>(false)
   const [updateSuccess, setUpdateSuccess] = useState(false)
@@ -155,9 +99,10 @@ export const useUpdatePlayerName = () => {
     setUpdateSuccess(false)
     setError(null)
 
+    const name = newName.trim()
     const { error } = await supabaseClient
       .from("players")
-      .update({ name: newName.trim() })
+      .update({ name })
       .eq("id", player.id)
 
     setLoading(false)
@@ -166,6 +111,7 @@ export const useUpdatePlayerName = () => {
       setError(error)
     } else {
       setUpdateSuccess(true)
+      setPlayer((current) => (current ? { ...current, name } : current))
     }
   }
 
@@ -177,64 +123,47 @@ export interface Year {
   questionCount: number
 }
 
-export const useYears = () => {
-  const [years, setYears] = useState<Year[] | null>([])
-  const [currentYear, setCurrentYear] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<Error | null>(null)
-
-  useEffect(() => {
-    let cancelled = false
-
-    apiFetch<{ years: Year[]; currentYear: string }>("/api/years")
-      .then(({ years, currentYear }) => {
-        if (cancelled) return
-        setYears(years)
-        setCurrentYear(currentYear)
-      })
-      .catch((e: Error) => {
-        if (!cancelled) setError(e)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  return { years, currentYear, loading, error }
-}
-
 export type { DoorState }
 
-export const useDoors = (year: Year | null) => {
-  const [error, setError] = useState<Error | null>(null)
-  const [loading, setLoading] = useState<boolean>(true)
-  const [doorStates, setDoorStates] = useState<DoorState[]>(
-    Array(24).fill("locked"),
-  )
+/**
+ * The doors of one year. The server renders the current year's doors with
+ * the page (`initial`); another year, or test mode, loads them here.
+ */
+export const useDoors = (
+  year: Year | null,
+  initial?: { year: string; doors: DoorState[] },
+) => {
+  const testMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
+  const key = year ? `${year.year}:${testMode}` : null
+  const seeded = !!initial && !testMode && initial.year === year?.year
+
+  const [state, setState] = useState<{
+    key: string
+    doors?: DoorState[]
+    error?: Error
+  } | null>(null)
 
   useEffect(() => {
-    if (!year) return
+    if (!key || seeded) return
     let cancelled = false
 
-    apiFetch<{ doors: DoorState[] }>(`/api/doors/${year.year}`)
+    apiFetch<{ doors: DoorState[] }>(`/api/doors/${key.split(":")[0]}`)
       .then(({ doors }) => {
-        if (!cancelled) setDoorStates(doors)
+        if (!cancelled) setState({ key, doors })
       })
-      .catch((e: Error) => {
-        if (!cancelled) setError(e)
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false)
+      .catch((error: Error) => {
+        if (!cancelled) setState({ key, error })
       })
 
     return () => {
       cancelled = true
     }
-  }, [year])
+  }, [key, seeded])
+
+  const current = state?.key === key ? state : null
+  const doorStates = seeded ? initial.doors : (current?.doors ?? null)
+  const loading = !seeded && !current
+  const error = seeded ? null : (current?.error ?? null)
 
   const openDoor = async (doorNumber: number) => {
     if (!year) return

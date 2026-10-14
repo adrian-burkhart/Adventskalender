@@ -1,7 +1,8 @@
 import "server-only"
-import type { SupabaseClient, User } from "@supabase/supabase-js"
+import type { SupabaseClient } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 import { DateTime } from "luxon"
+import { cache } from "react"
 import {
   DOOR_COUNT,
   TIME_ZONE,
@@ -19,7 +20,7 @@ import { calendarNow } from "@/lib/clock"
 import { parseDoorParams } from "@/lib/routes"
 import { getQuestion, listYears, type QuestionContent } from "@/lib/sanity"
 import { createAdminClient } from "@/lib/supabase/admin"
-import { createClient } from "@/lib/supabase/server"
+import { getSession, type SessionUser } from "@/lib/session"
 
 // The answer routes. The browser only ever gets what the current step needs:
 // the intro audio, then the question and options, then the result. The
@@ -68,7 +69,7 @@ const FAILED = () =>
     500,
   )
 
-function isAdmin(user: User): boolean {
+function isAdmin(user: SessionUser): boolean {
   const admins = (process.env.ADMIN_EMAILS ?? "")
     .split(",")
     .map((email) => email.trim().toLowerCase())
@@ -77,16 +78,8 @@ function isAdmin(user: User): boolean {
 }
 
 /** Test mode: admins only. Doors open early and nothing is saved. */
-function isTestMode(request: NextRequest, user: User): boolean {
+function isTestMode(request: NextRequest, user: SessionUser): boolean {
   return request.headers.get("x-test-mode") === "1" && isAdmin(user)
-}
-
-async function currentUser() {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-  return { supabase, user }
 }
 
 async function legacyDoors(
@@ -104,20 +97,58 @@ async function legacyDoors(
 
 // --- Calendar --------------------------------------------------------------
 
+/** The years in Sanity, plus the current one, which the calendar shows. */
+export const loadCalendarYears = cache(async () => {
+  // The calendar always shows the current year, even before its
+  // questions exist in Sanity.
+  const currentYear = String(
+    DateTime.fromJSDate(calendarNow()).setZone(TIME_ZONE).year,
+  )
+  const years = [...(await listYears())]
+  if (!years.some((y) => y.year === currentYear)) {
+    years.push({ year: currentYear, questionCount: 0 })
+  }
+  return { years, currentYear }
+})
+
+/** The state of all 24 doors of one year for one player. */
+export async function loadDoorStates(
+  supabase: SupabaseClient,
+  userId: string,
+  year: number,
+  testMode: boolean,
+): Promise<DoorState[]> {
+  const [{ data: rows, error }, legacy] = await Promise.all([
+    supabase
+      .from("answers")
+      .select("door, answered_at")
+      .eq("player_id", userId)
+      .eq("year", year),
+    legacyDoors(supabase, userId),
+  ])
+  if (error) throw error
+
+  const now = calendarNow()
+  return Array.from({ length: DOOR_COUNT }, (_, i) => {
+    const door = i + 1
+    const row = rows?.find((r) => r.door === door)
+    const old = legacyDoorStatus(legacy, year, door)
+    const state = doorState({
+      year,
+      door,
+      now,
+      opened: !!row || old.opened,
+      answered: !!row?.answered_at || old.answered,
+    })
+    return testMode && state === "locked" ? "closed" : state
+  })
+}
+
 export async function getYears() {
-  const { user } = await currentUser()
+  const { user } = await getSession()
   if (!user) return UNAUTHORIZED()
   try {
-    // The calendar always shows the current year, even before its
-    // questions exist in Sanity.
-    const currentYear = String(
-      DateTime.fromJSDate(calendarNow()).setZone(TIME_ZONE).year,
-    )
-    const years = await listYears()
-    if (!years.some((y) => y.year === currentYear)) {
-      years.push({ year: currentYear, questionCount: 0 })
-    }
-    return reply({ years, currentYear })
+    return reply(await loadCalendarYears())
   } catch (error) {
     console.error("getYears", error)
     return FAILED()
@@ -125,7 +156,7 @@ export async function getYears() {
 }
 
 export async function getDoorStates(request: NextRequest, yearParam: string) {
-  const { supabase, user } = await currentUser()
+  const { supabase, user } = await getSession()
   if (!user) return UNAUTHORIZED()
   const year = Number(yearParam)
   if (!/^\d{4}$/.test(yearParam) || year < 2023 || year > 2100) {
@@ -133,32 +164,12 @@ export async function getDoorStates(request: NextRequest, yearParam: string) {
   }
 
   try {
-    const testMode = isTestMode(request, user)
-    const [{ data: rows, error }, legacy] = await Promise.all([
-      supabase
-        .from("answers")
-        .select("door, answered_at")
-        .eq("player_id", user.id)
-        .eq("year", year),
-      legacyDoors(supabase, user.id),
-    ])
-    if (error) throw error
-
-    const now = calendarNow()
-    const doors: DoorState[] = Array.from({ length: DOOR_COUNT }, (_, i) => {
-      const door = i + 1
-      const row = rows?.find((r) => r.door === door)
-      const old = legacyDoorStatus(legacy, year, door)
-      const state = doorState({
-        year,
-        door,
-        now,
-        opened: !!row || old.opened,
-        answered: !!row?.answered_at || old.answered,
-      })
-      return testMode && state === "locked" ? "closed" : state
-    })
-
+    const doors = await loadDoorStates(
+      supabase,
+      user.id,
+      year,
+      isTestMode(request, user),
+    )
     return reply({ doors })
   } catch (error) {
     console.error("getDoorStates", error)
@@ -169,9 +180,8 @@ export async function getDoorStates(request: NextRequest, yearParam: string) {
 // --- One door --------------------------------------------------------------
 
 interface DoorContext {
-  request: NextRequest
   supabase: SupabaseClient
-  user: User
+  user: SessionUser
   year: number
   door: number
   question: QuestionContent
@@ -181,12 +191,33 @@ interface DoorContext {
 
 type DoorParams = Promise<{ year: string; door: string }>
 
+/** Everything a door step needs, or null when the question is missing. */
+async function loadDoorContext(
+  supabase: SupabaseClient,
+  user: SessionUser,
+  year: string,
+  door: number,
+  testMode: boolean,
+): Promise<DoorContext | null> {
+  const question = await getQuestion(year, door)
+  if (!question) return null
+  return {
+    supabase,
+    user,
+    year: Number(year),
+    door,
+    question,
+    testMode,
+    now: new Date(),
+  }
+}
+
 async function withDoor(
   request: NextRequest,
   params: DoorParams,
   handler: (ctx: DoorContext) => Promise<DoorResponse>,
 ) {
-  const { supabase, user } = await currentUser()
+  const { supabase, user } = await getSession()
   if (!user) return UNAUTHORIZED()
 
   const { year: yearParam, door: doorParam } = await params
@@ -194,21 +225,15 @@ async function withDoor(
   if (!parsed) return reply({ error: "Unbekannte Tür" }, 404)
 
   try {
-    const question = await getQuestion(parsed.year, parsed.doorNumber)
-    if (!question) return reply({ status: "missing" } satisfies DoorResponse)
-
-    return reply(
-      await handler({
-        request,
-        supabase,
-        user,
-        year: Number(parsed.year),
-        door: parsed.doorNumber,
-        question,
-        testMode: isTestMode(request, user),
-        now: new Date(),
-      }),
+    const ctx = await loadDoorContext(
+      supabase,
+      user,
+      parsed.year,
+      parsed.doorNumber,
+      isTestMode(request, user),
     )
+    if (!ctx) return reply({ status: "missing" } satisfies DoorResponse)
+    return reply(await handler(ctx))
   } catch (error) {
     console.error("door route", error)
     return FAILED()
@@ -274,34 +299,58 @@ async function recordAnswer(
   return { recorded: data.recorded, score: data.year_score, points }
 }
 
+/** Where the player stands with this door. */
+async function doorStep(ctx: DoorContext): Promise<DoorResponse> {
+  if (ctx.testMode) {
+    return { status: "intro", introAudio: ctx.question.introAudio }
+  }
+
+  const progress = await loadProgress(ctx)
+  if (progress.answered) return { status: "answered" }
+  if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
+    return { status: "locked" }
+  }
+
+  if (progress.startedAt) {
+    if (isWithinDeadline(progress.startedAt, ctx.now)) {
+      return questionStep(ctx, progress.startedAt)
+    }
+    // Time ran out while the page was closed: that counts as wrong.
+    await recordAnswer(ctx, {
+      selected: null,
+      correct: false,
+      leftPage: false,
+    })
+    return { status: "answered" }
+  }
+
+  return { status: "intro", introAudio: ctx.question.introAudio }
+}
+
 /** GET: where the player stands with this door. */
 export function getDoor(request: NextRequest, params: DoorParams) {
-  return withDoor(request, params, async (ctx) => {
-    if (ctx.testMode) {
-      return { status: "intro", introAudio: ctx.question.introAudio }
-    }
+  return withDoor(request, params, doorStep)
+}
 
-    const progress = await loadProgress(ctx)
-    if (progress.answered) return { status: "answered" }
-    if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
-      return { status: "locked" }
-    }
-
-    if (progress.startedAt) {
-      if (isWithinDeadline(progress.startedAt, ctx.now)) {
-        return questionStep(ctx, progress.startedAt)
-      }
-      // Time ran out while the page was closed: that counts as wrong.
-      await recordAnswer(ctx, {
-        selected: null,
-        correct: false,
-        leftPage: false,
-      })
-      return { status: "answered" }
-    }
-
-    return { status: "intro", introAudio: ctx.question.introAudio }
-  })
+/**
+ * The first step of a door for the server-rendered door page, without test
+ * mode (the browser asks the API again when it is on). Null when it fails;
+ * the page then asks the API.
+ */
+export async function initialDoorStep(
+  year: string,
+  door: number,
+): Promise<DoorResponse | null> {
+  const { supabase, user } = await getSession()
+  if (!user) return null
+  try {
+    const ctx = await loadDoorContext(supabase, user, year, door, false)
+    if (!ctx) return { status: "missing" }
+    return await doorStep(ctx)
+  } catch (error) {
+    console.error("initialDoorStep", error)
+    return null
+  }
 }
 
 /** POST: the door was clicked in the calendar. */
@@ -360,7 +409,7 @@ export function startQuestion(request: NextRequest, params: DoorParams) {
 /** POST: the answer, or `leftPage` when the player switched away. */
 export function submitAnswer(request: NextRequest, params: DoorParams) {
   return withDoor(request, params, async (ctx) => {
-    const body = (await ctx.request.json().catch(() => ({}))) as {
+    const body = (await request.json().catch(() => ({}))) as {
       option?: unknown
       leftPage?: unknown
     }

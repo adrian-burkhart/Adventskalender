@@ -2,16 +2,15 @@
 
 import { ReactNode, memo } from "react"
 import Navbar from "./navbar"
-import { useMyScores, useYears } from "@/lib/hooks"
+import { useMyScores } from "@/lib/hooks"
 import { useSelectedYear } from "@/lib/context"
 import Footer from "./footer"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 
 const Layout = memo(({ children }: { children: ReactNode }) => {
-  const { years } = useYears()
   const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
 
-  const { selectedYear, setSelectedYear } = useSelectedYear()
+  const { years, selectedYear, setSelectedYear } = useSelectedYear()
   const { scores } = useMyScores()
 
   const currentScore = selectedYear
@@ -19,20 +18,20 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
     : null
 
   const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const year = years!.find((y) => y.year === e.target.value)
+    const year = years.find((y) => y.year === e.target.value)
     if (year) setSelectedYear(year)
   }
 
   return (
     <>
       <Navbar />
-      {enabledTestMode && years && (
+      {enabledTestMode && years.length > 0 && (
         <select
           onChange={handleOnChange}
           value={selectedYear?.year}
           className="bg-red-500"
         >
-          {years?.map((year) => (
+          {years.map((year) => (
             <option key={year.year}>{year.year}</option>
           ))}
         </select>

@@ -1,15 +1,22 @@
 "use client"
 
 import type { ReactNode } from "react"
+import type { AppData } from "@/lib/app-data"
 import { AuthProvider } from "@/lib/auth-context"
-import { YearProvider } from "@/lib/context"
+import { AppDataProvider } from "@/lib/context"
 import { FeatureFlagProvider } from "@/lib/feature-flags"
 
-export default function Providers({ children }: { children: ReactNode }) {
+export default function Providers({
+  initial,
+  children,
+}: {
+  initial: AppData | null
+  children: ReactNode
+}) {
   return (
-    <AuthProvider>
+    <AuthProvider initialUser={initial?.user ?? null}>
       <FeatureFlagProvider>
-        <YearProvider>{children}</YearProvider>
+        <AppDataProvider initial={initial}>{children}</AppDataProvider>
       </FeatureFlagProvider>
     </AuthProvider>
   )
