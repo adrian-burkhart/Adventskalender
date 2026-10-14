@@ -12,10 +12,10 @@ const Footer = memo(() => {
             text: "GitHub",
             href: "https://github.com/adrian-burkhart/Adventskalender",
           },
-          // Staging and local runs link the design proposals.
+          // Staging and local runs link the previews.
           ...(process.env.NEXT_PUBLIC_VERCEL_ENV === "production"
             ? []
-            : [{ text: "Design-Vorschau", href: "/vorschau" }]),
+            : [{ text: "Vorschau", href: "/vorschau" }]),
         ].map((link) => (
           <li key={link.href}>
             <Link

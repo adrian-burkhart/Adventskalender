@@ -15,7 +15,6 @@ import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import Loading from "./loading"
 import ChristmasTree from "./christmas-tree"
-import DoorNumber from "./door-number"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
 
@@ -133,7 +132,12 @@ const CalendarDoor = memo(
             )}
           />
         </div>
-        <DoorNumber number={doorNumber} />
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl"
+        >
+          {doorNumber}
+        </span>
         {status && <span className="sr-only">({status})</span>}
       </button>
     )

@@ -35,13 +35,13 @@ const SLOTS: [number, number][] = [
   [45.7, 42.5],
 ]
 
-/** Painted bauble colours: light, middle and shadow. */
+/** Painted bauble colours (light, middle, shadow), muted to suit the tree. */
 const BAUBLES: [string, string, string][] = [
-  ["#ff8a7a", "#d23a2c", "#8e1d1d"],
-  ["#ffe08a", "#e5a823", "#a8700f"],
-  ["#9ccaf2", "#3d7fc4", "#234f86"],
-  ["#f4f4f4", "#c3c8cf", "#80868f"],
-  ["#f2a7d8", "#c0509a", "#7d2a63"],
+  ["#f08a78", "#c8423a", "#7e2320"],
+  ["#f6d58a", "#d9a441", "#8f6420"],
+  ["#a9c8ec", "#4f7fbe", "#25466f"],
+  ["#f4f5f6", "#c9ced4", "#7f868e"],
+  ["#e59ab0", "#a8384f", "#5e1c2b"],
 ]
 
 export function isStar(index: number) {
@@ -79,7 +79,7 @@ const ChristmasTree = memo(
               style={{
                 left: `${x}%`,
                 top: `${y}%`,
-                width: isStar(i) ? "7.5%" : "5.6%",
+                width: isStar(i) ? "7.5%" : "6.4%",
                 translate: "-50% -50%",
               }}
             >
@@ -91,7 +91,7 @@ const ChristmasTree = memo(
                   className="h-auto w-full"
                 />
               ) : (
-                <Bauble colors={BAUBLES[i % BAUBLES.length]} />
+                <Bauble kind={i % BAUBLES.length} />
               )}
             </span>
           )
@@ -101,25 +101,62 @@ const ChristmasTree = memo(
   },
 )
 
-/** A soft, painted-looking bauble with a little cap. */
-function Bauble({
-  colors: [light, middle, shadow],
-}: {
-  colors: [string, string, string]
-}) {
+/**
+ * A soft, painted-looking bauble: a little gold loop and cap, gentle
+ * shading, a blurred highlight and a faint shadow on the branches.
+ */
+function Bauble({ kind }: { kind: number }) {
+  const [light, middle, shadow] = BAUBLES[kind]
+  const id = `bauble-${kind}`
   return (
-    <span className="relative block aspect-[1/1.15] w-full">
-      <span className="absolute left-1/2 top-0 h-[22%] w-[38%] -translate-x-1/2 rounded-[1px] bg-[#c9a24a]" />
-      <span
-        className="absolute bottom-0 left-0 aspect-square w-full rounded-full"
-        style={{
-          background: `radial-gradient(circle at 35% 32%, ${light} 0%, ${middle} 45%, ${shadow} 100%)`,
-          boxShadow: `0 0 3px ${middle}`,
-          filter: "blur(0.25px)",
-        }}
+    <svg viewBox="0 0 20 24" className="block w-full overflow-visible">
+      <defs>
+        <radialGradient id={id} cx="36%" cy="34%" r="70%">
+          <stop offset="0%" stopColor={light} />
+          <stop offset="55%" stopColor={middle} />
+          <stop offset="100%" stopColor={shadow} />
+        </radialGradient>
+        <filter id="bauble-soft" x="-30%" y="-30%" width="160%" height="160%">
+          <feGaussianBlur stdDeviation="0.35" />
+        </filter>
+        <filter id="bauble-blur" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="0.9" />
+        </filter>
+      </defs>
+      {/* Shadow on the branches behind it. */}
+      <ellipse
+        cx="11.5"
+        cy="16.5"
+        rx="8.5"
+        ry="7.5"
+        fill="#1b3d17"
+        opacity="0.35"
+        filter="url(#bauble-blur)"
       />
-      <span className="absolute left-[22%] top-[38%] h-[22%] w-[22%] rounded-full bg-white/70 blur-[0.6px]" />
-    </span>
+      <g filter="url(#bauble-soft)">
+        <circle
+          cx="10"
+          cy="2.2"
+          r="1.5"
+          fill="none"
+          stroke="#c9a24a"
+          strokeWidth="0.8"
+        />
+        <path d="M7.6 3.6 H12.4 L12 6.2 H8 Z" fill="#c9a24a" />
+        <circle cx="10" cy="14.6" r="8.6" fill={`url(#${id})`} />
+      </g>
+      {/* A soft highlight, as if from a candle. */}
+      <ellipse
+        cx="7.4"
+        cy="11.2"
+        rx="2.4"
+        ry="1.5"
+        transform="rotate(-35 7.4 11.2)"
+        fill="white"
+        opacity="0.6"
+        filter="url(#bauble-blur)"
+      />
+    </svg>
   )
 }
 

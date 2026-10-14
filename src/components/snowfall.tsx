@@ -51,8 +51,8 @@ function flakes(
 
 // Small snow crystals at different depths: the nearer, the larger and the
 // faster.
-const FAR = flakes(12, 5, [4, 6], [70, 100], [0.45, 0.65], 0)
-const NEAR = flakes(9, 31, [7, 10], [50, 70], [0.7, 0.95], 0)
+const FAR = flakes(12, 5, [4, 6], [150, 210], [0.45, 0.65], 0)
+const NEAR = flakes(9, 31, [7, 10], [110, 150], [0.7, 0.95], 0)
 
 /**
  * Snow behind the page. Rendered in the browser only: it's decoration and

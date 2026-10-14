@@ -71,7 +71,7 @@ const Rangliste = memo(
                 aria-label="Jahr"
                 value={year}
                 onChange={(e) => setChosenYear(e.target.value)}
-                className="cursor-pointer appearance-none rounded-full border-2 border-gold/60 bg-pine-950/60 py-1 pl-5 pr-12 font-display text-2xl text-candle focus:outline-none focus:ring-4 focus:ring-gold/50"
+                className="card-white cursor-pointer appearance-none rounded-full bg-pine-950/60 py-1 pl-5 pr-12 font-display text-2xl text-white [text-shadow:0_0_8px_rgb(200_225_255/0.55)] focus:outline-none focus:ring-4 focus:ring-white/50"
               >
                 {years.map((y) => (
                   <option key={y} value={y} className="bg-pine-900 font-body">
@@ -82,7 +82,7 @@ const Rangliste = memo(
               <svg
                 viewBox="0 0 12 8"
                 aria-hidden
-                className="pointer-events-none absolute right-5 top-1/2 h-2 w-3 -translate-y-1/2 text-candle"
+                className="pointer-events-none absolute right-5 top-1/2 h-2 w-3 -translate-y-1/2 text-white"
               >
                 <path
                   d="M1 1.5 L6 6.5 L11 1.5"
@@ -220,7 +220,7 @@ function Together({ entries, unlocked }: BoardProps) {
   const possible = playing.length * unlocked
 
   return (
-    <section className="card w-full px-5 py-5 text-center">
+    <section className="card card-white w-full px-5 py-5 text-center">
       <h2 className="text-2xl">Gemeinsam geschafft</h2>
       <div className="mt-4 grid grid-cols-3 gap-2">
         <Stat
@@ -233,9 +233,6 @@ function Together({ entries, unlocked }: BoardProps) {
       {possible > 0 && (
         <div className="mt-4">
           <LightGarland done={totalDoors} total={possible} />
-          <p className="mt-2 text-base text-candle/85">
-            {totalDoors} von {possible} möglichen Türchen sind schon offen.
-          </p>
         </div>
       )}
     </section>

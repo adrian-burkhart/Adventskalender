@@ -191,11 +191,7 @@ const OutroStep = memo(
         {revealed ? (
           <ResultView result={result} doorNumber={doorNumber} />
         ) : (
-          <Anticipation
-            isCorrect={result.isCorrect}
-            started={started}
-            onDone={() => setRevealed(true)}
-          />
+          <Anticipation started={started} onDone={() => setRevealed(true)} />
         )}
       </div>
     )

@@ -4,10 +4,7 @@
 
 @layer base {
   html {
-    /* Until the chosen font is applied in the browser. */
-    --font-display: var(--font-fraunces);
-    --display-weight: 600;
-    --display-variation: "SOFT" 50;
+    --font-display: var(--font-lora-j), var(--font-fraunces);
     /* A little larger than the default: many players read without glasses. */
     font-size: 112.5%;
   }
@@ -41,47 +38,18 @@
       );
   }
 
-  html[data-font="fraunces"] {
-    --font-display: var(--font-fraunces);
-    --display-weight: 600;
-    --display-variation: "SOFT" 50;
-  }
-  html[data-font="fraunces-weich"] {
-    --font-display: var(--font-fraunces);
-    --display-weight: 600;
-    --display-style: italic;
-    --display-variation: "SOFT" 100, "WONK" 1;
-  }
-  html[data-font="young"] {
-    --font-display: var(--font-young);
-    --display-weight: 400;
-    --display-variation: normal;
-  }
-  html[data-font="dmserif"] {
-    --font-display: var(--font-dmserif);
-    --display-weight: 400;
-    --display-variation: normal;
-  }
-  html[data-font="bree"] {
-    --font-display: var(--font-bree);
-    --display-weight: 400;
-    --display-variation: normal;
-  }
-
   h1,
   h2,
   h3 {
     font-family: theme("fontFamily.display");
-    font-weight: var(--display-weight, 400);
-    font-style: var(--display-style, normal);
-    font-variation-settings: var(--display-variation, normal);
+    font-weight: 600;
+    font-variation-settings: "SOFT" 50;
     color: theme("colors.candle.DEFAULT");
     line-height: 1.2;
   }
 }
 
 @layer components {
-  /* A warm, slightly transparent card, like a window at night. */
   /* A warm, slightly transparent card, like a window at night. Its edge is
      a soft glow instead of a sharp line. */
   .card {
@@ -142,11 +110,9 @@
   }
 }
 
-/* Card proposal "weiss" (see /vorschau): a white, softly glowing edge and
-   white text, like the Rangliste title. [data-cards-preview] shows one
-   proposal inside /vorschau, whatever is chosen. */
-html[data-cards="weiss"] .card,
-html [data-cards-preview="weiss"] .card.card {
+/* A white, softly glowing edge and white text, like the Rangliste title.
+   Only for a few things on the Rangliste. */
+.card-white {
   color: #fff;
   box-shadow:
     0 0 0 1.5px rgb(255 255 255 / 0.7),
@@ -154,38 +120,12 @@ html [data-cards-preview="weiss"] .card.card {
     inset 0 0 14px rgb(255 255 255 / 0.1),
     0 8px 30px rgb(0 0 0 / 0.35);
 }
-html[data-cards="weiss"] .card-glow,
-html [data-cards-preview="weiss"] .card.card-glow {
-  box-shadow:
-    0 0 0 2px rgb(255 255 255 / 0.9),
-    0 0 22px 4px rgb(220 235 255 / 0.5),
-    inset 0 0 18px rgb(255 255 255 / 0.16),
-    0 8px 30px rgb(0 0 0 / 0.35);
-}
-html[data-cards="weiss"] .card :is(h1, h2, h3, [class*="text-candle"]),
-html
-  [data-cards-preview="weiss"]
-  .card.card
-  :is(h1, h2, h3, [class*="text-candle"]) {
+.card-white :is(h1, h2, h3, [class*="text-candle"]) {
   color: #fff;
   text-shadow: 0 0 8px rgb(200 225 255 / 0.55);
 }
-html [data-cards-preview="gold"] .card.card {
-  color: inherit;
-  box-shadow:
-    0 0 16px 1px rgb(233 196 106 / 0.12),
-    inset 0 0 18px rgb(233 196 106 / 0.08),
-    0 8px 30px rgb(0 0 0 / 0.35);
-}
-html
-  [data-cards-preview="gold"]
-  .card.card
-  :is(h1, h2, h3, [class*="text-candle"]) {
-  color: theme("colors.candle.DEFAULT");
-  text-shadow: none;
-}
 
-/* --- Snow (proposals on /vorschau) ---------------------------------------- */
+/* --- Snow ---------------------------------------- */
 
 .snowfall {
   position: fixed;
@@ -243,6 +183,22 @@ html
   }
 }
 
+/* A locked door wobbles when tapped. */
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-6px) rotate(-1deg);
+  }
+  40%,
+  80% {
+    transform: translateX(6px) rotate(1deg);
+  }
+}
+
 /* --- Countdown ------------------------------------------------------------ */
 
 /* The Wichtel rocks gently while he thinks. */
@@ -254,35 +210,6 @@ html
   animation-duration: 1.6s;
 }
 
-/* The drawn Wichtel push the snowballs. */
-.wichtel-push {
-  transform-box: fill-box;
-  transform-origin: 50% 100%;
-  animation: push 1.3s ease-in-out infinite;
-}
-.wichtel-push-late {
-  animation-name: push-left;
-  animation-delay: -0.65s;
-}
-
-@keyframes push {
-  0%,
-  100% {
-    transform: translateX(0) rotate(0);
-  }
-  50% {
-    transform: translateX(4px) rotate(3deg);
-  }
-}
-@keyframes push-left {
-  0%,
-  100% {
-    transform: translateX(0) rotate(0);
-  }
-  50% {
-    transform: translateX(-4px) rotate(-3deg);
-  }
-}
 @keyframes rock {
   0%,
   100% {
@@ -307,24 +234,15 @@ html
   opacity: 0;
 }
 .anticipation-box,
-.anticipation-lid,
-.anticipation-shake {
+.anticipation-lid {
   transform-box: fill-box;
 }
-.anticipation-box,
-.anticipation-shake {
+.anticipation-box {
   transform-origin: 50% 100%;
 }
 .anticipation-lid {
   transform-origin: 20% 100%;
 }
-.anticipation-frost {
-  opacity: 0.85;
-}
-.globe-flake {
-  transform: translate(var(--x0), var(--y0));
-}
-
 .anticipation-playing .anticipation-carry {
   animation: carry-in 2.4s ease-out both;
 }
@@ -346,16 +264,6 @@ html
   animation-timing-function: ease-out;
   animation-fill-mode: forwards;
 }
-.anticipation-playing .anticipation-shake {
-  animation: globe-shake 1.4s ease-in-out;
-}
-.anticipation-playing .globe-flake {
-  animation: globe-snow 6.4s cubic-bezier(0.25, 0.6, 0.3, 1) forwards;
-}
-.anticipation-playing .anticipation-frost {
-  animation: frost-clear 3s 3.4s ease-out forwards;
-}
-
 @keyframes carry-in {
   0% {
     opacity: 0;
@@ -425,40 +333,6 @@ html
     transform: translate(var(--drift), -80px);
   }
 }
-@keyframes globe-shake {
-  0%,
-  100% {
-    transform: rotate(0);
-  }
-  15%,
-  55% {
-    transform: rotate(-6deg) translateX(-4px);
-  }
-  35%,
-  75% {
-    transform: rotate(6deg) translateX(4px);
-  }
-}
-@keyframes globe-snow {
-  0% {
-    transform: translate(var(--x0), var(--y0));
-  }
-  25% {
-    transform: translate(var(--x1), var(--y1));
-  }
-  55% {
-    transform: translate(var(--x2), var(--y2));
-  }
-  100% {
-    transform: translate(var(--x3), var(--y3));
-  }
-}
-@keyframes frost-clear {
-  to {
-    opacity: 0;
-  }
-}
-
 /* --- Christmas tree ------------------------------------------------------ */
 
 .ornament-new {
@@ -478,22 +352,15 @@ html
 
 @media (prefers-reduced-motion: reduce) {
   .wichtel-rock,
-  .wichtel-push,
   .anticipation-playing *,
   .animate-bob,
   .animate-glow {
     animation: none !important;
   }
 }
-/* Without motion: everyone in place, the snow globe already clear. */
+/* Without motion: the Wichtel stands in place. */
 @media (prefers-reduced-motion: reduce) {
   .anticipation-carry {
     opacity: 1;
-  }
-  .anticipation-frost {
-    opacity: 0;
-  }
-  .globe-flake {
-    transform: translate(var(--x3), var(--y3));
   }
 }

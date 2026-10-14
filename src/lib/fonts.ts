@@ -1,10 +1,4 @@
-import {
-  Bree_Serif,
-  DM_Serif_Display,
-  Fraunces,
-  Lora,
-  Young_Serif,
-} from "next/font/google"
+import { Fraunces, Lora } from "next/font/google"
 import localFont from "next/font/local"
 
 /** The door numbers. */
@@ -14,33 +8,23 @@ export const cochinFont = localFont({
   variable: "--font-cochin",
 })
 
-// Heading fonts on trial on staging (see /vorschau): Fraunces and fonts
-// like it. Only the chosen one stays.
+/** Headings: a soft, warm serif. */
 const fraunces = Fraunces({
   subsets: ["latin"],
   display: "swap",
-  style: ["normal", "italic"],
-  axes: ["SOFT", "WONK", "opsz"],
+  axes: ["SOFT", "opsz"],
   variable: "--font-fraunces",
 })
-const young = Young_Serif({
-  subsets: ["latin"],
+
+/**
+ * Only the capital J, from Lora: Fraunces' own J sits short on the line and
+ * looks odd. Headings list this first, so it takes over just that letter.
+ */
+const loraJ = localFont({
+  src: "../../public/fonts/lora-j-600.woff2",
+  weight: "600",
   display: "swap",
-  weight: ["400"],
-  variable: "--font-young",
-})
-const dmSerif = DM_Serif_Display({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400"],
-  style: ["normal", "italic"],
-  variable: "--font-dmserif",
-})
-const bree = Bree_Serif({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400"],
-  variable: "--font-bree",
+  variable: "--font-lora-j",
 })
 
 /** Body text: a warm, easy-to-read serif. */
@@ -50,13 +34,6 @@ export const bodyFont = Lora({
   variable: "--font-body",
 })
 
-export const fontVariables = [
-  cochinFont,
-  fraunces,
-  young,
-  dmSerif,
-  bree,
-  bodyFont,
-]
+export const fontVariables = [cochinFont, fraunces, loraJ, bodyFont]
   .map((font) => font.variable)
   .join(" ")

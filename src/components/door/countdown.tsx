@@ -5,10 +5,6 @@ import Image from "next/image"
 import { memo, useEffect, useRef, useState } from "react"
 import { QUESTION_SECONDS } from "@/lib/doors"
 import thinkingImage from "../../../public/images/thinking.webp"
-import { useDesign, type DesignChoice } from "@/lib/design-variants"
-import { DrawnWichtel, ORANGE_WICHTEL, RED_WICHTEL } from "./drawn-wichtel"
-
-export type CountdownVariant = DesignChoice<"countdown">
 
 function msLeft(deadline: number) {
   return Math.max(0, deadline - Date.now())
@@ -23,15 +19,11 @@ const Countdown = memo(
     deadline,
     onComplete,
     isSubmitted,
-    variant,
   }: {
     deadline: number
     isSubmitted: boolean
     onComplete: () => void
-    /** Overrides the chosen design (for /vorschau). */
-    variant?: CountdownVariant
   }) => {
-    const chosen = useDesign("countdown")
     const [left, setLeft] = useState(() => msLeft(deadline))
     const onCompleteRef = useRef(onComplete)
 
@@ -55,13 +47,7 @@ const Countdown = memo(
 
     const seconds = Math.ceil(left / 1000)
     const fraction = Math.min(1, left / (QUESTION_SECONDS * 1000))
-    return (
-      <SnowmanCountdown
-        seconds={seconds}
-        fraction={fraction}
-        variant={variant ?? chosen}
-      />
-    )
+    return <SnowmanCountdown seconds={seconds} fraction={fraction} />
   },
 )
 
@@ -78,9 +64,7 @@ function stage(progress: number, from: number, to: number) {
 export function SnowmanCountdown({
   seconds,
   fraction,
-  variant,
 }: {
-  variant: CountdownVariant
   /** Whole seconds left, as shown. */
   seconds: number
   /** 1 at the start, 0 when the time is up. */
@@ -109,11 +93,8 @@ export function SnowmanCountdown({
       </g>
     )
 
-  // The snowman stands right of the painted Wichtel, or between the two
-  // drawn ones.
-  const dx = variant === "gezeichnet" ? -40 : 0
   const snowman = (
-    <g transform={`translate(${dx} 0)`}>
+    <g>
       {ball(200, 142, 32, bottom)}
       {ball(200, 92, 23, middle)}
       {ball(200, 54, 17, head)}
@@ -151,7 +132,6 @@ export function SnowmanCountdown({
       )}
     </g>
   )
-  const building = seconds > 0 && progress < 1
 
   return (
     <div
@@ -177,22 +157,6 @@ export function SnowmanCountdown({
               <feDisplacementMap in="SourceGraphic" scale="3" />
               <feGaussianBlur stdDeviation="0.7" />
             </filter>
-            <filter
-              id="painted-soft"
-              x="-10%"
-              y="-10%"
-              width="120%"
-              height="120%"
-            >
-              <feTurbulence
-                type="fractalNoise"
-                baseFrequency="0.08"
-                numOctaves="2"
-                seed="5"
-              />
-              <feDisplacementMap in="SourceGraphic" scale="1.5" />
-              <feGaussianBlur stdDeviation="0.45" />
-            </filter>
             <radialGradient id="snowball" cx="38%" cy="32%" r="75%">
               <stop offset="0%" stopColor="#ffffff" />
               <stop offset="55%" stopColor="#e9eff6" />
@@ -215,33 +179,16 @@ export function SnowmanCountdown({
             />
             {snowman}
           </g>
-          {variant === "gezeichnet" && (
-            <g filter="url(#painted-soft)">
-              <g className={clsx(building && "wichtel-push")}>
-                <g transform="translate(30 42) scale(0.9)">
-                  <DrawnWichtel look={RED_WICHTEL} />
-                </g>
-              </g>
-              <g className={clsx(building && "wichtel-push wichtel-push-late")}>
-                <g transform="translate(290 42) scale(-0.9 0.9)">
-                  <DrawnWichtel look={ORANGE_WICHTEL} />
-                </g>
-              </g>
-            </g>
-          )}
-          <g></g>
         </svg>
-        {variant === "gezeichnet" ? null : (
-          <Image
-            src={thinkingImage}
-            alt=""
-            priority
-            className={clsx(
-              "wichtel-rock absolute -bottom-[7%] left-[5%] h-auto w-[42%]",
-              hurry && "wichtel-rock-hurry",
-            )}
-          />
-        )}
+        <Image
+          src={thinkingImage}
+          alt=""
+          priority
+          className={clsx(
+            "wichtel-rock absolute -bottom-[7%] left-[5%] h-auto w-[42%]",
+            hurry && "wichtel-rock-hurry",
+          )}
+        />
       </div>
       <div
         aria-hidden
