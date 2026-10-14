@@ -20,7 +20,8 @@ deleted again.
 ## Running
 
 The `E2E` workflow runs after every successful preview deployment and on
-demand (Actions → E2E → Run workflow, with the preview URL).
+demand: Actions → E2E → Run workflow. Without a URL it tests the latest
+successful preview deployment.
 
 Locally:
 

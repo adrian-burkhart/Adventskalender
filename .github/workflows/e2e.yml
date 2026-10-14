@@ -7,11 +7,12 @@ on:
   workflow_dispatch:
     inputs:
       base_url:
-        description: Preview URL to test (https://….vercel.app)
-        required: true
+        description: Preview URL to test (empty = the latest preview)
+        required: false
 
 permissions:
   contents: read
+  deployments: read
 
 concurrency:
   # One run at a time: the teardown deletes all test accounts.
@@ -36,6 +37,22 @@ jobs:
       E2E_SUPABASE_URL: https://ezpfqoydxccofpxvklvp.supabase.co
       E2E_SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.E2E_SUPABASE_SERVICE_ROLE_KEY }}
     steps:
+      - name: Find the latest preview
+        if: env.E2E_BASE_URL == ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for id in $(gh api "repos/$GITHUB_REPOSITORY/deployments?per_page=30" \
+              --jq '.[] | select(.environment | startswith("Preview")) | .id'); do
+            url=$(gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" \
+              --jq '[.[] | select(.state == "success")][0].environment_url // empty')
+            if [ -n "$url" ]; then
+              echo "Testing $url"
+              echo "E2E_BASE_URL=$url" >> "$GITHUB_ENV"
+              exit 0
+            fi
+          done
+          echo "No successful preview deployment found"; exit 1
       - name: Refuse production
         run: |
           case "$E2E_BASE_URL" in
