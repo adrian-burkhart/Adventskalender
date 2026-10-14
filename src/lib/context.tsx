@@ -1,31 +1,101 @@
 "use client"
 
-import { ReactNode, createContext, useContext, useState } from "react"
-import { Year, useYears } from "./hooks"
+import {
+  ReactNode,
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react"
+import type { Player, Year, YearScore } from "./hooks"
+import { useSupabaseClient } from "./auth-context"
 
-const YearContext = createContext<{
+interface AppContextValue {
+  years: Year[]
   selectedYear: Year | null
   setSelectedYear: React.Dispatch<React.SetStateAction<Year | null>>
-} | null>(null)
+  player: Player | null
+  setPlayer: React.Dispatch<React.SetStateAction<Player | null>>
+  scores: YearScore[] | null
+  refreshScores: () => void
+}
 
-export const useSelectedYear = () => {
-  const context = useContext(YearContext)
+const AppContext = createContext<AppContextValue | null>(null)
+
+function useAppContext() {
+  const context = useContext(AppContext)
   if (!context) {
-    throw new Error("useSelectedYear must be used within a YearProvider")
+    throw new Error("useAppContext must be used within an AppDataProvider")
   }
   return context
 }
 
-export const YearProvider = ({ children }: { children: ReactNode }) => {
+export const useSelectedYear = () => {
+  const { years, selectedYear, setSelectedYear } = useAppContext()
+  return { years, selectedYear, setSelectedYear }
+}
+
+export const usePlayerContext = () => {
+  const { player, setPlayer } = useAppContext()
+  return { player, setPlayer }
+}
+
+export const useScoresContext = () => {
+  const { scores, refreshScores } = useAppContext()
+  return { scores, refreshScores }
+}
+
+/**
+ * Years, the player and their points, rendered on the server with the page.
+ * The browser starts with them instead of loading them one after another.
+ */
+export const AppDataProvider = ({
+  initial,
+  children,
+}: {
+  initial: {
+    years: Year[]
+    currentYear: string
+    player: Player | null
+    scores: YearScore[]
+  } | null
+  children: ReactNode
+}) => {
+  const supabaseClient = useSupabaseClient()
+  const years = useMemo(() => initial?.years ?? [], [initial])
   const [chosenYear, setSelectedYear] = useState<Year | null>(null)
-  const { years, currentYear } = useYears()
+  const [player, setPlayer] = useState<Player | null>(initial?.player ?? null)
+  const [scores, setScores] = useState<YearScore[] | null>(
+    initial?.scores ?? null,
+  )
+
   // The calendar shows the current year unless an admin picks another.
+  const currentYear = initial?.currentYear ?? null
   const selectedYear =
-    chosenYear ?? years?.find((y) => y.year === currentYear) ?? null
+    chosenYear ??
+    years.find((y) => y.year === currentYear) ??
+    (currentYear ? { year: currentYear, questionCount: 0 } : null)
+
+  const refreshScores = useCallback(() => {
+    supabaseClient.rpc("my_scores").then(({ data, error }) => {
+      if (!error && data) setScores(data as YearScore[])
+    })
+  }, [supabaseClient])
 
   return (
-    <YearContext.Provider value={{ selectedYear, setSelectedYear }}>
+    <AppContext.Provider
+      value={{
+        years,
+        selectedYear,
+        setSelectedYear,
+        player,
+        setPlayer,
+        scores,
+        refreshScores,
+      }}
+    >
       {children}
-    </YearContext.Provider>
+    </AppContext.Provider>
   )
 }

@@ -1,89 +1,35 @@
-"use client"
+import { redirect } from "next/navigation"
+import Rangliste from "@/components/rangliste"
+import { loadCalendarYears } from "@/lib/door-api"
+import type { LeaderboardEntry } from "@/lib/hooks"
+import { getSession } from "@/lib/session"
 
-import { useLeaderboard, useScoreYears } from "@/lib/hooks"
-import Layout from "@/components/layout"
-import { useSelectedYear } from "@/lib/context"
-import ranglisteImage from "../../../public/images/rangliste.webp"
-import { memo, useState } from "react"
-import Image from "next/image"
-import { TreeEvergreen } from "@phosphor-icons/react"
-import { ERROR_TEXT, LOADING_TEXT } from "@/lib/texts"
+// The current year's leaderboard comes with the page; other years load
+// when they are picked.
+export default async function Page() {
+  const { supabase, user } = await getSession()
+  if (!user) redirect("/login")
 
-const Rangliste = memo(() => {
-  const { selectedYear } = useSelectedYear()
-  const [chosenYear, setChosenYear] = useState<string | null>(null)
-  const year = chosenYear ?? selectedYear?.year ?? null
-  const scoreYears = useScoreYears()
-  const { entries, error, loading } = useLeaderboard(year)
-
-  if (!year) {
-    return <div>Kein Jahr ausgewählt</div>
-  }
-
-  if (error) {
-    return <div>{ERROR_TEXT}</div>
-  }
-
-  if (loading || !entries) {
-    return <div>{LOADING_TEXT}</div>
-  }
-
-  // Every year with points, plus the current one, newest first.
-  const years = [
-    ...new Set([...scoreYears.map(String), selectedYear?.year ?? year, year]),
-  ].sort((a, b) => b.localeCompare(a))
-
-  // The database returns the players already ranked.
-  const highestScore = entries[0]?.score ?? 0
+  const { currentYear } = await loadCalendarYears().catch(() => ({
+    currentYear: String(new Date().getFullYear()),
+  }))
+  const [leaderboard, scoreYears] = await Promise.all([
+    supabase.rpc("leaderboard", { p_year: Number(currentYear) }),
+    supabase.rpc("score_years"),
+  ])
+  if (leaderboard.error) console.error("rangliste", leaderboard.error)
 
   return (
-    <Layout>
-      <main>
-        <div className="flex flex-col items-center gap-10">
-          <Image src={ranglisteImage} alt="" />
-          {years.length > 1 ? (
-            <select
-              aria-label="Jahr"
-              value={year}
-              onChange={(e) => setChosenYear(e.target.value)}
-              className="cursor-pointer rounded-md border border-yellow-200 bg-transparent px-2 py-1 text-2xl text-yellow-200 focus:outline-none focus:ring-2 focus:ring-red-500"
-            >
-              {years.map((y) => (
-                <option key={y} value={y} className="bg-green-950">
-                  {y}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <div className="text-2xl">{year}</div>
-          )}
-          <div className="flex flex-col items-center justify-center gap-4">
-            {entries.map((entry, i) => (
-              <div key={entry.player_id ?? `alt-${i}`} className="flex gap-4">
-                <div className="w-6 text-xl">{i + 1}.</div>
-                <div className="flex w-64 flex-col rounded-md bg-black bg-opacity-40 px-2 py-1 shadow-md">
-                  <div className="flex justify-between gap-2">
-                    <div>
-                      <div className="text-white">{entry.name}</div>
-                      <div className="text-green-700">
-                        Türchen geöffnet: {entry.doors}
-                      </div>
-                      <div>Punkte: {entry.score}</div>
-                    </div>
-                    {highestScore > 0 && entry.score === highestScore && (
-                      <div className="flex items-center justify-center px-2">
-                        <TreeEvergreen size={32} />
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </main>
-    </Layout>
+    <Rangliste
+      initial={
+        leaderboard.error
+          ? undefined
+          : {
+              year: currentYear,
+              entries: leaderboard.data as LeaderboardEntry[],
+            }
+      }
+      scoreYears={(scoreYears.data as number[] | null) ?? []}
+    />
   )
-})
-
-export default Rangliste
+}

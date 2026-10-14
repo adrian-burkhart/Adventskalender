@@ -13,7 +13,10 @@ import ReadyButton from "./ready-button"
 import Image from "next/image"
 import { apiFetch } from "@/lib/api-client"
 import type { DoorResponse } from "@/lib/door-api"
-import { ERROR_TEXT, LOADING_TEXT } from "@/lib/texts"
+import { ERROR_TEXT } from "@/lib/texts"
+import { useScoresContext } from "@/lib/context"
+import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
+import Loading from "./loading"
 
 type Result = Extract<DoorResponse, { status: "result" }>
 
@@ -236,27 +239,54 @@ function Message({ children }: { children: React.ReactNode }) {
   )
 }
 
+/**
+ * Steps the server can render with the page. A running question isn't one:
+ * its countdown depends on this device's clock.
+ */
+function initialStep(initial: DoorResponse | null): Step {
+  if (!initial || initial.status === "question" || initial.status === "result")
+    return { kind: "loading" }
+  return toStep(initial)
+}
+
 const QuestionForm = memo(
-  ({ year, doorNumber }: { year: string; doorNumber: number }) => {
+  ({
+    year,
+    doorNumber,
+    initial,
+  }: {
+    year: string
+    doorNumber: number
+    initial: DoorResponse | null
+  }) => {
     const base = `/api/doors/${year}/${doorNumber}`
-    const [step, setStep] = useState<Step>({ kind: "loading" })
+    const [step, setStep] = useState<Step>(() => initialStep(initial))
     const [isSubmitted, setIsSubmitted] = useState(false)
     const submitted = useRef(false)
+    const testMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
+    const { refreshScores } = useScoresContext()
+    const needsLoad = initialStep(initial).kind === "loading"
 
     const load = useCallback(
       (path: string, init?: RequestInit) =>
         apiFetch<DoorResponse>(path, init)
-          .then((response) => setStep(toStep(response)))
+          .then((response) => {
+            setStep(toStep(response))
+            // The new points show up in the header right away.
+            if (response.status === "result") refreshScores()
+          })
           .catch((error) => {
             console.error(error)
             setStep({ kind: "error" })
           }),
-      [],
+      [refreshScores],
     )
 
+    // Test mode (admins) asks the API, which knows about it; so does a
+    // question that is already running.
     useEffect(() => {
-      load(base)
-    }, [base, load])
+      if (needsLoad || testMode) load(base)
+    }, [base, load, needsLoad, testMode])
 
     const start = () => {
       setStep({ kind: "loading" })
@@ -284,7 +314,7 @@ const QuestionForm = memo(
 
     switch (step.kind) {
       case "loading":
-        return <div>{LOADING_TEXT}</div>
+        return <Loading />
       case "error":
         return <div>{ERROR_TEXT}</div>
       case "missing":
