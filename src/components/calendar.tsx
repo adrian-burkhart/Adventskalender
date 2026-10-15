@@ -50,6 +50,7 @@ interface CalendarDoorProps {
   isBusy: boolean
   onOpen: (doorNumber: number) => void
   onLocked: () => void
+  onReview: (doorNumber: number) => void
 }
 
 const CalendarDoor = memo(
@@ -63,6 +64,7 @@ const CalendarDoor = memo(
     isBusy,
     onOpen,
     onLocked,
+    onReview,
   }: CalendarDoorProps) => {
     const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
     const [showLock, setShowLock] = useState(false)
@@ -76,7 +78,8 @@ const CalendarDoor = memo(
 
     const handleClick = () => {
       if (isBusy || isOpening) return
-      if (!enabledTestMode && isAnswered) return
+      // An answered door opens straight to the look back at it.
+      if (!enabledTestMode && isAnswered) return onReview(doorNumber)
       if (!enabledTestMode && isLocked) {
         if (showLock) return
         setShowLock(true)
@@ -93,11 +96,11 @@ const CalendarDoor = memo(
       <button
         type="button"
         onClick={handleClick}
-        aria-disabled={(!enabledTestMode && isAnswered) || isBusy}
+        aria-disabled={isBusy}
         className={clsx(
           "group relative block w-full rounded-2xl transition-transform duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/70",
-          !isAnswered && !isBusy && "cursor-pointer hover:scale-[1.03]",
-          (isAnswered || isBusy) && "cursor-default",
+          !isBusy && "cursor-pointer hover:scale-[1.03]",
+          isBusy && "cursor-default",
           isToday && !isAnswered && "animate-glow",
           showLock && "animate-[shake_0.5s_ease-in-out]",
         )}
@@ -177,6 +180,13 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
     playUpsi()
   }, [playLocked, playUpsi])
 
+  const handleReview = useCallback(
+    (doorNumber: number) => {
+      if (selectedYear) router.push(doorPath(selectedYear.year, doorNumber))
+    },
+    [selectedYear, router],
+  )
+
   const handleOpen = useCallback(
     (doorNumber: number) => {
       if (!selectedYear) return
@@ -246,6 +256,7 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
                 isBusy={openingDoor !== null && openingDoor !== doorNumber}
                 onOpen={handleOpen}
                 onLocked={handleLocked}
+                onReview={handleReview}
               />
             </li>
           )

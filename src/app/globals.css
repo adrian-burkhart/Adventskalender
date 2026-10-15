@@ -60,7 +60,7 @@
       0 8px 30px rgb(0 0 0 / 0.35);
   }
 
-  /* A card that stands out (your own row, the chosen proposal). */
+  /* A card that stands out: your own row in the Rangliste. */
   .card-glow {
     box-shadow:
       0 0 22px 4px rgb(233 196 106 / 0.35),
@@ -353,7 +353,6 @@
 @media (prefers-reduced-motion: reduce) {
   .wichtel-rock,
   .anticipation-playing *,
-  .animate-bob,
   .animate-glow {
     animation: none !important;
   }

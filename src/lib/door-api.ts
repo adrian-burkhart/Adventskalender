@@ -31,7 +31,7 @@ import { getSession, type SessionUser } from "@/lib/session"
 export type DoorResponse =
   | { status: "missing" }
   | { status: "locked" }
-  | { status: "answered" }
+  | { status: "answered"; review: DoorReview }
   | { status: "intro"; introAudio: string | null }
   | {
       status: "question"
@@ -54,8 +54,23 @@ export type DoorResponse =
       timedOut: boolean
       /** Place in this year's Rangliste after the answer; ties share one. */
       rank: number | null
-      playerCount: number | null
     }
+
+/**
+ * A door the player has already answered, to look at again: the question,
+ * their answer and the right one. Nothing in it can be changed.
+ */
+export interface DoorReview {
+  question: string
+  options: string[]
+  correctAnswer: string
+  /** Null when no answer was picked, or for doors from the old app. */
+  selected: string | null
+  /** Null for doors from the old app, which kept no answers. */
+  isCorrect: boolean | null
+  points: number | null
+  image: string | null
+}
 
 function reply(data: unknown, status = 200) {
   return NextResponse.json(data, {
@@ -253,13 +268,19 @@ async function withDoor(
 interface Progress {
   startedAt: Date | null
   answered: boolean
+  /** What was saved with the answer (not for doors from the old app). */
+  saved: {
+    selected: string | null
+    isCorrect: boolean | null
+    points: number | null
+  } | null
 }
 
 async function loadProgress(ctx: DoorContext): Promise<Progress> {
   const [{ data: row, error }, legacy] = await Promise.all([
     ctx.supabase
       .from("answers")
-      .select("started_at, answered_at")
+      .select("started_at, answered_at, selected_option, is_correct, points")
       .eq("player_id", ctx.user.id)
       .eq("year", ctx.year)
       .eq("door", ctx.door)
@@ -272,6 +293,33 @@ async function loadProgress(ctx: DoorContext): Promise<Progress> {
     answered:
       !!row?.answered_at ||
       legacyDoorStatus(legacy, ctx.year, ctx.door).answered,
+    saved: row?.answered_at
+      ? {
+          selected: row.selected_option ?? null,
+          isCorrect: row.is_correct ?? null,
+          points: row.points ?? null,
+        }
+      : null,
+  }
+}
+
+/** The answered door, with everything to look at it again. */
+async function answeredStep(
+  ctx: DoorContext,
+  progress?: Progress,
+): Promise<DoorResponse> {
+  const saved = (progress ?? (await loadProgress(ctx))).saved
+  return {
+    status: "answered",
+    review: {
+      question: ctx.question.question,
+      options: ctx.question.answerOptions,
+      correctAnswer: normalizeOption(ctx.question.answer),
+      selected: saved?.selected ?? null,
+      isCorrect: saved?.isCorrect ?? null,
+      points: saved?.points ?? null,
+      image: ctx.question.image,
+    },
   }
 }
 
@@ -313,9 +361,7 @@ async function recordAnswer(
  * The player's place in the year's Rangliste, for the result screen. Ties
  * share a place. If the Rangliste can't be loaded, the result still shows.
  */
-async function standing(
-  ctx: DoorContext,
-): Promise<{ rank: number | null; playerCount: number | null }> {
+async function standing(ctx: DoorContext): Promise<{ rank: number | null }> {
   const { data, error } = await ctx.supabase.rpc("leaderboard", {
     p_year: ctx.year,
   })
@@ -328,7 +374,6 @@ async function standing(
   const mine = entries.find((entry) => entry.player_id === ctx.user.id)
   return {
     rank: mine ? rankOf(mine.score, entries) : null,
-    playerCount: entries.length > 0 ? entries.length : null,
   }
 }
 
@@ -339,7 +384,7 @@ async function doorStep(ctx: DoorContext): Promise<DoorResponse> {
   }
 
   const progress = await loadProgress(ctx)
-  if (progress.answered) return { status: "answered" }
+  if (progress.answered) return answeredStep(ctx, progress)
   if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
     return { status: "locked" }
   }
@@ -354,7 +399,7 @@ async function doorStep(ctx: DoorContext): Promise<DoorResponse> {
       correct: false,
       leftPage: false,
     })
-    return { status: "answered" }
+    return answeredStep(ctx)
   }
 
   return { status: "intro", introAudio: ctx.question.introAudio }
@@ -411,7 +456,7 @@ export function startQuestion(request: NextRequest, params: DoorParams) {
     if (ctx.testMode) return questionStep(ctx, ctx.now)
 
     const progress = await loadProgress(ctx)
-    if (progress.answered) return { status: "answered" }
+    if (progress.answered) return answeredStep(ctx, progress)
     if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
       return { status: "locked" }
     }
@@ -424,7 +469,7 @@ export function startQuestion(request: NextRequest, params: DoorParams) {
       })
       .single<{ started_at: string; answered_at: string | null }>()
     if (error) throw error
-    if (data.answered_at) return { status: "answered" }
+    if (data.answered_at) return answeredStep(ctx)
 
     const startedAt = new Date(data.started_at)
     if (!isWithinDeadline(startedAt, ctx.now)) {
@@ -433,7 +478,7 @@ export function startQuestion(request: NextRequest, params: DoorParams) {
         correct: false,
         leftPage: false,
       })
-      return { status: "answered" }
+      return answeredStep(ctx)
     }
     return questionStep(ctx, startedAt)
   })
@@ -481,7 +526,7 @@ export function submitAnswer(request: NextRequest, params: DoorParams) {
     }
 
     const progress = await loadProgress(ctx)
-    if (progress.answered) return { status: "answered" }
+    if (progress.answered) return answeredStep(ctx, progress)
     if (!progress.startedAt)
       return { status: "intro", introAudio: ctx.question.introAudio }
 
@@ -492,7 +537,7 @@ export function submitAnswer(request: NextRequest, params: DoorParams) {
       isCorrectAnswer(selected, ctx.question.answer, ctx.question.answerOptions)
 
     const saved = await recordAnswer(ctx, { selected, correct, leftPage })
-    if (!saved.recorded) return { status: "answered" }
+    if (!saved.recorded) return answeredStep(ctx)
     return result(correct, saved.points, saved.score, timedOut)
   })
 }

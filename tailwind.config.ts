@@ -29,7 +29,6 @@ const config: Config = {
           light: "#e25555",
           dark: "#8e1d1d",
         },
-        paper: "#fbf3e2",
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],
@@ -37,10 +36,7 @@ const config: Config = {
         body: ["var(--font-body)", "Georgia", "serif"],
       },
       animation: {
-        "spin-thrice": "spin 1s linear 3",
         glow: "glow 2.4s ease-in-out infinite",
-        bob: "bob 2.6s ease-in-out infinite",
-        "fade-in": "fade-in 0.6s ease-out both",
         "rise-in": "rise-in 0.7s cubic-bezier(.2,.8,.2,1) both",
       },
       keyframes: {
@@ -53,14 +49,6 @@ const config: Config = {
             filter:
               "drop-shadow(0 0 12px rgb(254 240 138 / .8)) drop-shadow(0 0 30px rgb(233 196 106 / .45))",
           },
-        },
-        bob: {
-          "0%, 100%": { transform: "translateY(0) rotate(-1deg)" },
-          "50%": { transform: "translateY(-6px) rotate(1deg)" },
-        },
-        "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
         },
         "rise-in": {
           from: { opacity: "0", transform: "translateY(16px) scale(.97)" },

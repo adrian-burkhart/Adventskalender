@@ -39,7 +39,7 @@ const Result = memo(
           <Explanation result={result} />
           <Standing result={result} />
         </div>
-        <SolutionPicture result={result} />
+        <SolutionPicture image={result.image} />
         <Actions />
       </div>
     )
@@ -115,8 +115,8 @@ function Standing({ result }: { result: ResultData }) {
 }
 
 /** The picture from the CMS that goes with the answer. */
-function SolutionPicture({ result }: { result: ResultData }) {
-  if (!result.image) return null
+export function SolutionPicture({ image }: { image: string | null }) {
+  if (!image) return null
   return (
     <div className="rotate-1 rounded-sm bg-white p-2 pb-6 shadow-lg">
       <Image
@@ -124,7 +124,7 @@ function SolutionPicture({ result }: { result: ResultData }) {
         height="0"
         sizes="(min-width: 640px) 24rem, 90vw"
         className="h-auto max-h-80 w-auto max-w-full"
-        src={result.image}
+        src={image}
         alt=""
       />
     </div>
