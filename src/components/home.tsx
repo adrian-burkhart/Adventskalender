@@ -83,6 +83,7 @@ const Home = memo(
           </div>
           {player && selectedYear && choices.length > 1 && (
             <YearSelect
+              tone="gold"
               years={choices}
               value={selectedYear.year}
               onChange={(value) => {

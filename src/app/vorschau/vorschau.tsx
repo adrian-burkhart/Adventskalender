@@ -93,7 +93,6 @@ export default function Vorschau() {
               ["#rangliste", "Rangliste"],
               ["#rueckblick", "Beantwortetes Türchen"],
               ["#schneemann", "Schneemann"],
-              ["#ruhmeshalle", "Ruhmeshalle"],
             ].map(([href, text]) => (
               <a
                 key={href}
@@ -139,14 +138,6 @@ export default function Vorschau() {
         <ReviewSection />
 
         <SnowmanSection />
-
-        <Section
-          id="ruhmeshalle"
-          title="Ruhmeshalle"
-          intro="Vorschlag: Unter der Rangliste die Gewinner der früheren Jahre, wie Ehrentafeln. Die Daten gibt es schon, das Jahr wird am 1. Januar entschieden."
-        >
-          <HallOfFame />
-        </Section>
       </div>
     </Layout>
   )
@@ -378,83 +369,5 @@ function SnowmanSection() {
         </label>
       </div>
     </Section>
-  )
-}
-
-const pastWinners: {
-  year: number
-  winners: string[]
-  score: number
-  runnersUp: [string, number][]
-}[] = [
-  {
-    year: 2024,
-    winners: ["Oma Gerda"],
-    score: 610,
-    runnersUp: [
-      ["Lukas", 580],
-      ["Tante Anni", 545],
-    ],
-  },
-  {
-    year: 2023,
-    winners: ["Lukas", "Tante Anni"],
-    score: 560,
-    runnersUp: [["Opa Heinz", 520]],
-  },
-  {
-    year: 2022,
-    winners: ["Opa Heinz"],
-    score: 495,
-    runnersUp: [
-      ["Marie", 470],
-      ["Oma Gerda", 450],
-    ],
-  },
-]
-
-function HallOfFame() {
-  return (
-    <ul className="mx-auto flex w-full max-w-2xl flex-col gap-5">
-      {pastWinners.map(({ year, winners, score, runnersUp }) => (
-        <li
-          key={year}
-          className="card-glow flex flex-col items-center gap-2 px-6 py-5 text-center sm:flex-row sm:gap-6 sm:text-left"
-        >
-          <div className="flex w-24 shrink-0 flex-col items-center">
-            <Star />
-            <span className="font-display text-3xl text-gold">{year}</span>
-          </div>
-          <div className="flex flex-col gap-1">
-            <p className="text-base text-candle/80">
-              {winners.length > 1 ? "Gemeinsam gewonnen haben" : "Gewonnen hat"}
-            </p>
-            <p className="font-display text-3xl">{winners.join(" & ")}</p>
-            <p className="text-lg">mit {score} Punkten</p>
-            {runnersUp.length > 0 && (
-              <p className="text-base text-candle/80">
-                Dahinter:{" "}
-                {runnersUp
-                  .map(([name, points]) => `${name} (${points})`)
-                  .join(", ")}
-              </p>
-            )}
-          </div>
-        </li>
-      ))}
-    </ul>
-  )
-}
-
-function Star() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-10 w-10" aria-hidden>
-      <path
-        d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.3l-6.1 3.3 1.4-6.8L2.2 9.1l6.9-.8z"
-        fill="#facc15"
-        stroke="#a16207"
-        strokeWidth="0.8"
-      />
-    </svg>
   )
 }

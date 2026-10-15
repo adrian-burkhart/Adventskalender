@@ -1,15 +1,19 @@
+import clsx from "clsx"
 import { memo } from "react"
 
 /**
- * The year picker of the calendar and the Rangliste: large, white and
- * glowing, with our own arrow (the browser's sits too close to the edge).
+ * The year picker of the calendar (golden, like its text) and the
+ * Rangliste (white), large and glowing, with our own arrow (the
+ * browser's sits too close to the edge).
  */
 const YearSelect = memo(
   ({
     years,
     value,
     onChange,
+    tone = "white",
   }: {
+    tone?: "white" | "gold"
     years: string[]
     value: string
     onChange: (year: string) => void
@@ -20,7 +24,12 @@ const YearSelect = memo(
           aria-label="Jahr"
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="card-white cursor-pointer appearance-none rounded-full bg-pine-950/60 py-1 pl-5 pr-12 font-display text-2xl text-white [text-shadow:0_0_8px_rgb(200_225_255/0.55)] focus:outline-none focus:ring-4 focus:ring-white/50"
+          className={clsx(
+            "cursor-pointer appearance-none rounded-full bg-pine-950/60 py-1 pl-5 pr-12 font-display text-2xl focus:outline-none focus:ring-4",
+            tone === "white"
+              ? "card-white text-white [text-shadow:0_0_8px_rgb(200_225_255/0.55)] focus:ring-white/50"
+              : "text-candle shadow-[0_0_0_1.5px_rgb(233_196_106/0.8),0_0_14px_2px_rgb(233_196_106/0.3),inset_0_0_14px_rgb(233_196_106/0.1),0_8px_30px_rgb(0_0_0/0.35)] [text-shadow:0_0_8px_rgb(250_204_21/0.4)] focus:ring-gold/50",
+          )}
         >
           {years.map((y) => (
             <option key={y} value={y} className="bg-pine-900 font-body">
@@ -31,7 +40,10 @@ const YearSelect = memo(
         <svg
           viewBox="0 0 12 8"
           aria-hidden
-          className="pointer-events-none absolute right-5 top-1/2 h-2 w-3 -translate-y-1/2 text-white"
+          className={clsx(
+            "pointer-events-none absolute right-5 top-1/2 h-2 w-3 -translate-y-1/2",
+            tone === "white" ? "text-white" : "text-candle",
+          )}
         >
           <path
             d="M1 1.5 L6 6.5 L11 1.5"

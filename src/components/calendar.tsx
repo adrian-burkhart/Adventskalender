@@ -249,10 +249,7 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
 
   return (
     <div className="flex w-full flex-col items-center gap-10">
-      <section className="flex flex-col items-center gap-2 text-center">
-        <h2 className="text-2xl">Dein Weihnachtsbaum</h2>
-        <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
-      </section>
+      <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
       <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
         {doorStates.map((doorState, i) => {
           const doorNumber = i + 1

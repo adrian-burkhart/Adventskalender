@@ -2,6 +2,7 @@
 
 import { useLeaderboard, usePlayer, type LeaderboardEntry } from "@/lib/hooks"
 import YearSelect from "./year-select"
+import { ButtonLink } from "./button"
 import Layout from "@/components/layout"
 import { useSelectedYear } from "@/lib/context"
 // The picture without the parachute Wichtel: he flies on his own.
@@ -85,6 +86,9 @@ const Rangliste = memo(
               }
             />
           )}
+          <ButtonLink href="/ruhmeshalle" quiet>
+            Zur Ruhmeshalle
+          </ButtonLink>
         </div>
       </Layout>
     )

@@ -363,3 +363,52 @@
     opacity: 1;
   }
 }
+
+/* --- Ruhmeshalle ---------------------------------------- */
+
+.hall-twinkle {
+  animation: hall-twinkle 2s ease-in-out infinite alternate;
+}
+@keyframes hall-twinkle {
+  from {
+    opacity: 0.45;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hall-flame {
+  transform-origin: bottom center;
+  animation: hall-flame 0.9s ease-in-out infinite alternate;
+}
+@keyframes hall-flame {
+  from {
+    transform: scale(1, 1) skewX(-2deg);
+    opacity: 0.85;
+  }
+  to {
+    transform: scale(0.94, 1.08) skewX(3deg);
+    opacity: 1;
+  }
+}
+
+.hall-swing {
+  animation: hall-swing 5s ease-in-out infinite alternate;
+}
+@keyframes hall-swing {
+  from {
+    transform: rotate(-2.5deg);
+  }
+  to {
+    transform: rotate(2.5deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hall-twinkle,
+  .hall-flame,
+  .hall-swing {
+    animation: none;
+  }
+}
