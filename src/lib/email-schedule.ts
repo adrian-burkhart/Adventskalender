@@ -1,8 +1,12 @@
 import { DateTime } from "luxon"
 import { DOOR_COUNT, TIME_ZONE } from "./doors"
 
-/** First and last day (December, Berlin) on which reminders go out. */
-const REMINDER_FIRST_DAY = 4
+/**
+ * First and last day (December, Berlin) on which reminders go out. Five
+ * doors can be missed at the earliest on 6 December (door 1 opened, 2 to 6
+ * not).
+ */
+const REMINDER_FIRST_DAY = 6
 const REMINDER_LAST_DAY = 28
 
 /**

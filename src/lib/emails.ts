@@ -90,7 +90,7 @@ function plain(heading: string, paragraphs: string[], url: string): string {
   ].join("\n")
 }
 
-/** The one reminder per season, after three days without a door. */
+/** The one reminder per season, after five missed doors. */
 export function reminderEmail({
   to,
   name,
