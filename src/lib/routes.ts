@@ -1,5 +1,6 @@
 const PUBLIC_PATHS = ["/login", "/impressum", "/datenschutz"]
-const PUBLIC_PREFIXES = ["/auth/"]
+// The e-mail routes check the cron secret or an admin login themselves.
+const PUBLIC_PREFIXES = ["/auth/", "/api/emails/"]
 
 /** Pages that work without a login. Everything else needs a session. */
 export function isPublicPath(pathname: string): boolean {

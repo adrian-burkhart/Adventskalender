@@ -21,6 +21,7 @@ import { calendarNow } from "@/lib/clock"
 import { rankOf } from "@/lib/ranking"
 import { parseDoorParams } from "@/lib/routes"
 import { getQuestion, listYears, type QuestionContent } from "@/lib/sanity"
+import { isAdminEmail } from "@/lib/admins"
 import { createAdminClient } from "@/lib/supabase/admin"
 import { getSession, type SessionUser } from "@/lib/session"
 
@@ -90,11 +91,7 @@ const FAILED = () =>
   )
 
 function isAdmin(user: SessionUser): boolean {
-  const admins = (process.env.ADMIN_EMAILS ?? "")
-    .split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean)
-  return !!user.email && admins.includes(user.email.toLowerCase())
+  return isAdminEmail(user.email)
 }
 
 /** Test mode: admins only. Doors open early and nothing is saved. */

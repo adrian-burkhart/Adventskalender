@@ -1,4 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "regions": ["dub1"]
+  "regions": ["dub1"],
+  "crons": [
+    { "path": "/api/emails/reminder", "schedule": "0 8 * * *" },
+    { "path": "/api/emails/winner", "schedule": "0 10 1 1 *" }
+  ]
 }
