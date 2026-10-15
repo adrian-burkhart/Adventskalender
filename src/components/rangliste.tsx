@@ -1,6 +1,8 @@
 "use client"
 
 import { useLeaderboard, usePlayer, type LeaderboardEntry } from "@/lib/hooks"
+import YearSelect from "./year-select"
+import { ButtonLink } from "./button"
 import Layout from "@/components/layout"
 import { useSelectedYear } from "@/lib/context"
 // The picture without the parachute Wichtel: he flies on his own.
@@ -11,6 +13,7 @@ import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import { ranks } from "@/lib/ranking"
 import ChristmasTree from "./christmas-tree"
+import { hasDecorations } from "@/lib/doors"
 import DriftingWichtel from "./drifting-wichtel"
 import Loading from "./loading"
 
@@ -65,35 +68,7 @@ const Rangliste = memo(
           </div>
           <DriftingWichtel picture={picture} />
           {years.length > 1 ? (
-            // Our own arrow: the browser's sits too close to the edge.
-            <div className="relative">
-              <select
-                aria-label="Jahr"
-                value={year}
-                onChange={(e) => setChosenYear(e.target.value)}
-                className="card-white cursor-pointer appearance-none rounded-full bg-pine-950/60 py-1 pr-12 pl-5 font-display text-2xl text-white [text-shadow:0_0_8px_rgb(200_225_255/0.55)] focus:ring-4 focus:ring-white/50 focus:outline-hidden"
-              >
-                {years.map((y) => (
-                  <option key={y} value={y} className="bg-pine-900 font-body">
-                    {y}
-                  </option>
-                ))}
-              </select>
-              <svg
-                viewBox="0 0 12 8"
-                aria-hidden
-                className="pointer-events-none absolute top-1/2 right-5 h-2 w-3 -translate-y-1/2 text-white"
-              >
-                <path
-                  d="M1 1.5 L6 6.5 L11 1.5"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
+            <YearSelect years={years} value={year} onChange={setChosenYear} />
           ) : (
             <div className="font-display text-3xl">{year}</div>
           )}
@@ -102,6 +77,7 @@ const Rangliste = memo(
           ) : (
             <Board
               entries={entries}
+              decorated={hasDecorations(Number(year), Number(currentYear))}
               myId={player?.id ?? null}
               unlocked={
                 year === currentYear
@@ -112,6 +88,9 @@ const Rangliste = memo(
               }
             />
           )}
+          <ButtonLink href="/hall-of-fame" quiet>
+            Zur Hall of Fame
+          </ButtonLink>
         </div>
       </Layout>
     )
@@ -124,6 +103,8 @@ export interface BoardProps {
   myId: string | null
   /** Doors open so far in that year. */
   unlocked: number
+  /** Trees: only for the years that had them. */
+  decorated: boolean
 }
 
 /** What everyone did together, then the list with everyone's tree. */
@@ -171,7 +152,7 @@ function Medal({ rank, size = 36 }: { rank: number; size?: number }) {
   )
 }
 
-function List({ entries, myId }: BoardProps) {
+function List({ entries, myId, decorated }: BoardProps) {
   const places = ranks(entries)
   return (
     <ol className="flex w-full flex-col gap-3">
@@ -202,10 +183,12 @@ function List({ entries, myId }: BoardProps) {
               </div>
               <div className="text-base">Punkte: {entry.score}</div>
             </div>
-            <ChristmasTree
-              ornaments={entry.doors}
-              className="w-16 shrink-0 sm:w-20"
-            />
+            {decorated && (
+              <ChristmasTree
+                ornaments={entry.doors}
+                className="w-16 shrink-0 sm:w-20"
+              />
+            )}
           </li>
         )
       })}
@@ -220,7 +203,7 @@ function Together({ entries, unlocked }: BoardProps) {
   const possible = playing.length * unlocked
 
   return (
-    <section className="card-white w-full card px-5 py-5 text-center">
+    <section className="white-text w-full px-5 py-5 text-center">
       <h2 className="text-2xl">Gemeinsam geschafft</h2>
       <div className="mt-4 grid grid-cols-3 gap-2">
         <Stat
@@ -359,7 +342,7 @@ function Stat({ value, label }: { value: number; label: string }) {
       <span className="font-door text-3xl text-candle sm:text-4xl">
         {value}
       </span>
-      <span className="text-sm leading-tight text-candle/85 sm:text-base sm:leading-6">
+      <span className="text-sm leading-tight text-candle/85 sm:text-base">
         {label}
       </span>
     </div>

@@ -9,10 +9,13 @@ import {
   useState,
 } from "react"
 import type { Player, Year, YearScore } from "./hooks"
+import { usePathname } from "next/navigation"
 import { useSupabaseClient } from "./auth-context"
 
 interface AppContextValue {
   years: Year[]
+  /** The year of the season now (or the next one). */
+  currentYear: string | null
   selectedYear: Year | null
   setSelectedYear: React.Dispatch<React.SetStateAction<Year | null>>
   player: Player | null
@@ -32,8 +35,8 @@ function useAppContext() {
 }
 
 export const useSelectedYear = () => {
-  const { years, selectedYear, setSelectedYear } = useAppContext()
-  return { years, selectedYear, setSelectedYear }
+  const { years, currentYear, selectedYear, setSelectedYear } = useAppContext()
+  return { years, currentYear, selectedYear, setSelectedYear }
 }
 
 export const usePlayerContext = () => {
@@ -77,6 +80,18 @@ export const AppDataProvider = ({
     years.find((y) => y.year === currentYear) ??
     (currentYear ? { year: currentYear, questionCount: 0 } : null)
 
+  // A past year is only for a look back: it stays while going between the
+  // calendar and its doors, and anywhere else (or after a reload) the
+  // calendar shows the current year again.
+  const pathname = usePathname()
+  const [seenPath, setSeenPath] = useState(pathname)
+  if (pathname !== seenPath) {
+    setSeenPath(pathname)
+    if (pathname !== "/" && !/^\/\d{4}\/\d{1,2}\/?$/.test(pathname)) {
+      setSelectedYear(null)
+    }
+  }
+
   const refreshScores = useCallback(() => {
     supabaseClient.rpc("my_scores").then(({ data, error }) => {
       if (!error && data) setScores(data as YearScore[])
@@ -87,6 +102,7 @@ export const AppDataProvider = ({
     <AppContext.Provider
       value={{
         years,
+        currentYear,
         selectedYear,
         setSelectedYear,
         player,

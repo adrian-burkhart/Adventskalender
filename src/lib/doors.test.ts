@@ -3,6 +3,7 @@ import {
   doorOfTheDay,
   doorsUnlocked,
   doorState,
+  hasDecorations,
   doorUnlocksAt,
   isCorrectAnswer,
   isDoorAnswerable,
@@ -69,10 +70,11 @@ describe("doorState", () => {
     )
   })
 
-  it("locks unanswered doors of a past season", () => {
+  it("leaves unanswered doors of a past season to listen to", () => {
     expect(doorState({ ...base, year: 2025, door: 5, opened: true })).toBe(
-      "locked",
+      "past",
     )
+    expect(doorState({ ...base, year: 2025, door: 24 })).toBe("past")
   })
 })
 
@@ -157,5 +159,14 @@ describe("doors unlocked so far", () => {
     expect(doorsUnlocked(2026, at("2026-11-30T12:00:00+01:00"))).toBe(0)
     expect(doorsUnlocked(2026, at("2026-12-10T09:00:00+01:00"))).toBe(10)
     expect(doorsUnlocked(2026, at("2027-01-05T09:00:00+01:00"))).toBe(24)
+  })
+})
+
+describe("hasDecorations", () => {
+  it("shows the tree from 2026 on and for the season of now", () => {
+    expect(hasDecorations(2023, 2026)).toBe(false)
+    expect(hasDecorations(2025, 2026)).toBe(false)
+    expect(hasDecorations(2026, 2027)).toBe(true)
+    expect(hasDecorations(2025, 2025)).toBe(true)
   })
 })

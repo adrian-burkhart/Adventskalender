@@ -6,23 +6,16 @@ import Navbar from "./navbar"
 import { useMyScores } from "@/lib/hooks"
 import { useSelectedYear } from "@/lib/context"
 import Footer from "./footer"
-import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import star from "../../public/images/star.webp"
 
 const Layout = memo(({ children }: { children: ReactNode }) => {
-  const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
-
-  const { years, selectedYear, setSelectedYear } = useSelectedYear()
+  // Always this season's points, whatever year the calendar shows.
+  const { currentYear } = useSelectedYear()
   const { scores } = useMyScores()
 
-  const currentScore = selectedYear
-    ? scores?.find((score) => score.year === Number(selectedYear.year))
+  const currentScore = currentYear
+    ? scores?.find((score) => score.year === Number(currentYear))
     : null
-
-  const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const year = years.find((y) => y.year === e.target.value)
-    if (year) setSelectedYear(year)
-  }
 
   return (
     <>
@@ -38,18 +31,6 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
                 </strong>
               </span>
             </div>
-          )}
-          {enabledTestMode && years.length > 0 && (
-            <select
-              aria-label="Jahr (Testmodus)"
-              onChange={handleOnChange}
-              value={selectedYear?.year}
-              className="rounded-sm bg-berry px-2 py-1 text-base text-white"
-            >
-              {years.map((year) => (
-                <option key={year.year}>{year.year}</option>
-              ))}
-            </select>
           )}
         </div>
         <Navbar />

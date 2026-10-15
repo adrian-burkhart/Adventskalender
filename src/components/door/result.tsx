@@ -1,5 +1,6 @@
 "use client"
 
+import clsx from "clsx"
 import Image from "next/image"
 import { memo } from "react"
 import { ButtonLink } from "@/components/button"
@@ -28,18 +29,24 @@ const Result = memo(
           className="h-auto w-72 animate-rise-in drop-shadow-[0_0_30px_rgb(254_240_138/0.25)] sm:w-80"
         />
         <h2
-          className={
+          className={clsx(
             // The farewell on door 24 is a whole sentence: a little smaller.
-            !result.isCorrect && doorNumber === 24 ? "text-2xl" : "text-4xl"
-          }
+            !result.isCorrect && doorNumber === 24 ? "text-2xl" : "text-4xl",
+            // Dark red like a Christmas ribbon, lit softly to read well.
+            "text-[#b3121f] [text-shadow:0_0_2px_rgb(255_245_225/0.9),0_0_14px_rgb(255_235_200/0.45)]",
+          )}
         >
           <Headline result={result} doorNumber={doorNumber} />
         </h2>
-        <div className="flex w-full flex-col gap-3 card px-5 py-5 text-lg">
+        <div
+          className={clsx(
+            "flex w-full flex-col gap-3 card px-5 py-5 text-lg shadow-[0_0_0_2px_rgb(179_18_31/0.95),0_0_18px_3px_rgb(179_18_31/0.45),0_8px_30px_rgb(0_0_0/0.35)]",
+          )}
+        >
           <Explanation result={result} />
           <Standing result={result} />
         </div>
-        <SolutionPicture result={result} />
+        <SolutionPicture image={result.image} />
         <Actions />
       </div>
     )
@@ -115,8 +122,8 @@ function Standing({ result }: { result: ResultData }) {
 }
 
 /** The picture from the CMS that goes with the answer. */
-function SolutionPicture({ result }: { result: ResultData }) {
-  if (!result.image) return null
+export function SolutionPicture({ image }: { image: string | null }) {
+  if (!image) return null
   return (
     <div className="rotate-1 rounded-xs bg-white p-2 pb-6 shadow-lg">
       <Image
@@ -124,7 +131,7 @@ function SolutionPicture({ result }: { result: ResultData }) {
         height="0"
         sizes="(min-width: 640px) 24rem, 90vw"
         className="h-auto max-h-80 w-auto max-w-full"
-        src={result.image}
+        src={image}
         alt=""
       />
     </div>

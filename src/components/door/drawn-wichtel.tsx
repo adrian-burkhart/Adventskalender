@@ -9,8 +9,6 @@ export interface WichtelLook {
   coat: [string, string]
   beard: [string, string]
   mittens: string
-  /** The orange-hat Wichtel from the welcome picture shows his eyes. */
-  eyes?: boolean
 }
 
 export const RED_WICHTEL: WichtelLook = {
@@ -19,15 +17,6 @@ export const RED_WICHTEL: WichtelLook = {
   coat: ["#cf3b30", "#8e1d1d"],
   beard: ["#ffffff", "#c9ccd2"],
   mittens: "#3f8a3a",
-}
-
-export const ORANGE_WICHTEL: WichtelLook = {
-  id: "orange",
-  hat: ["#e07a3a", "#9c4419"],
-  coat: ["#5f8f45", "#2f5a2a"],
-  beard: ["#d9c7b1", "#9c8670"],
-  mittens: "#5e9a55",
-  eyes: true,
 }
 
 export function DrawnWichtel({
@@ -110,58 +99,67 @@ export function DrawnWichtel({
         <path d="M72 86 Q72 102 68 120" />
       </g>
 
-      <g transform={lookDown ? "rotate(14 60 80) translate(4 2)" : undefined}>
-        {/* Face: cheeks, eyes for the orange one, and the round nose. */}
-        <ellipse cx="60" cy="72" rx="15" ry="7" fill="#f2c4a8" />
-        {look.eyes && (
-          <g>
-            <ellipse cx="53" cy="70" rx="3.6" ry="4.2" fill="white" />
-            <ellipse cx="67" cy="70" rx="3.6" ry="4.2" fill="white" />
-            <circle cx="54" cy="71" r="2.4" fill="#5b3f86" />
-            <circle cx="68" cy="71" r="2.4" fill="#5b3f86" />
-            <circle cx="54.6" cy="70.2" r="0.8" fill="white" />
-            <circle cx="68.6" cy="70.2" r="0.8" fill="white" />
-          </g>
+      <g transform={lookDown ? "rotate(16 60 80) translate(3 2)" : undefined}>
+        {lookDown ? (
+          // Turned towards what he holds: the face moves to the right,
+          // the eyes peek out under the hat and look down at it.
+          <>
+            <ellipse cx="65" cy="73" rx="17" ry="8" fill="#f2c4a8" />
+            <ellipse cx="57.5" cy="71" rx="3.2" ry="3.6" fill="white" />
+            <ellipse cx="68" cy="71" rx="2.8" ry="3.4" fill="white" />
+            <circle cx="59" cy="72.6" r="1.9" fill="#2b1d16" />
+            <circle cx="69.3" cy="72.6" r="1.7" fill="#2b1d16" />
+            <path
+              d="M52 82 Q62 76 71 81 Q78 77 83 82"
+              stroke={look.beard[0]}
+              strokeWidth="5"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <circle cx="76" cy="80" r="6.5" fill="#e98b7a" />
+            <circle cx="74" cy="78" r="2" fill="white" opacity="0.6" />
+          </>
+        ) : (
+          <>
+            {/* Face: cheeks and the round nose. */}
+            <ellipse cx="60" cy="72" rx="15" ry="7" fill="#f2c4a8" />
+            <path
+              d="M44 80 Q52 74 60 79 Q68 74 76 80"
+              stroke={look.beard[0]}
+              strokeWidth="5"
+              strokeLinecap="round"
+              fill="none"
+            />
+            <circle cx="60" cy="78" r="6.5" fill="#e98b7a" />
+            <circle cx="58" cy="76" r="2" fill="white" opacity="0.6" />
+          </>
         )}
-        <path
-          d="M44 80 Q52 74 60 79 Q68 74 76 80"
-          stroke={look.beard[0]}
-          strokeWidth="5"
-          strokeLinecap="round"
-          fill="none"
-        />
-        <circle cx="60" cy="78" r="6.5" fill="#e98b7a" />
-        <circle cx="58" cy="76" r="2" fill="white" opacity="0.6" />
 
         {/* The long hat, flopping to the side. */}
         <path
-          d={
-            look.eyes
-              ? "M38 66 Q40 38 58 24 Q72 12 92 22 Q78 26 74 42 Q80 54 84 66 Q60 60 38 66 Z"
-              : "M38 72 Q40 40 58 24 Q72 10 98 18 Q80 24 74 42 Q80 58 84 72 Q60 64 38 72 Z"
-          }
+          d="M38 72 Q40 40 58 24 Q72 10 98 18 Q80 24 74 42 Q80 58 84 72 Q60 64 38 72 Z"
           fill={`url(#${g("hat")})`}
         />
 
         {/* Headphones over the hat, with the cable. */}
-        {!look.eyes && (
-          <g>
-            <path
-              d="M39 68 Q42 34 60 30 Q78 34 81 68"
-              stroke="#262626"
-              strokeWidth="3"
-              fill="none"
-            />
-            <ellipse cx="38" cy="70" rx="5.5" ry="7" fill="#262626" />
+        <g>
+          <path
+            d="M39 68 Q42 34 60 30 Q78 34 81 68"
+            stroke="#262626"
+            strokeWidth="3"
+            fill="none"
+          />
+          <ellipse cx="38" cy="70" rx="5.5" ry="7" fill="#262626" />
+          {!lookDown && (
             <ellipse cx="82" cy="70" rx="5.5" ry="7" fill="#262626" />
-            <path
-              d="M36 77 Q30 100 38 116 Q42 126 36 134"
-              stroke="#262626"
-              strokeWidth="1"
-              fill="none"
-            />
-          </g>
-        )}
+          )}
+          <path
+            d="M36 77 Q30 100 38 116 Q42 126 36 134"
+            stroke="#262626"
+            strokeWidth="1"
+            fill="none"
+          />
+        </g>
       </g>
     </g>
   )

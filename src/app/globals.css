@@ -17,8 +17,6 @@
   --color-berry-light: #e25555;
   --color-berry-dark: #8e1d1d;
 
-  --color-paper: #fbf3e2;
-
   /* Line heights as in Tailwind v3 (fixed rem instead of ratios), so text
      sits exactly as before with the larger base font size. */
   --text-xs--line-height: 1rem;
@@ -35,10 +33,7 @@
   --font-door: var(--font-cochin), Georgia, serif;
   --font-body: var(--font-lora), Georgia, serif;
 
-  --animate-spin-thrice: spin 1s linear 3;
   --animate-glow: glow 2.4s ease-in-out infinite;
-  --animate-bob: bob 2.6s ease-in-out infinite;
-  --animate-fade-in: fade-in 0.6s ease-out both;
   --animate-rise-in: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 
   @keyframes glow {
@@ -50,23 +45,6 @@
     50% {
       filter: drop-shadow(0 0 12px rgb(254 240 138 / 0.8))
         drop-shadow(0 0 30px rgb(233 196 106 / 0.45));
-    }
-  }
-  @keyframes bob {
-    0%,
-    100% {
-      transform: translateY(0) rotate(-1deg);
-    }
-    50% {
-      transform: translateY(-6px) rotate(1deg);
-    }
-  }
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
     }
   }
   @keyframes rise-in {
@@ -121,7 +99,7 @@
 }
 
 @utility card-glow {
-  /* A card that stands out (your own row, the chosen proposal). */
+  /* A card that stands out: your own row in the Rangliste. */
   box-shadow:
     0 0 22px 4px rgb(233 196 106 / 0.35),
     inset 0 0 22px rgb(233 196 106 / 0.18),
@@ -225,7 +203,11 @@
     inset 0 0 14px rgb(255 255 255 / 0.1),
     0 8px 30px rgb(0 0 0 / 0.35);
 }
-.card-white :is(h1, h2, h3, [class*="text-candle"]) {
+/* White text without the card around it. */
+.white-text {
+  color: #fff;
+}
+:is(.card-white, .white-text) :is(h1, h2, h3, [class*="text-candle"]) {
   color: #fff;
   text-shadow: 0 0 8px rgb(200 225 255 / 0.55);
 }
@@ -458,7 +440,6 @@
 @media (prefers-reduced-motion: reduce) {
   .wichtel-rock,
   .anticipation-playing *,
-  .animate-bob,
   .animate-glow {
     animation: none !important;
   }

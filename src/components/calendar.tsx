@@ -17,6 +17,7 @@ import Loading from "./loading"
 import ChristmasTree from "./christmas-tree"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
+import { hasDecorations } from "@/lib/doors"
 
 /**
  * How long the door opens before the question page shows. The opening sound
@@ -32,6 +33,7 @@ type DoorVariant = "closed-one" | "closed-two"
 /** What a door says about itself, for screen readers. */
 function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
   if (state === "answered") return "schon beantwortet"
+  if (state === "past") return "zum Anhören"
   if (state === "locked") return "noch verschlossen"
   if (isToday) return "heute"
   if (isMissed) return "zum Nachholen"
@@ -50,6 +52,7 @@ interface CalendarDoorProps {
   isBusy: boolean
   onOpen: (doorNumber: number) => void
   onLocked: () => void
+  onReview: (doorNumber: number) => void
 }
 
 const CalendarDoor = memo(
@@ -63,6 +66,7 @@ const CalendarDoor = memo(
     isBusy,
     onOpen,
     onLocked,
+    onReview,
   }: CalendarDoorProps) => {
     const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
     const [showLock, setShowLock] = useState(false)
@@ -71,12 +75,16 @@ const CalendarDoor = memo(
 
     const isAnswered = doorState === "answered"
     const isLocked = doorState === "locked"
+    const isPast = doorState === "past"
     const closedImage = variant === "closed-one" ? doorClosedOne : doorClosedTwo
     const showOpen = isOpening || doorState === "open"
 
     const handleClick = () => {
       if (isBusy || isOpening) return
-      if (!enabledTestMode && isAnswered) return
+      // An answered door opens straight to the look back at it.
+      if (!enabledTestMode && isAnswered) return onReview(doorNumber)
+      // A door of a past season opens straight away, to listen to.
+      if (isPast) return onReview(doorNumber)
       if (!enabledTestMode && isLocked) {
         if (showLock) return
         setShowLock(true)
@@ -93,11 +101,11 @@ const CalendarDoor = memo(
       <button
         type="button"
         onClick={handleClick}
-        aria-disabled={(!enabledTestMode && isAnswered) || isBusy}
+        aria-disabled={isBusy}
         className={clsx(
           "group relative block w-full rounded-2xl transition-transform duration-200 focus-visible:ring-4 focus-visible:ring-gold/70 focus-visible:outline-hidden",
-          !isAnswered && !isBusy && "cursor-pointer hover:scale-[1.03]",
-          (isAnswered || isBusy) && "cursor-default",
+          !isBusy && "cursor-pointer hover:scale-[1.03]",
+          isBusy && "cursor-default",
           isToday && !isAnswered && "animate-glow",
           showLock && "animate-[shake_0.5s_ease-in-out]",
         )}
@@ -134,7 +142,11 @@ const CalendarDoor = memo(
         </div>
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl"
+          className={clsx(
+            "pointer-events-none absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light transition-opacity duration-300 [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl",
+            // The number goes while the door opens or shows its lock.
+            (isOpening || showLock) && "opacity-0",
+          )}
         >
           {doorNumber}
         </span>
@@ -145,7 +157,7 @@ const CalendarDoor = memo(
 )
 
 const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
-  const { selectedYear } = useSelectedYear()
+  const { selectedYear, currentYear } = useSelectedYear()
   const { doorStates, today, openDoor, loading, error } = useDoors(
     selectedYear,
     initialDoors,
@@ -176,6 +188,23 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
     playLocked()
     playUpsi()
   }, [playLocked, playUpsi])
+
+  const handleReview = useCallback(
+    (doorNumber: number) => {
+      if (selectedYear) router.push(doorPath(selectedYear.year, doorNumber))
+    },
+    [selectedYear, router],
+  )
+
+  // Answered doors are just a look back: get their pages ready beforehand.
+  useEffect(() => {
+    if (!selectedYear || !doorStates) return
+    doorStates.forEach((state, i) => {
+      if (state === "answered" || state === "past") {
+        router.prefetch(doorPath(selectedYear.year, i + 1))
+      }
+    })
+  }, [selectedYear, doorStates, router])
 
   const handleOpen = useCallback(
     (doorNumber: number) => {
@@ -221,10 +250,9 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
 
   return (
     <div className="flex w-full flex-col items-center gap-10">
-      <section className="flex flex-col items-center gap-2 text-center">
-        <h2 className="text-2xl">Dein Weihnachtsbaum</h2>
+      {hasDecorations(Number(selectedYear.year), Number(currentYear)) && (
         <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
-      </section>
+      )}
       <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
         {doorStates.map((doorState, i) => {
           const doorNumber = i + 1
@@ -246,6 +274,7 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
                 isBusy={openingDoor !== null && openingDoor !== doorNumber}
                 onOpen={handleOpen}
                 onLocked={handleLocked}
+                onReview={handleReview}
               />
             </li>
           )

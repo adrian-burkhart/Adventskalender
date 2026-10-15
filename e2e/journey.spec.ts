@@ -147,10 +147,10 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
   })
 
   await test.step("Beantwortete und verschlossene Türen", async () => {
+    // An answered door opens again to look back at it.
     await page.goto(`/${year}/1`)
-    await expect(
-      page.getByText("Du hast diese Frage bereits beantwortet."),
-    ).toBeVisible()
+    await expect(page.getByText("Türchen 1 · schon beantwortet")).toBeVisible()
+    await expect(page.getByText("Deine Antwort, richtig")).toBeVisible()
 
     await page.goto(`/${year}/${env.lockedDoor()}`)
     await expect(
