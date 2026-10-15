@@ -24,7 +24,7 @@ interface Letter {
  * The season e-mails, sent by Vercel Cron (vercel.json):
  *
  * - reminder: daily in December, once per season to players who opened a
- *   door this year but none for three days.
+ *   door this year but then missed five doors in a row.
  * - winner: on 1 January, the winner to everyone who took part.
  *
  * Only production sends to players. Outside production an admin can open

@@ -45,9 +45,10 @@ export default function Datenschutz() {
           <p>
             Ein Teil der Daten wird erhoben, um eine fehlerfreie Bereitstellung
             der Website zu gew&auml;hrleisten. Die &uuml;brigen Daten brauchen
-            wir, damit Sie am Adventskalender teilnehmen k&ouml;nnen und Ihre
-            Punkte in der Rangliste erscheinen. Ihr Nutzerverhalten werten wir
-            nicht aus.
+            wir, damit Sie am Adventskalender teilnehmen k&ouml;nnen, Ihre
+            Punkte in der Rangliste erscheinen und wir Ihnen wenige E-Mails zum
+            Adventskalender schicken k&ouml;nnen (siehe Abschnitt 4). Ihr
+            Nutzerverhalten werten wir nicht aus.
           </p>
           <h4>Welche Rechte haben Sie bez&uuml;glich Ihrer Daten?</h4>
           <p>
@@ -131,8 +132,10 @@ export default function Datenschutz() {
           <h3 className="font-semibold">Resend (E-Mail-Versand)</h3>
           <p>
             E-Mails zur Anmeldung (Login-Code, Bestätigungs- und Passwort-Links)
+            sowie die Erinnerung und die Gewinner-Nachricht zum Adventskalender
             versenden wir über Resend (Resend, Inc., USA). Dafür werden Ihre
-            E-Mail-Adresse und der Inhalt der E-Mail an Resend übermittelt.
+            E-Mail-Adresse, Ihr Name und der Inhalt der E-Mail an Resend
+            übermittelt.
           </p>
           <p>
             Weitere Informationen:{" "}
@@ -441,6 +444,37 @@ export default function Datenschutz() {
             Login-Code, einem Link zum Bestätigen Ihrer E-Mail-Adresse oder zum
             Setzen eines neuen Passworts. Rechtsgrundlage ist Art. 6 Abs. 1 lit.
             b DSGVO. Werbung oder Newsletter verschicken wir nicht.
+          </p>
+          <h3 className="font-semibold">E-Mails zum Adventskalender</h3>
+          <p>
+            Außerdem schicken wir Teilnehmern höchstens zwei E-Mails pro Jahr:
+          </p>
+          <ul className="list-disc pl-6">
+            <li>
+              eine einmalige Erinnerung, wenn Sie in diesem Jahr schon ein
+              Türchen geöffnet, danach aber fünf Türchen in Folge nicht mehr
+              geöffnet haben (verschickt zwischen dem 6. und 28. Dezember),
+            </li>
+            <li>
+              am 1. Januar eine Nachricht, wer den Adventskalender des
+              vergangenen Jahres gewonnen hat, mit Ihren eigenen Punkten und
+              Ihrem Platz. Sie geht an alle, die in dem Jahr mitgespielt haben.
+            </li>
+          </ul>
+          <p>
+            Dafür verwenden wir Ihre E-Mail-Adresse, Ihren Namen, den Zeitpunkt
+            Ihrer geöffneten Türchen und Ihre Punkte. Damit jede E-Mail
+            höchstens einmal verschickt wird, speichern wir, wann wir sie Ihnen
+            geschickt haben; diese Einträge löschen wir zusammen mit Ihrem
+            Konto.
+          </p>
+          <p>
+            Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Unser berechtigtes
+            Interesse liegt darin, die Teilnehmer an das laufende Spiel zu
+            erinnern und ihnen das Ergebnis mitzuteilen. Sie können dem
+            jederzeit widersprechen: Eine kurze E-Mail an
+            mail@adventskalender-haas.de genügt, dann bekommen Sie diese E-Mails
+            nicht mehr.
           </p>
           <h3 className="font-semibold">Cookies</h3>
           <p>
