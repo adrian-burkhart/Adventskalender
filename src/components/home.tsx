@@ -2,6 +2,7 @@
 
 import Layout from "@/components/layout"
 import Calendar from "@/components/calendar"
+import YearSelect from "@/components/year-select"
 import { memo, useEffect, useState } from "react"
 import { usePlayer } from "@/lib/hooks"
 import Image from "next/image"
@@ -26,7 +27,13 @@ const Home = memo(
     renderedAt: number
   }) => {
     const { player } = usePlayer()
-    const { selectedYear } = useSelectedYear()
+    const { years, currentYear, selectedYear, setSelectedYear } =
+      useSelectedYear()
+    // Years with questions to look back on, and the current one.
+    const choices = years
+      .filter((y) => y.questionCount > 0 || y.year === currentYear)
+      .map((y) => y.year)
+      .sort((a, b) => b.localeCompare(a))
     const [now, setNow] = useState(renderedAt)
 
     useEffect(() => {
@@ -74,6 +81,16 @@ const Home = memo(
               </div>
             )}
           </div>
+          {player && selectedYear && choices.length > 1 && (
+            <YearSelect
+              years={choices}
+              value={selectedYear.year}
+              onChange={(value) => {
+                const year = years.find((y) => y.year === value)
+                if (year) setSelectedYear(year)
+              }}
+            />
+          )}
           {player && <Calendar initialDoors={initialDoors} />}
         </div>
       </Layout>

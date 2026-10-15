@@ -7,7 +7,8 @@ export const QUESTION_SECONDS = 30
 /** Extra seconds the server accepts, for slow networks. */
 export const GRACE_SECONDS = 3
 
-export type DoorState = "closed" | "open" | "locked" | "answered"
+/** "past": a door of a season that is over, now only to listen to. */
+export type DoorState = "closed" | "open" | "locked" | "answered" | "past"
 
 /** Door N of a year opens at midnight Berlin time on N December. */
 export function doorUnlocksAt(year: number, door: number): Date {
@@ -61,6 +62,7 @@ export function doorState({
   answered: boolean
 }): DoorState {
   if (answered) return "answered"
+  if (now >= seasonEndsAt(year)) return "past"
   if (!isDoorAnswerable(year, door, now)) return "locked"
   return opened ? "open" : "closed"
 }

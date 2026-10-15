@@ -69,10 +69,11 @@ describe("doorState", () => {
     )
   })
 
-  it("locks unanswered doors of a past season", () => {
+  it("leaves unanswered doors of a past season to listen to", () => {
     expect(doorState({ ...base, year: 2025, door: 5, opened: true })).toBe(
-      "locked",
+      "past",
     )
+    expect(doorState({ ...base, year: 2025, door: 24 })).toBe("past")
   })
 })
 

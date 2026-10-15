@@ -10,6 +10,7 @@ import {
   doorState,
   isCorrectAnswer,
   isDoorAnswerable,
+  seasonEndsAt,
   isWithinDeadline,
   legacyDoorStatus,
   normalizeOption,
@@ -71,6 +72,13 @@ export interface DoorReview {
   isCorrect: boolean | null
   points: number | null
   image: string | null
+  /** False for a door of a past season that this player never answered. */
+  played: boolean
+  audio: {
+    intro: string | null
+    question: string | null
+    outro: string | null
+  }
 }
 
 function reply(data: unknown, status = 200) {
@@ -157,7 +165,9 @@ export async function loadDoorStates(
       opened: !!row || old.opened,
       answered: !!row?.answered_at || old.answered,
     })
-    return testMode && state === "locked" ? "closed" : state
+    return testMode && (state === "locked" || state === "past")
+      ? "closed"
+      : state
   })
 }
 
@@ -305,7 +315,7 @@ async function answeredStep(
   ctx: DoorContext,
   progress?: Progress,
 ): Promise<DoorResponse> {
-  const saved = (progress ?? (await loadProgress(ctx))).saved
+  const { saved, answered } = progress ?? (await loadProgress(ctx))
   return {
     status: "answered",
     review: {
@@ -316,6 +326,12 @@ async function answeredStep(
       isCorrect: saved?.isCorrect ?? null,
       points: saved?.points ?? null,
       image: ctx.question.image,
+      played: answered,
+      audio: {
+        intro: ctx.question.introAudio,
+        question: ctx.question.questionAudio,
+        outro: ctx.question.outroAudio,
+      },
     },
   }
 }
@@ -382,6 +398,10 @@ async function doorStep(ctx: DoorContext): Promise<DoorResponse> {
 
   const progress = await loadProgress(ctx)
   if (progress.answered) return answeredStep(ctx, progress)
+  // A season that is over: every door can still be listened to.
+  if (calendarNow() >= seasonEndsAt(ctx.year)) {
+    return answeredStep(ctx, progress)
+  }
   if (!isDoorAnswerable(ctx.year, ctx.door, calendarNow())) {
     return { status: "locked" }
   }

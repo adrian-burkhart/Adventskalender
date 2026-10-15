@@ -293,7 +293,9 @@ const QuestionForm = memo(
       case "locked":
         return <Message>Diese Tür ist gerade verschlossen.</Message>
       case "answered":
-        return <Review review={step.review} doorNumber={doorNumber} />
+        return (
+          <Review review={step.review} year={year} doorNumber={doorNumber} />
+        )
       case "question":
         return (
           <QuestionStep

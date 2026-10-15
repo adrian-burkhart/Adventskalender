@@ -1,5 +1,6 @@
 "use client"
 
+import clsx from "clsx"
 import Image from "next/image"
 import { memo } from "react"
 import { ButtonLink } from "@/components/button"
@@ -28,14 +29,22 @@ const Result = memo(
           className="h-auto w-72 animate-rise-in drop-shadow-[0_0_30px_rgb(254_240_138/0.25)] sm:w-80"
         />
         <h2
-          className={
+          className={clsx(
             // The farewell on door 24 is a whole sentence: a little smaller.
-            !result.isCorrect && doorNumber === 24 ? "text-2xl" : "text-4xl"
-          }
+            !result.isCorrect && doorNumber === 24 ? "text-2xl" : "text-4xl",
+            // A wrong answer is told in a calm white, as on the Rangliste.
+            !result.isCorrect &&
+              "text-white [text-shadow:0_0_8px_rgb(200_225_255/0.55)]",
+          )}
         >
           <Headline result={result} doorNumber={doorNumber} />
         </h2>
-        <div className="card flex w-full flex-col gap-3 px-5 py-5 text-lg">
+        <div
+          className={clsx(
+            "card flex w-full flex-col gap-3 px-5 py-5 text-lg",
+            !result.isCorrect && "card-white",
+          )}
+        >
           <Explanation result={result} />
           <Standing result={result} />
         </div>

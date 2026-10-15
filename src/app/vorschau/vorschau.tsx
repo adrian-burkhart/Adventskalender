@@ -38,6 +38,8 @@ const demoReview = (isCorrect: boolean): DoorReview => ({
   isCorrect,
   points: isCorrect ? 30 : 0,
   image: null,
+  played: true,
+  audio: { intro: null, question: null, outro: null },
 })
 
 const ME = "demo-me"
@@ -318,7 +320,7 @@ function ReviewSection() {
       extra={<Toggle value={isCorrect} onChange={setIsCorrect} />}
     >
       <div className="flex justify-center">
-        <Review review={demoReview(isCorrect)} doorNumber={7} />
+        <Review review={demoReview(isCorrect)} year="2025" doorNumber={7} />
       </div>
     </Section>
   )

@@ -13,6 +13,8 @@ import { useSupabaseClient } from "./auth-context"
 
 interface AppContextValue {
   years: Year[]
+  /** The year of the season now (or the next one). */
+  currentYear: string | null
   selectedYear: Year | null
   setSelectedYear: React.Dispatch<React.SetStateAction<Year | null>>
   player: Player | null
@@ -32,8 +34,8 @@ function useAppContext() {
 }
 
 export const useSelectedYear = () => {
-  const { years, selectedYear, setSelectedYear } = useAppContext()
-  return { years, selectedYear, setSelectedYear }
+  const { years, currentYear, selectedYear, setSelectedYear } = useAppContext()
+  return { years, currentYear, selectedYear, setSelectedYear }
 }
 
 export const usePlayerContext = () => {
@@ -87,6 +89,7 @@ export const AppDataProvider = ({
     <AppContext.Provider
       value={{
         years,
+        currentYear,
         selectedYear,
         setSelectedYear,
         player,

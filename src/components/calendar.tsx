@@ -32,6 +32,7 @@ type DoorVariant = "closed-one" | "closed-two"
 /** What a door says about itself, for screen readers. */
 function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
   if (state === "answered") return "schon beantwortet"
+  if (state === "past") return "zum Anhören"
   if (state === "locked") return "noch verschlossen"
   if (isToday) return "heute"
   if (isMissed) return "zum Nachholen"
@@ -73,6 +74,7 @@ const CalendarDoor = memo(
 
     const isAnswered = doorState === "answered"
     const isLocked = doorState === "locked"
+    const isPast = doorState === "past"
     const closedImage = variant === "closed-one" ? doorClosedOne : doorClosedTwo
     const showOpen = isOpening || doorState === "open"
 
@@ -80,6 +82,8 @@ const CalendarDoor = memo(
       if (isBusy || isOpening) return
       // An answered door opens straight to the look back at it.
       if (!enabledTestMode && isAnswered) return onReview(doorNumber)
+      // A door of a past season opens straight away, to listen to.
+      if (isPast) return onReview(doorNumber)
       if (!enabledTestMode && isLocked) {
         if (showLock) return
         setShowLock(true)
@@ -137,7 +141,11 @@ const CalendarDoor = memo(
         </div>
         <span
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl"
+          className={clsx(
+            "pointer-events-none absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light transition-opacity duration-300 [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl",
+            // The number goes while the door opens or shows its lock.
+            (isOpening || showLock) && "opacity-0",
+          )}
         >
           {doorNumber}
         </span>
@@ -191,7 +199,7 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
   useEffect(() => {
     if (!selectedYear || !doorStates) return
     doorStates.forEach((state, i) => {
-      if (state === "answered") {
+      if (state === "answered" || state === "past") {
         router.prefetch(doorPath(selectedYear.year, i + 1))
       }
     })
