@@ -1,4 +1,5 @@
-const PUBLIC_PATHS = ["/login", "/impressum", "/datenschutz"]
+// /api/keepalive checks its own secret (Vercel Cron), not a login.
+const PUBLIC_PATHS = ["/login", "/impressum", "/datenschutz", "/api/keepalive"]
 // The e-mail routes check the cron secret or an admin login themselves.
 const PUBLIC_PREFIXES = ["/auth/", "/api/emails/"]
 

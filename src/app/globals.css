@@ -1,10 +1,154 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-pine-700: #14532d;
+  --color-pine-800: #0b3d22;
+  --color-pine-900: #052e16;
+  --color-pine-950: #03170c;
+
+  --color-candle: #fef08a;
+  --color-candle-soft: #fdf6c8;
+
+  --color-gold: #e9c46a;
+  --color-gold-light: #f6dc94;
+  --color-gold-dark: #b8862b;
+
+  --color-berry: #c62f2f;
+  --color-berry-light: #e25555;
+  --color-berry-dark: #8e1d1d;
+
+  /* Line heights as in Tailwind v3 (fixed rem instead of ratios), so text
+     sits exactly as before with the larger base font size. */
+  --text-xs--line-height: 1rem;
+  --text-sm--line-height: 1.25rem;
+  --text-base--line-height: 1.5rem;
+  --text-lg--line-height: 1.75rem;
+  --text-xl--line-height: 1.75rem;
+  --text-2xl--line-height: 2rem;
+  --text-3xl--line-height: 2.25rem;
+  --text-4xl--line-height: 2.5rem;
+
+  /* Headings: the J from Lora, everything else from Fraunces. */
+  --font-display: var(--font-lora-j), var(--font-fraunces), Georgia, serif;
+  --font-door: var(--font-cochin), Georgia, serif;
+  --font-body: var(--font-lora), Georgia, serif;
+
+  --animate-glow: glow 2.4s ease-in-out infinite;
+  --animate-rise-in: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes glow {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 6px rgb(254 240 138 / 0.45))
+        drop-shadow(0 0 16px rgb(233 196 106 / 0.25));
+    }
+    50% {
+      filter: drop-shadow(0 0 12px rgb(254 240 138 / 0.8))
+        drop-shadow(0 0 30px rgb(233 196 106 / 0.45));
+    }
+  }
+  @keyframes rise-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
+
+  /* Tailwind v3 defaults that v4 changed: pointer on buttons, gray
+     placeholders. Kept so the design stays as it was. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-gray-400);
+  }
+}
+
+@utility card {
+  /* A warm, slightly transparent card, like a window at night. Its edge is
+     a soft glow instead of a sharp line. */
+  @apply rounded-2xl bg-black/35 backdrop-blur-[2px];
+  box-shadow:
+    0 0 16px 1px rgb(233 196 106 / 0.12),
+    inset 0 0 18px rgb(233 196 106 / 0.08),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+
+@utility card-glow {
+  /* A card that stands out: your own row in the Rangliste. */
+  box-shadow:
+    0 0 22px 4px rgb(233 196 106 / 0.35),
+    inset 0 0 22px rgb(233 196 106 / 0.18),
+    0 8px 30px rgb(0 0 0 / 0.35);
+}
+
+@utility btn {
+  /* Like the painted play button: a golden bauble with a green rim. */
+  @apply relative inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 py-2 text-center font-body text-lg font-bold transition focus-visible:ring-4 focus-visible:ring-candle/70 focus-visible:outline-hidden active:translate-y-[2px];
+  border: 5px solid #3f7a2a;
+  background: radial-gradient(
+    circle at 32% 28%,
+    #fbd56b 0%,
+    #e39a1c 55%,
+    #b86d0c 100%
+  );
+  color: #8e1d1d;
+  text-shadow: 0 1px 0 rgb(255 230 160 / 0.6);
+  box-shadow:
+    0 0 10px 2px rgb(110 170 60 / 0.55),
+    inset 0 3px 8px rgb(255 245 200 / 0.7),
+    inset 0 -5px 10px rgb(120 60 0 / 0.45);
+  &:hover {
+    background: radial-gradient(
+      circle at 32% 28%,
+      #ffe08a 0%,
+      #eda72a 55%,
+      #c47710 100%
+    );
+  }
+  /* Not ready yet (no answer picked): the same bauble, pale and quiet. */
+  &:disabled {
+    @apply pointer-events-none;
+    opacity: 0.5;
+    filter: saturate(0.55);
+    box-shadow:
+      inset 0 3px 8px rgb(255 245 200 / 0.5),
+      inset 0 -5px 10px rgb(120 60 0 / 0.3);
+  }
+}
+
+@utility btn-quiet {
+  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-transparent px-6 py-2 text-center font-body text-lg text-candle transition hover:bg-gold/10 focus-visible:ring-4 focus-visible:ring-candle/70 focus-visible:outline-hidden;
+  border: 4px solid #3f7a2a;
+  box-shadow: 0 0 8px 1px rgb(110 170 60 / 0.45);
+}
 
 @layer base {
   html {
-    --font-display: var(--font-lora-j), var(--font-fraunces);
     /* A little larger than the default: many players read without glasses. */
     font-size: 112.5%;
   }
@@ -12,9 +156,9 @@
   body {
     min-height: 100vh;
     padding: 0.5rem;
-    background-color: theme("colors.pine.900");
-    color: theme("colors.candle.DEFAULT");
-    font-family: theme("fontFamily.body");
+    background-color: var(--color-pine-900);
+    color: var(--color-candle);
+    font-family: var(--font-body);
     line-height: 1.55;
   }
 
@@ -33,80 +177,19 @@
       ),
       radial-gradient(
         ellipse 120% 90% at 50% 40%,
-        theme("colors.pine.900") 40%,
-        theme("colors.pine.950") 100%
+        var(--color-pine-900) 40%,
+        var(--color-pine-950) 100%
       );
   }
 
   h1,
   h2,
   h3 {
-    font-family: theme("fontFamily.display");
+    font-family: var(--font-display);
     font-weight: 600;
     font-variation-settings: "SOFT" 50;
-    color: theme("colors.candle.DEFAULT");
+    color: var(--color-candle);
     line-height: 1.2;
-  }
-}
-
-@layer components {
-  /* A warm, slightly transparent card, like a window at night. Its edge is
-     a soft glow instead of a sharp line. */
-  .card {
-    @apply rounded-2xl bg-black/35 backdrop-blur-[2px];
-    box-shadow:
-      0 0 16px 1px rgb(233 196 106 / 0.12),
-      inset 0 0 18px rgb(233 196 106 / 0.08),
-      0 8px 30px rgb(0 0 0 / 0.35);
-  }
-
-  /* A card that stands out: your own row in the Rangliste. */
-  .card-glow {
-    box-shadow:
-      0 0 22px 4px rgb(233 196 106 / 0.35),
-      inset 0 0 22px rgb(233 196 106 / 0.18),
-      0 8px 30px rgb(0 0 0 / 0.35);
-  }
-
-  /* Like the painted play button: a golden bauble with a green rim. */
-  .btn {
-    @apply relative inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-full px-6 py-2 text-center font-body text-lg font-bold transition focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-candle/70 active:translate-y-[2px];
-    border: 5px solid #3f7a2a;
-    background: radial-gradient(
-      circle at 32% 28%,
-      #fbd56b 0%,
-      #e39a1c 55%,
-      #b86d0c 100%
-    );
-    color: #8e1d1d;
-    text-shadow: 0 1px 0 rgb(255 230 160 / 0.6);
-    box-shadow:
-      0 0 10px 2px rgb(110 170 60 / 0.55),
-      inset 0 3px 8px rgb(255 245 200 / 0.7),
-      inset 0 -5px 10px rgb(120 60 0 / 0.45);
-  }
-  .btn:hover {
-    background: radial-gradient(
-      circle at 32% 28%,
-      #ffe08a 0%,
-      #eda72a 55%,
-      #c47710 100%
-    );
-  }
-  /* Not ready yet (no answer picked): the same bauble, pale and quiet. */
-  .btn:disabled {
-    @apply pointer-events-none;
-    opacity: 0.5;
-    filter: saturate(0.55);
-    box-shadow:
-      inset 0 3px 8px rgb(255 245 200 / 0.5),
-      inset 0 -5px 10px rgb(120 60 0 / 0.3);
-  }
-
-  .btn-quiet {
-    @apply inline-flex min-h-[3rem] items-center justify-center gap-2 rounded-full bg-transparent px-6 py-2 text-center font-body text-lg text-candle transition hover:bg-gold/10 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-candle/70;
-    border: 4px solid #3f7a2a;
-    box-shadow: 0 0 8px 1px rgb(110 170 60 / 0.45);
   }
 }
 

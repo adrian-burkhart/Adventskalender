@@ -69,7 +69,7 @@ const Home = memo(
               <h1 className="text-3xl sm:text-4xl">Hallo {player.name}!</h1>
             )}
             {!calendarHasStarted && (
-              <div className="card mt-2 flex max-w-md flex-col items-center justify-center gap-2 px-6 py-4 text-center">
+              <div className="mt-2 flex max-w-md flex-col items-center justify-center gap-2 card px-6 py-4 text-center">
                 <div>Schön, dass du schon hier bist!</div>
                 <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
                 <div>

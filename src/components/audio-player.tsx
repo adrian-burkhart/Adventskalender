@@ -25,7 +25,7 @@ export const PlayPauseButton = memo(
       <button
         type="button"
         onClick={isPlaying ? pauseAudio : playAudio}
-        className="rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/60"
+        className="rounded-full focus-visible:ring-4 focus-visible:ring-gold/60 focus-visible:outline-hidden"
       >
         <Image
           src={isPlaying ? pauseButton : playButton}

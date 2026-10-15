@@ -103,7 +103,7 @@ const CalendarDoor = memo(
         onClick={handleClick}
         aria-disabled={isBusy}
         className={clsx(
-          "group relative block w-full rounded-2xl transition-transform duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-gold/70",
+          "group relative block w-full rounded-2xl transition-transform duration-200 focus-visible:ring-4 focus-visible:ring-gold/70 focus-visible:outline-hidden",
           !isBusy && "cursor-pointer hover:scale-[1.03]",
           isBusy && "cursor-default",
           isToday && !isAnswered && "animate-glow",

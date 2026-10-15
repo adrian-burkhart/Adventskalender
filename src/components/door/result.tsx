@@ -40,7 +40,7 @@ const Result = memo(
         </h2>
         <div
           className={clsx(
-            "card flex w-full flex-col gap-3 px-5 py-5 text-lg shadow-[0_0_0_2px_rgb(179_18_31/0.95),0_0_18px_3px_rgb(179_18_31/0.45),0_8px_30px_rgb(0_0_0/0.35)]",
+            "flex w-full flex-col gap-3 card px-5 py-5 text-lg shadow-[0_0_0_2px_rgb(179_18_31/0.95),0_0_18px_3px_rgb(179_18_31/0.45),0_8px_30px_rgb(0_0_0/0.35)]",
           )}
         >
           <Explanation result={result} />
@@ -125,7 +125,7 @@ function Standing({ result }: { result: ResultData }) {
 export function SolutionPicture({ image }: { image: string | null }) {
   if (!image) return null
   return (
-    <div className="rotate-1 rounded-sm bg-white p-2 pb-6 shadow-lg">
+    <div className="rotate-1 rounded-xs bg-white p-2 pb-6 shadow-lg">
       <Image
         width="0"
         height="0"

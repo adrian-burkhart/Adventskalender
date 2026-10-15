@@ -162,8 +162,8 @@ function List({ entries, myId, decorated }: BoardProps) {
           <li
             key={entry.player_id ?? `alt-${i}`}
             className={clsx(
-              "card flex items-center gap-3 py-2 pl-3 pr-2",
-              isMe ? "card-glow bg-gold/15" : "bg-black/40",
+              "flex items-center gap-3 card py-2 pr-2 pl-3",
+              isMe ? "bg-gold/15 card-glow" : "bg-black/40",
             )}
           >
             <div className="flex w-10 shrink-0 justify-center">

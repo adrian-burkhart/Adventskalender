@@ -42,7 +42,7 @@ export default function Profile() {
         <h1 className="text-4xl">Profil</h1>
         {player && (
           <>
-            <section className="card flex flex-col gap-3 px-5 py-5">
+            <section className="flex flex-col gap-3 card px-5 py-5">
               <label htmlFor="name" className="text-lg">
                 Hier kannst du deinen Namen ändern:
               </label>
@@ -56,7 +56,7 @@ export default function Profile() {
                   maxLength={30}
                   value={newName}
                   onChange={handleNameChange}
-                  className="w-full rounded-lg border border-gold/50 bg-black/30 px-4 py-3 text-lg text-white focus:border-gold focus:outline-none focus:ring-2 focus:ring-gold/40"
+                  className="w-full rounded-lg border border-gold/50 bg-black/30 px-4 py-3 text-lg text-white focus:border-gold focus:ring-2 focus:ring-gold/40 focus:outline-hidden"
                   type="text"
                 />
                 <Button type="submit">

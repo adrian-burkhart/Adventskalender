@@ -25,7 +25,7 @@ const YearSelect = memo(
           value={value}
           onChange={(e) => onChange(e.target.value)}
           className={clsx(
-            "cursor-pointer appearance-none rounded-full bg-pine-950/60 py-1 pl-5 pr-12 font-display text-2xl focus:outline-none focus:ring-4",
+            "cursor-pointer appearance-none rounded-full bg-pine-950/60 py-1 pr-12 pl-5 font-display text-2xl focus:ring-4 focus:outline-hidden",
             tone === "white"
               ? "card-white text-white [text-shadow:0_0_8px_rgb(200_225_255/0.55)] focus:ring-white/50"
               : "text-candle shadow-[0_0_0_1.5px_rgb(233_196_106/0.8),0_0_14px_2px_rgb(233_196_106/0.3),inset_0_0_14px_rgb(233_196_106/0.1),0_8px_30px_rgb(0_0_0/0.35)] [text-shadow:0_0_8px_rgb(250_204_21/0.4)] focus:ring-gold/50",
@@ -41,7 +41,7 @@ const YearSelect = memo(
           viewBox="0 0 12 8"
           aria-hidden
           className={clsx(
-            "pointer-events-none absolute right-5 top-1/2 h-2 w-3 -translate-y-1/2",
+            "pointer-events-none absolute top-1/2 right-5 h-2 w-3 -translate-y-1/2",
             tone === "white" ? "text-white" : "text-candle",
           )}
         >

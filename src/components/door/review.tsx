@@ -44,7 +44,7 @@ const Review = memo(
               : []),
           ]}
         />
-        <h1 className="card w-full px-5 py-4 font-body text-xl font-semibold not-italic">
+        <h1 className="w-full card px-5 py-4 font-body text-xl font-semibold not-italic">
           {review.question}
         </h1>
         <ul className="flex w-full flex-col gap-2.5 text-left">

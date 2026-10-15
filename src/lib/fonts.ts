@@ -34,7 +34,7 @@ const loraJ = localFont({
 export const bodyFont = Lora({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-body",
+  variable: "--font-lora",
 })
 
 export const fontVariables = [cochinFont, fraunces, loraJ, bodyFont]

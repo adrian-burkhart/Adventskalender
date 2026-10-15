@@ -141,13 +141,13 @@ function Trophy({ entries }: { entries: HallEntry[] }) {
       </svg>
 
       {/* The plinth with its plates. */}
-      <div className="w-full rounded-b-2xl rounded-t-md border-t-4 border-[#5a3820] bg-gradient-to-b from-[#7a4a26] to-[#4a2c16] px-5 pb-6 pt-5 shadow-2xl">
+      <div className="w-full rounded-t-md rounded-b-2xl border-t-4 border-[#5a3820] bg-linear-to-b from-[#7a4a26] to-[#4a2c16] px-5 pt-5 pb-6 shadow-2xl">
         <ol className="flex flex-col gap-3">
           {entries.map((entry, i) => (
             <li
               key={entry.year}
               className={clsx(
-                "rounded-md border border-[#7a5a1e] bg-gradient-to-b from-[#f3d98a] via-[#d9b25a] to-[#b38a36] px-4 py-2 text-center text-[#3b2a10] shadow-[inset_0_1px_0_rgb(255_255_255/0.6),0_2px_4px_rgb(0_0_0/0.4)]",
+                "rounded-md border border-[#7a5a1e] bg-linear-to-b from-[#f3d98a] via-[#d9b25a] to-[#b38a36] px-4 py-2 text-center text-[#3b2a10] shadow-[inset_0_1px_0_rgb(255_255_255/0.6),0_2px_4px_rgb(0_0_0/0.4)]",
                 i === 0 &&
                   "shadow-[0_0_18px_rgb(250_204_21/0.5)] ring-2 ring-[#fff2b8]/70",
               )}
