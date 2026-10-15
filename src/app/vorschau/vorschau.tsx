@@ -131,7 +131,7 @@ export default function Vorschau() {
           intro="„Gemeinsam geschafft“ über der Liste, neben jedem Namen der eigene Weihnachtsbaum. Den Fallschirm-Wichtel siehst du auf der echten Rangliste."
         >
           <div className="flex justify-center">
-            <Board entries={demoEntries} myId={ME} unlocked={10} />
+            <Board entries={demoEntries} myId={ME} unlocked={10} decorated />
           </div>
         </Section>
 

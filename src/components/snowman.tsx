@@ -1,9 +1,9 @@
 import { memo } from "react"
 
 /**
- * A snowman that grows by one piece per right answer, 24 in all: first the
- * three snowballs are rolled bigger, then face, buttons, arms and
- * finally the trimmings. Nothing is ever taken away again.
+ * A snowman that grows by one piece per answered door, 24 in all (like
+ * the tree, right or wrong): first the three snowballs are rolled bigger,
+ * then face, buttons, arms and finally the trimmings.
  */
 const Snowman = memo(
   ({ pieces, className }: { pieces: number; className?: string }) => {

@@ -9,11 +9,12 @@ import Footer from "./footer"
 import star from "../../public/images/star.webp"
 
 const Layout = memo(({ children }: { children: ReactNode }) => {
-  const { selectedYear } = useSelectedYear()
+  // Always this season's points, whatever year the calendar shows.
+  const { currentYear } = useSelectedYear()
   const { scores } = useMyScores()
 
-  const currentScore = selectedYear
-    ? scores?.find((score) => score.year === Number(selectedYear.year))
+  const currentScore = currentYear
+    ? scores?.find((score) => score.year === Number(currentYear))
     : null
 
   return (

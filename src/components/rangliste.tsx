@@ -13,6 +13,8 @@ import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import { ranks } from "@/lib/ranking"
 import ChristmasTree from "./christmas-tree"
+import Snowman from "./snowman"
+import { hasDecorations } from "@/lib/doors"
 import DriftingWichtel from "./drifting-wichtel"
 import Loading from "./loading"
 
@@ -76,6 +78,7 @@ const Rangliste = memo(
           ) : (
             <Board
               entries={entries}
+              decorated={hasDecorations(Number(year), Number(currentYear))}
               myId={player?.id ?? null}
               unlocked={
                 year === currentYear
@@ -101,6 +104,8 @@ export interface BoardProps {
   myId: string | null
   /** Doors open so far in that year. */
   unlocked: number
+  /** Trees and snowmen: only for the years that had them. */
+  decorated: boolean
 }
 
 /** What everyone did together, then the list with everyone's tree. */
@@ -148,7 +153,7 @@ function Medal({ rank, size = 36 }: { rank: number; size?: number }) {
   )
 }
 
-function List({ entries, myId }: BoardProps) {
+function List({ entries, myId, decorated }: BoardProps) {
   const places = ranks(entries)
   return (
     <ol className="flex w-full flex-col gap-3">
@@ -179,10 +184,18 @@ function List({ entries, myId }: BoardProps) {
               </div>
               <div className="text-base">Punkte: {entry.score}</div>
             </div>
-            <ChristmasTree
-              ornaments={entry.doors}
-              className="w-16 shrink-0 sm:w-20"
-            />
+            {decorated && (
+              <div className="flex shrink-0 items-end">
+                <ChristmasTree
+                  ornaments={entry.doors}
+                  className="w-16 sm:w-20"
+                />
+                <Snowman
+                  pieces={entry.doors}
+                  className="relative -ml-4 w-10 sm:-ml-5 sm:w-12"
+                />
+              </div>
+            )}
           </li>
         )
       })}
@@ -197,7 +210,7 @@ function Together({ entries, unlocked }: BoardProps) {
   const possible = playing.length * unlocked
 
   return (
-    <section className="card card-white w-full px-5 py-5 text-center">
+    <section className="card-white w-full rounded-2xl px-5 py-5 text-center">
       <h2 className="text-2xl">Gemeinsam geschafft</h2>
       <div className="mt-4 grid grid-cols-3 gap-2">
         <Stat

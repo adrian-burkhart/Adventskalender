@@ -32,17 +32,15 @@ const Result = memo(
           className={clsx(
             // The farewell on door 24 is a whole sentence: a little smaller.
             !result.isCorrect && doorNumber === 24 ? "text-2xl" : "text-4xl",
-            // A wrong answer is told in a calm white, as on the Rangliste.
-            !result.isCorrect &&
-              "text-white [text-shadow:0_0_8px_rgb(200_225_255/0.55)]",
+            // Dark red like a Christmas ribbon, lit softly to read well.
+            "text-[#b3121f] [text-shadow:0_0_2px_rgb(255_245_225/0.9),0_0_14px_rgb(255_235_200/0.45)]",
           )}
         >
           <Headline result={result} doorNumber={doorNumber} />
         </h2>
         <div
           className={clsx(
-            "card flex w-full flex-col gap-3 px-5 py-5 text-lg",
-            !result.isCorrect && "card-white",
+            "card flex w-full flex-col gap-3 px-5 py-5 text-lg shadow-[0_0_0_2px_rgb(179_18_31/0.95),0_0_18px_3px_rgb(179_18_31/0.45),0_8px_30px_rgb(0_0_0/0.35)]",
           )}
         >
           <Explanation result={result} />
