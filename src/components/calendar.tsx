@@ -15,7 +15,6 @@ import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import Loading from "./loading"
 import ChristmasTree from "./christmas-tree"
-import Snowman from "./snowman"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
 import { hasDecorations } from "@/lib/doors"
@@ -252,14 +251,7 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
   return (
     <div className="flex w-full flex-col items-center gap-10">
       {hasDecorations(Number(selectedYear.year), Number(currentYear)) && (
-        // The snowman stands a little in front of the tree, to its right.
-        <div className="flex items-end justify-center">
-          <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
-          <Snowman
-            pieces={answered}
-            className="relative z-10 -ml-20 w-28 sm:-ml-24 sm:w-36"
-          />
-        </div>
+        <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
       )}
       <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
         {doorStates.map((doorState, i) => {

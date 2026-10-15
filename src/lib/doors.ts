@@ -9,7 +9,7 @@ export const GRACE_SECONDS = 3
 
 /** "past": a door of a season that is over, now only to listen to. */
 /**
- * The Christmas tree and the snowman started in 2026. Earlier seasons
+ * The Christmas trees started in 2026. Earlier seasons
  * didn't have them, so they show only for 2026 on, and for the season of
  * now (on staging that can be an older one).
  */

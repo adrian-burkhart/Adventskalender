@@ -13,7 +13,6 @@ import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import { ranks } from "@/lib/ranking"
 import ChristmasTree from "./christmas-tree"
-import Snowman from "./snowman"
 import { hasDecorations } from "@/lib/doors"
 import DriftingWichtel from "./drifting-wichtel"
 import Loading from "./loading"
@@ -89,8 +88,8 @@ const Rangliste = memo(
               }
             />
           )}
-          <ButtonLink href="/ruhmeshalle" quiet>
-            Zur Ruhmeshalle
+          <ButtonLink href="/hall-of-fame" quiet>
+            Zur Hall of Fame
           </ButtonLink>
         </div>
       </Layout>
@@ -104,7 +103,7 @@ export interface BoardProps {
   myId: string | null
   /** Doors open so far in that year. */
   unlocked: number
-  /** Trees and snowmen: only for the years that had them. */
+  /** Trees: only for the years that had them. */
   decorated: boolean
 }
 
@@ -185,16 +184,10 @@ function List({ entries, myId, decorated }: BoardProps) {
               <div className="text-base">Punkte: {entry.score}</div>
             </div>
             {decorated && (
-              <div className="flex shrink-0 items-end">
-                <ChristmasTree
-                  ornaments={entry.doors}
-                  className="w-16 sm:w-20"
-                />
-                <Snowman
-                  pieces={entry.doors}
-                  className="relative -ml-4 w-10 sm:-ml-5 sm:w-12"
-                />
-              </div>
+              <ChristmasTree
+                ornaments={entry.doors}
+                className="w-16 shrink-0 sm:w-20"
+              />
             )}
           </li>
         )
@@ -210,7 +203,7 @@ function Together({ entries, unlocked }: BoardProps) {
   const possible = playing.length * unlocked
 
   return (
-    <section className="card-white w-full rounded-2xl px-5 py-5 text-center">
+    <section className="white-text w-full px-5 py-5 text-center">
       <h2 className="text-2xl">Gemeinsam geschafft</h2>
       <div className="mt-4 grid grid-cols-3 gap-2">
         <Stat

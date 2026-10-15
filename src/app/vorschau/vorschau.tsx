@@ -7,7 +7,6 @@ import Countdown from "@/components/door/countdown"
 import Anticipation from "@/components/door/anticipation"
 import Result, { type ResultData } from "@/components/door/result"
 import Review from "@/components/door/review"
-import Snowman from "@/components/snowman"
 import type { DoorReview } from "@/lib/door-api"
 import ChristmasTree from "@/components/christmas-tree"
 import { Board } from "@/components/rangliste"
@@ -92,7 +91,6 @@ export default function Vorschau() {
               ["#baum", "Baum"],
               ["#rangliste", "Rangliste"],
               ["#rueckblick", "Beantwortetes Türchen"],
-              ["#schneemann", "Schneemann"],
             ].map(([href, text]) => (
               <a
                 key={href}
@@ -136,8 +134,6 @@ export default function Vorschau() {
         </Section>
 
         <ReviewSection />
-
-        <SnowmanSection />
       </div>
     </Layout>
   )
@@ -343,31 +339,5 @@ function Toggle({
         </button>
       ))}
     </div>
-  )
-}
-
-function SnowmanSection() {
-  const [count, setCount] = useState(13)
-  return (
-    <Section
-      id="schneemann"
-      title="Schneemann"
-      intro="Vorschlag: Für jede richtige Antwort ein Teil, 24 Teile insgesamt. Erst werden die Kugeln größer gerollt, dann kommen Gesicht, Knöpfe, Arme und zum Schluss Mütze, Besen, Rotkehlchen, Laterne und Lichterkette. Es geht nie etwas verloren."
-    >
-      <div className="card mx-auto flex w-full max-w-md flex-col items-center gap-4 px-4 py-6">
-        <Snowman pieces={count} className="w-64" />
-        <label className="flex w-full flex-col items-center gap-2 text-base">
-          Richtige Antworten: {count}
-          <input
-            type="range"
-            min={0}
-            max={24}
-            value={count}
-            onChange={(e) => setCount(Number(e.target.value))}
-            className="w-full accent-gold"
-          />
-        </label>
-      </div>
-    </Section>
   )
 }

@@ -163,7 +163,7 @@ describe("doors unlocked so far", () => {
 })
 
 describe("hasDecorations", () => {
-  it("shows tree and snowman from 2026 on and for the season of now", () => {
+  it("shows the tree from 2026 on and for the season of now", () => {
     expect(hasDecorations(2023, 2026)).toBe(false)
     expect(hasDecorations(2025, 2026)).toBe(false)
     expect(hasDecorations(2026, 2027)).toBe(true)

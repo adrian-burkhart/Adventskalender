@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation"
-import Ruhmeshalle, { type HallEntry } from "@/components/ruhmeshalle"
+import HallOfFame, { type HallEntry } from "@/components/hall-of-fame"
 import { calendarNow } from "@/lib/clock"
 import { seasonEndsAt } from "@/lib/doors"
 import type { LeaderboardEntry } from "@/lib/hooks"
@@ -21,7 +21,7 @@ export default async function Page() {
       const { data, error } = await supabase.rpc("leaderboard", {
         p_year: year,
       })
-      if (error) console.error("ruhmeshalle", year, error)
+      if (error) console.error("hall of fame", year, error)
       return { year, entries: (data as LeaderboardEntry[] | null) ?? [] }
     }),
   )
@@ -39,7 +39,7 @@ export default async function Page() {
   })
 
   return (
-    <Ruhmeshalle
+    <HallOfFame
       entries={entries}
       // Staging has hardly any finished seasons: show example winners too.
       withExamples={process.env.VERCEL_ENV !== "production"}
