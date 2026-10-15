@@ -187,6 +187,16 @@ const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
     [selectedYear, router],
   )
 
+  // Answered doors are just a look back: get their pages ready beforehand.
+  useEffect(() => {
+    if (!selectedYear || !doorStates) return
+    doorStates.forEach((state, i) => {
+      if (state === "answered") {
+        router.prefetch(doorPath(selectedYear.year, i + 1))
+      }
+    })
+  }, [selectedYear, doorStates, router])
+
   const handleOpen = useCallback(
     (doorNumber: number) => {
       if (!selectedYear) return
