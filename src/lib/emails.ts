@@ -9,17 +9,24 @@ export interface Email {
   text: string
 }
 
-/** Sends one e-mail through Resend. Throws when it didn't go out. */
-export async function sendEmail(email: Email): Promise<void> {
+/** Resend takes up to 100 e-mails per request. */
+export const BATCH_SIZE = 100
+
+/**
+ * Sends e-mails through Resend in one request, all or nothing. Throws when
+ * they didn't go out.
+ */
+export async function sendEmails(emails: Email[]): Promise<void> {
+  if (emails.length === 0) return
   const key = process.env.RESEND_API_KEY
   if (!key) throw new Error("RESEND_API_KEY is not set")
-  const response = await fetch("https://api.resend.com/emails", {
+  const response = await fetch("https://api.resend.com/emails/batch", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${key}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from: FROM, ...email }),
+    body: JSON.stringify(emails.map((email) => ({ from: FROM, ...email }))),
   })
   if (!response.ok) {
     throw new Error(`Resend: ${response.status} ${await response.text()}`)

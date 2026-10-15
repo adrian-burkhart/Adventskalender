@@ -2,12 +2,15 @@ import { NextResponse, type NextRequest } from "next/server"
 import { isAdminEmail } from "@/lib/admins"
 import { calendarNow } from "@/lib/clock"
 import { reminderSeason, winnerSeason } from "@/lib/email-schedule"
-import { reminderEmail, sendEmail, winnerEmail, type Email } from "@/lib/emails"
+import {
+  BATCH_SIZE,
+  reminderEmail,
+  sendEmails,
+  winnerEmail,
+  type Email,
+} from "@/lib/emails"
 import { getSession } from "@/lib/session"
 import { createAdminClient } from "@/lib/supabase/admin"
-
-// Sending to the whole family can take a while (Resend: 2 mails a second).
-export const maxDuration = 300
 
 type Kind = "reminder" | "winner"
 
@@ -73,11 +76,9 @@ export async function GET(
     // A test run: one sample to the admin, nothing to anyone else.
     if (testTo) {
       const sample = letters[0]?.email ?? sampleEmail(kind, year, site)
-      await sendEmail({
-        ...sample,
-        to: testTo,
-        subject: `[Test] ${sample.subject}`,
-      })
+      await sendEmails([
+        { ...sample, to: testTo, subject: `[Test] ${sample.subject}` },
+      ])
     }
     return NextResponse.json({
       kind,
@@ -140,23 +141,39 @@ async function winners(year: number, site: string): Promise<Letter[]> {
   }))
 }
 
-/** Each mail at most once: claimed in the log first, given back on failure. */
+/**
+ * Each mail at most once: claimed in the log first, sent in batches, and
+ * given back when a batch fails so the next run tries again.
+ */
 async function send(kind: Kind, year: number, letters: Letter[]) {
   const supabase = createAdminClient()
-  let sent = 0
+  const claimed: Letter[] = []
   for (const letter of letters) {
-    const claim = { p_player: letter.playerId, p_year: year, p_kind: kind }
-    const { data: claimed, error } = await supabase.rpc("claim_email", claim)
+    const { data, error } = await supabase.rpc("claim_email", {
+      p_player: letter.playerId,
+      p_year: year,
+      p_kind: kind,
+    })
     if (error) throw error
-    if (!claimed) continue
+    if (data) claimed.push(letter)
+  }
+
+  let sent = 0
+  for (let i = 0; i < claimed.length; i += BATCH_SIZE) {
+    const batch = claimed.slice(i, i + BATCH_SIZE)
     try {
-      await sendEmail(letter.email)
-      sent++
+      await sendEmails(batch.map((letter) => letter.email))
+      sent += batch.length
     } catch (sendError) {
       console.error(sendError)
-      await supabase.rpc("release_email", claim)
+      for (const letter of batch) {
+        await supabase.rpc("release_email", {
+          p_player: letter.playerId,
+          p_year: year,
+          p_kind: kind,
+        })
+      }
     }
-    await new Promise((resolve) => setTimeout(resolve, 600))
   }
   return sent
 }
