@@ -38,11 +38,11 @@ export default function Profile() {
 
   return (
     <Layout>
-      <div className="flex w-full max-w-md flex-col gap-6 text-center">
+      <div className="flex w-full max-w-md flex-col gap-6 px-3 text-center">
         <h1 className="text-4xl">Profil</h1>
         {player && (
           <>
-            <section className="flex flex-col gap-3 card px-5 py-5">
+            <section className="flex flex-col gap-3">
               <label htmlFor="name" className="text-lg">
                 Hier kannst du deinen Namen ändern:
               </label>
@@ -59,7 +59,7 @@ export default function Profile() {
                   className="w-full rounded-lg border border-gold/50 bg-black/30 px-4 py-3 text-lg text-white focus:border-gold focus:ring-2 focus:ring-gold/40 focus:outline-hidden"
                   type="text"
                 />
-                <Button type="submit">
+                <Button type="submit" quiet>
                   {loading ? "Wird gespeichert …" : "Namen ändern"}
                 </Button>
               </form>
@@ -80,7 +80,7 @@ export default function Profile() {
             </section>
 
             {!!scores?.length && (
-              <section className="card px-5 py-5">
+              <section>
                 <h2 className="text-2xl">Deine Punkte der letzten Jahre</h2>
                 <ul className="mt-3 flex flex-col gap-1 text-lg">
                   {[...scores].reverse().map((score) => (

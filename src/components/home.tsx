@@ -81,18 +81,24 @@ const Home = memo(
               </div>
             )}
           </div>
-          {player && selectedYear && choices.length > 1 && (
-            <YearSelect
-              tone="gold"
-              years={choices}
-              value={selectedYear.year}
-              onChange={(value) => {
-                const year = years.find((y) => y.year === value)
-                if (year) setSelectedYear(year)
-              }}
-            />
-          )}
           {player && <Calendar initialDoors={initialDoors} />}
+          {player && selectedYear && choices.length > 1 && (
+            // Below all doors: earlier years are only for a look back.
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-center">
+              <span className="text-lg">
+                Hier kannst du nochmal die Türen aus den letzten Jahren sehen
+              </span>
+              <YearSelect
+                tone="gold"
+                years={choices}
+                value={selectedYear.year}
+                onChange={(value) => {
+                  const year = years.find((y) => y.year === value)
+                  if (year) setSelectedYear(year)
+                }}
+              />
+            </div>
+          )}
         </div>
       </Layout>
     )

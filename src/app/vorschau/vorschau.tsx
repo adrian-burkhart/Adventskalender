@@ -91,6 +91,7 @@ export default function Vorschau() {
               ["#baum", "Baum"],
               ["#rangliste", "Rangliste"],
               ["#rueckblick", "Beantwortetes Türchen"],
+              ["#knoepfe", "Knöpfe"],
             ].map(([href, text]) => (
               <a
                 key={href}
@@ -134,6 +135,8 @@ export default function Vorschau() {
         </Section>
 
         <ReviewSection />
+
+        <ButtonSection />
       </div>
     </Layout>
   )
@@ -339,5 +342,54 @@ function Toggle({
         </button>
       ))}
     </div>
+  )
+}
+
+const BUTTON_PROPOSALS = [
+  {
+    id: "schlicht",
+    title: "1. Schlicht",
+    text: "Kerzenhell mit dunkelgrüner Schrift, ohne Glanz und Rand.",
+  },
+  {
+    id: "rot",
+    title: "2. Weihnachtsrot",
+    text: "Dunkelrot mit goldener Schrift, wie ein Geschenkband.",
+  },
+  {
+    id: "verspielt",
+    title: "3. Verspielt",
+    text: "Wie ein aufgenähter Stoffflicken mit Naht und Stern, ein bisschen schief. Wackelt, wenn man darüberfährt.",
+  },
+] as const
+
+function ButtonSection() {
+  return (
+    <Section
+      id="knoepfe"
+      title="Knöpfe"
+      intro="Vorschläge für einen einzigen, schlichten Knopf in der ganzen App, statt der goldenen. Darunter jeweils der zweite, leisere Knopf (z. B. „Zur Rangliste“) und ein noch nicht aktiver."
+    >
+      <div className="grid w-full gap-6 md:grid-cols-3">
+        {BUTTON_PROPOSALS.map(({ id, title, text }) => (
+          <div
+            key={id}
+            className="flex flex-col items-center gap-4 card px-4 py-6 text-center"
+          >
+            <h3 className="text-2xl">{title}</h3>
+            <p className="text-base text-candle/85">{text}</p>
+            <button type="button" className={`knopf knopf-${id}`}>
+              Zurück zum Kalender
+            </button>
+            <button type="button" className={`knopf knopf-${id} knopf-leise`}>
+              Zur Rangliste
+            </button>
+            <button type="button" disabled className={`knopf knopf-${id}`}>
+              Bestätigen
+            </button>
+          </div>
+        ))}
+      </div>
+    </Section>
   )
 }

@@ -337,13 +337,13 @@
   animation: steps 0.4s ease-in-out 6 alternate;
 }
 .anticipation-playing .anticipation-box {
-  animation: wobble-grow 3.8s 2.6s ease-in-out both;
+  animation: wobble-grow 3.3s 2.6s ease-in-out both;
 }
 .anticipation-playing .anticipation-lid {
-  animation: lid-pop 0.45s 6.45s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
+  animation: lid-pop 0.45s 5.95s cubic-bezier(0.3, 0.7, 0.3, 1) forwards;
 }
 .anticipation-playing .anticipation-glow {
-  animation: glow-in 0.5s 6.45s ease-out forwards;
+  animation: glow-in 0.5s 5.95s ease-out forwards;
 }
 .anticipation-playing .anticipation-flake {
   animation-name: flake-up;
@@ -448,5 +448,128 @@
 @media (prefers-reduced-motion: reduce) {
   .anticipation-carry {
     opacity: 1;
+  }
+}
+
+/* --- Button proposals (only on /vorschau for now) ------------------------ */
+
+.knopf {
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 12px;
+  padding: 0.5rem 1.5rem;
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  transition:
+    background-color 150ms,
+    transform 150ms;
+}
+.knopf:focus-visible {
+  outline: 3px solid var(--color-candle);
+  outline-offset: 3px;
+}
+.knopf:disabled {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+/* 1. Simple: candle-coloured, dark green text, nothing else. */
+.knopf-schlicht {
+  background: #fdf3c4;
+  color: #0b3d22;
+}
+.knopf-schlicht:hover {
+  background: #fff8db;
+}
+.knopf-schlicht:active {
+  transform: translateY(1px);
+}
+.knopf-schlicht.knopf-leise {
+  background: transparent;
+  color: var(--color-candle);
+  box-shadow: inset 0 0 0 2px rgb(253 243 196 / 0.7);
+}
+.knopf-schlicht.knopf-leise:hover {
+  background: rgb(253 243 196 / 0.1);
+}
+
+/* 2. Christmas red with gold lettering, like a ribbon. */
+.knopf-rot {
+  background: #a3161f;
+  color: #f6dc94;
+  box-shadow: inset 0 0 0 1px rgb(246 220 148 / 0.45);
+}
+.knopf-rot:hover {
+  background: #b81d27;
+}
+.knopf-rot:active {
+  transform: translateY(1px);
+}
+.knopf-rot.knopf-leise {
+  background: transparent;
+  color: #f6dc94;
+  box-shadow: inset 0 0 0 2px rgb(196 40 48 / 0.9);
+}
+.knopf-rot.knopf-leise:hover {
+  background: rgb(163 22 31 / 0.25);
+}
+
+/* 3. Playful: a cloth patch with stitching, sewn on a little crooked. */
+.knopf-verspielt {
+  position: relative;
+  background: #c0262d;
+  color: #fff7e0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  rotate: -1.2deg;
+  box-shadow: 0 3px 0 #7a1418;
+}
+.knopf-verspielt::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px dashed rgb(255 247 224 / 0.75);
+  border-radius: 8px;
+  pointer-events: none;
+}
+.knopf-verspielt::before {
+  content: "★";
+  color: #f6dc94;
+  font-size: 0.9em;
+}
+.knopf-verspielt:hover {
+  animation: knopf-wackeln 0.4s ease-in-out;
+}
+.knopf-verspielt:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #7a1418;
+}
+.knopf-verspielt.knopf-leise {
+  background: #1f5a32;
+  box-shadow: 0 3px 0 #0b3d22;
+  rotate: 1deg;
+}
+@keyframes knopf-wackeln {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  30% {
+    transform: rotate(-2.5deg);
+  }
+  70% {
+    transform: rotate(2deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .knopf-verspielt:hover {
+    animation: none;
   }
 }

@@ -177,7 +177,7 @@ function RisingFlakes({ x, y }: { x: number; y: number }) {
           style={
             {
               "--drift": `${(i % 2 ? 1 : -1) * (6 + ((i * 7) % 14))}px`,
-              animationDelay: `${6.5 + i * 0.05}s`,
+              animationDelay: `${6 + i * 0.05}s`,
             } as CSSProperties
           }
         />
