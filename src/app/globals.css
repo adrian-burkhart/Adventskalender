@@ -106,47 +106,6 @@
     0 8px 30px rgb(0 0 0 / 0.35);
 }
 
-@utility btn {
-  /* Like the painted play button: a golden bauble with a green rim. */
-  @apply relative inline-flex min-h-12 items-center justify-center gap-2 rounded-[12px] px-6 py-2 text-center font-body text-lg font-bold transition focus-visible:ring-4 focus-visible:ring-candle/70 focus-visible:outline-hidden active:translate-y-[2px];
-  border: 5px solid #3f7a2a;
-  background: radial-gradient(
-    circle at 32% 28%,
-    #fbd56b 0%,
-    #e39a1c 55%,
-    #b86d0c 100%
-  );
-  color: #8e1d1d;
-  text-shadow: 0 1px 0 rgb(255 230 160 / 0.6);
-  box-shadow:
-    0 0 10px 2px rgb(110 170 60 / 0.55),
-    inset 0 3px 8px rgb(255 245 200 / 0.7),
-    inset 0 -5px 10px rgb(120 60 0 / 0.45);
-  &:hover {
-    background: radial-gradient(
-      circle at 32% 28%,
-      #ffe08a 0%,
-      #eda72a 55%,
-      #c47710 100%
-    );
-  }
-  /* Not ready yet (no answer picked): the same bauble, pale and quiet. */
-  &:disabled {
-    @apply pointer-events-none;
-    opacity: 0.5;
-    filter: saturate(0.55);
-    box-shadow:
-      inset 0 3px 8px rgb(255 245 200 / 0.5),
-      inset 0 -5px 10px rgb(120 60 0 / 0.3);
-  }
-}
-
-@utility btn-quiet {
-  @apply inline-flex min-h-12 items-center justify-center gap-2 rounded-[12px] bg-transparent px-6 py-2 text-center font-body text-lg text-candle transition hover:bg-gold/10 focus-visible:ring-4 focus-visible:ring-candle/70 focus-visible:outline-hidden;
-  border: 4px solid #3f7a2a;
-  box-shadow: 0 0 8px 1px rgb(110 170 60 / 0.45);
-}
-
 @layer base {
   html {
     /* A little larger than the default: many players read without glasses. */
@@ -451,112 +410,83 @@
   }
 }
 
-/* --- Button proposals (only on /vorschau for now) ------------------------ */
+/* --- Buttons --------------------------------------------------------------
+   One button for the whole app: a cloth patch with stitching and a little
+   star, sewn on slightly crooked. Red for the main choice, green for the
+   quieter second one (.btn-quiet). */
 
-.knopf {
-  display: inline-flex;
-  min-height: 3rem;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  border-radius: 12px;
-  padding: 0.5rem 1.5rem;
-  font-family: var(--font-body);
-  font-size: 1.125rem;
-  line-height: 1.75rem;
-  font-weight: 600;
-  text-align: center;
-  white-space: nowrap;
-  transition:
-    background-color 150ms,
-    transform 150ms;
-}
-.knopf:focus-visible {
-  outline: 3px solid var(--color-candle);
-  outline-offset: 3px;
-}
-.knopf:disabled {
-  pointer-events: none;
-  opacity: 0.45;
+@layer components {
+  .btn,
+  .btn-quiet {
+    position: relative;
+    display: inline-flex;
+    min-height: 3rem;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 12px;
+    padding: 0.5rem 1.5rem;
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff7e0;
+    background: #c0262d;
+    rotate: -1.2deg;
+    box-shadow: 0 3px 0 #7a1418;
+    transition: transform 150ms;
+  }
+  .btn-quiet {
+    background: #1f5a32;
+    rotate: 1deg;
+    box-shadow: 0 3px 0 #0b3d22;
+  }
+  /* The stitching. */
+  .btn::after,
+  .btn-quiet::after {
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border: 2px dashed rgb(255 247 224 / 0.75);
+    border-radius: 8px;
+    pointer-events: none;
+  }
+  /* The star, only decoration (empty text for screen readers). */
+  .btn::before,
+  .btn-quiet::before {
+    content: "★";
+    content: "★" / "";
+    color: #f6dc94;
+    font-size: 0.9em;
+  }
+  .btn:hover,
+  .btn-quiet:hover {
+    animation: btn-wiggle 0.4s ease-in-out;
+  }
+  .btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #7a1418;
+  }
+  .btn-quiet:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #0b3d22;
+  }
+  .btn:focus-visible,
+  .btn-quiet:focus-visible {
+    outline: 3px solid var(--color-candle);
+    outline-offset: 3px;
+  }
+  /* Not ready yet (no answer picked): the same patch, faded. */
+  .btn:disabled,
+  .btn-quiet:disabled {
+    pointer-events: none;
+    opacity: 0.45;
+  }
 }
 
-/* 1. Simple: candle-coloured, dark green text, nothing else. */
-.knopf-schlicht {
-  background: #fdf3c4;
-  color: #0b3d22;
-}
-.knopf-schlicht:hover {
-  background: #fff8db;
-}
-.knopf-schlicht:active {
-  transform: translateY(1px);
-}
-.knopf-schlicht.knopf-leise {
-  background: transparent;
-  color: var(--color-candle);
-  box-shadow: inset 0 0 0 2px rgb(253 243 196 / 0.7);
-}
-.knopf-schlicht.knopf-leise:hover {
-  background: rgb(253 243 196 / 0.1);
-}
-
-/* 2. Christmas red with gold lettering, like a ribbon. */
-.knopf-rot {
-  background: #a3161f;
-  color: #f6dc94;
-  box-shadow: inset 0 0 0 1px rgb(246 220 148 / 0.45);
-}
-.knopf-rot:hover {
-  background: #b81d27;
-}
-.knopf-rot:active {
-  transform: translateY(1px);
-}
-.knopf-rot.knopf-leise {
-  background: transparent;
-  color: #f6dc94;
-  box-shadow: inset 0 0 0 2px rgb(196 40 48 / 0.9);
-}
-.knopf-rot.knopf-leise:hover {
-  background: rgb(163 22 31 / 0.25);
-}
-
-/* 3. Playful: a cloth patch with stitching, sewn on a little crooked. */
-.knopf-verspielt {
-  position: relative;
-  background: #c0262d;
-  color: #fff7e0;
-  font-family: var(--font-display);
-  font-weight: 600;
-  rotate: -1.2deg;
-  box-shadow: 0 3px 0 #7a1418;
-}
-.knopf-verspielt::after {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 2px dashed rgb(255 247 224 / 0.75);
-  border-radius: 8px;
-  pointer-events: none;
-}
-.knopf-verspielt::before {
-  content: "★";
-  color: #f6dc94;
-  font-size: 0.9em;
-}
-.knopf-verspielt:hover {
-  animation: knopf-wackeln 0.4s ease-in-out;
-}
-.knopf-verspielt:active {
-  transform: translateY(2px);
-  box-shadow: 0 1px 0 #7a1418;
-}
-.knopf-verspielt.knopf-leise {
-  background: #1f5a32;
-  box-shadow: 0 3px 0 #0b3d22;
-  rotate: 1deg;
-}
-@keyframes knopf-wackeln {
+@keyframes btn-wiggle {
   0%,
   100% {
     transform: rotate(0);
@@ -568,8 +498,10 @@
     transform: rotate(2deg);
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .knopf-verspielt:hover {
+  .btn:hover,
+  .btn-quiet:hover {
     animation: none;
   }
 }
