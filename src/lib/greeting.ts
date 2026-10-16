@@ -27,10 +27,12 @@ export function adventSunday(date: Date): number | null {
  */
 export function greeting(name: string, date: Date): string {
   const advent = adventSunday(date)
-  if (advent) return `Frohen ${ORDINALS[advent - 1]} Advent, ${name}!`
-  if (date.getMonth() === 11 && date.getDate() === 6) {
-    return `Frohen Nikolaus, ${name}!`
+  const nikolaus = date.getMonth() === 11 && date.getDate() === 6
+  if (advent && nikolaus) {
+    return `Frohen Nikolaus und schönen ${ORDINALS[advent - 1]} Advent, ${name}!`
   }
+  if (advent) return `Frohen ${ORDINALS[advent - 1]} Advent, ${name}!`
+  if (nikolaus) return `Frohen Nikolaus, ${name}!`
   const hour = date.getHours()
   if (hour >= 5 && hour < 11) return `Guten Morgen, ${name}!`
   if (hour >= 18 && hour < 23) return `Guten Abend, ${name}!`

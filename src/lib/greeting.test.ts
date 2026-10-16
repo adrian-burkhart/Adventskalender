@@ -48,9 +48,9 @@ describe("greeting", () => {
     )
   })
 
-  it("lets the Advent Sunday win when it is also St Nicholas", () => {
+  it("wishes both when St Nicholas is an Advent Sunday", () => {
     expect(greeting("Adrian", at(2026, 12, 6))).toBe(
-      "Frohen zweiten Advent, Adrian!",
+      "Frohen Nikolaus und schönen zweiten Advent, Adrian!",
     )
   })
 })

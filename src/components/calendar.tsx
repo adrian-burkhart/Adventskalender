@@ -147,15 +147,31 @@ const CalendarDoor = memo(
             )}
           />
         </div>
+        {/* The number hangs from the top on a thin string. When the door
+            opens (or shows its lock) it is pulled up and out of the way. */}
         <span
           aria-hidden
-          className={clsx(
-            "pointer-events-none absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light transition-opacity duration-300 [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl",
-            // The number goes while the door opens or shows its lock.
-            (isOpening || showLock) && "opacity-0",
-          )}
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
         >
-          {doorNumber}
+          <span
+            className={clsx(
+              "absolute inset-0 transition-[translate] duration-700",
+              isOpening || showLock
+                ? "-translate-y-full ease-in"
+                : "translate-y-0 ease-out",
+            )}
+          >
+            <span
+              className="door-hanger absolute inset-0"
+              style={{ animationDelay: `${-((doorNumber * 1.7) % 5)}s` }}
+            >
+              <span className="absolute top-0 left-1/2 h-[39%] w-[1.5px] -translate-x-1/2 bg-[#e8d9b0] shadow-[0_0_2px_rgb(0_0_0/0.6)]" />
+              <span className="absolute top-[37.5%] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full border-[1.5px] border-[#d9b25a]" />
+              <span className="absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl">
+                {doorNumber}
+              </span>
+            </span>
+          </span>
         </span>
         {status && <span className="sr-only">({status})</span>}
       </button>
