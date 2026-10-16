@@ -22,8 +22,8 @@ export function adventSunday(date: Date): number | null {
 
 /**
  * The greeting above the calendar, by the player's own clock: Advent
- * Sundays and St Nicholas' Day get their own, otherwise it depends on the
- * time of day.
+ * Sundays, St Nicholas' Day, New Year's Eve and New Year's Day get their
+ * own, otherwise it depends on the time of day.
  */
 export function greeting(name: string, date: Date): string {
   const advent = adventSunday(date)
@@ -33,6 +33,12 @@ export function greeting(name: string, date: Date): string {
   }
   if (advent) return `Frohen ${ORDINALS[advent - 1]} Advent, ${name}!`
   if (nikolaus) return `Frohen Nikolaus, ${name}!`
+  if (date.getMonth() === 11 && date.getDate() === 31) {
+    return `Guten Rutsch, ${name}!`
+  }
+  if (date.getMonth() === 0 && date.getDate() === 1) {
+    return `Frohes Neues, ${name}!`
+  }
   const hour = date.getHours()
   if (hour >= 5 && hour < 11) return `Guten Morgen, ${name}!`
   if (hour >= 18 && hour < 23) return `Guten Abend, ${name}!`

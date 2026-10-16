@@ -48,6 +48,14 @@ describe("greeting", () => {
     )
   })
 
+  it("wishes a good start on New Year's Eve and a happy new year", () => {
+    expect(greeting("Adrian", at(2026, 12, 31, 20))).toBe(
+      "Guten Rutsch, Adrian!",
+    )
+    expect(greeting("Adrian", at(2027, 1, 1, 9))).toBe("Frohes Neues, Adrian!")
+    expect(greeting("Adrian", at(2027, 1, 2, 9))).toBe("Guten Morgen, Adrian!")
+  })
+
   it("wishes both when St Nicholas is an Advent Sunday", () => {
     expect(greeting("Adrian", at(2026, 12, 6))).toBe(
       "Frohen Nikolaus und schönen zweiten Advent, Adrian!",

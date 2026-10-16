@@ -74,7 +74,9 @@ const visible = (locator: Locator) => locator.filter({ visible: true })
 /** The greeting over the calendar changes with the time of day and Advent. */
 const greetingFor = (page: Page, name: string) =>
   page.getByRole("heading", {
-    name: new RegExp(`^(Hallo|Guten Morgen|Guten Abend|Frohen .+), ${name}!$`),
+    name: new RegExp(
+      `^(Hallo|Guten Morgen|Guten Abend|Guten Rutsch|Frohes Neues|Frohen .+), ${name}!$`,
+    ),
   })
 
 async function startQuestion(page: Page, door: number) {
