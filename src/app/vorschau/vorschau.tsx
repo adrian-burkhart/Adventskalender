@@ -95,7 +95,7 @@ export default function Vorschau() {
               <a
                 key={href}
                 href={href}
-                className="rounded-full border border-gold/50 px-3 py-1 hover:bg-gold/10"
+                className="rounded-[12px] border border-gold/50 px-3 py-1 hover:bg-gold/10"
               >
                 {text}
               </a>
@@ -246,7 +246,7 @@ function ResultSection() {
           type="button"
           aria-pressed={isCorrect === value}
           onClick={() => setIsCorrect(value as boolean)}
-          className="rounded-full border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
+          className="rounded-[12px] border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
         >
           {text as string}
         </button>
@@ -333,7 +333,7 @@ function Toggle({
           type="button"
           aria-pressed={value === option}
           onClick={() => onChange(option)}
-          className="rounded-full border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
+          className="rounded-[12px] border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
         >
           {text}
         </button>
