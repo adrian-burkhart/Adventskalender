@@ -1,6 +1,13 @@
 "use client"
 
-import { memo, useState, useCallback, useEffect, useRef } from "react"
+import {
+  memo,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+  type ReactNode,
+} from "react"
 import { useRouter } from "next/navigation"
 import { useSelectedYear } from "@/lib/context"
 import doorClosedOne from "../../public/images/door-closed-1.webp"
@@ -156,132 +163,144 @@ const CalendarDoor = memo(
   },
 )
 
-const Calendar = memo(({ initialDoors }: { initialDoors?: InitialDoors }) => {
-  const { selectedYear, currentYear } = useSelectedYear()
-  const { doorStates, today, openDoor, loading, error } = useDoors(
-    selectedYear,
+const Calendar = memo(
+  ({
     initialDoors,
-  )
-  const router = useRouter()
-  const [openingDoor, setOpeningDoor] = useState<number | null>(null)
+    greeting,
+  }: {
+    initialDoors?: InitialDoors
+    /** Shown under the tree, above the doors. */
+    greeting?: ReactNode
+  }) => {
+    const { selectedYear, currentYear } = useSelectedYear()
+    const { doorStates, today, openDoor, loading, error } = useDoors(
+      selectedYear,
+      initialDoors,
+    )
+    const router = useRouter()
+    const [openingDoor, setOpeningDoor] = useState<number | null>(null)
 
-  const [playOpen, { stop: stopOpen }] = useSound("/sounds/opening-door.mp3")
-  const [playLocked, { stop: stopLocked }] = useSound("/sounds/locked-door.mp3")
-  const [playChristmas, { stop: stopChristmas }] = useSound(
-    "/sounds/christmas.mp3",
-  )
-  const [playUpsi, { stop: stopUpsi }] = useSound("/sounds/upsi.mp3")
+    const [playOpen, { stop: stopOpen }] = useSound("/sounds/opening-door.mp3")
+    const [playLocked, { stop: stopLocked }] = useSound(
+      "/sounds/locked-door.mp3",
+    )
+    const [playChristmas, { stop: stopChristmas }] = useSound(
+      "/sounds/christmas.mp3",
+    )
+    const [playUpsi, { stop: stopUpsi }] = useSound("/sounds/upsi.mp3")
 
-  // Leaving the calendar ends its sounds, as the full page load used to.
-  const stopAll = useRef<() => void>(() => {})
-  useEffect(() => {
-    stopAll.current = () => {
-      stopOpen()
-      stopLocked()
-      stopChristmas()
-      stopUpsi()
-    }
-  }, [stopOpen, stopLocked, stopChristmas, stopUpsi])
-  useEffect(() => () => stopAll.current(), [])
-
-  const handleLocked = useCallback(() => {
-    playLocked()
-    playUpsi()
-  }, [playLocked, playUpsi])
-
-  const handleReview = useCallback(
-    (doorNumber: number) => {
-      if (selectedYear) router.push(doorPath(selectedYear.year, doorNumber))
-    },
-    [selectedYear, router],
-  )
-
-  // Answered doors are just a look back: get their pages ready beforehand.
-  useEffect(() => {
-    if (!selectedYear || !doorStates) return
-    doorStates.forEach((state, i) => {
-      if (state === "answered" || state === "past") {
-        router.prefetch(doorPath(selectedYear.year, i + 1))
+    // Leaving the calendar ends its sounds, as the full page load used to.
+    const stopAll = useRef<() => void>(() => {})
+    useEffect(() => {
+      stopAll.current = () => {
+        stopOpen()
+        stopLocked()
+        stopChristmas()
+        stopUpsi()
       }
-    })
-  }, [selectedYear, doorStates, router])
+    }, [stopOpen, stopLocked, stopChristmas, stopUpsi])
+    useEffect(() => () => stopAll.current(), [])
 
-  const handleOpen = useCallback(
-    (doorNumber: number) => {
-      if (!selectedYear) return
-      const route = doorPath(selectedYear.year, doorNumber)
-      // One door at a time: a second tap would open it twice.
-      setOpeningDoor(doorNumber)
-      playOpen()
-      if (doorNumber === 24) playChristmas()
+    const handleLocked = useCallback(() => {
+      playLocked()
+      playUpsi()
+    }, [playLocked, playUpsi])
 
-      // Save the opening and load the door page while the door opens, so
-      // the question is there right after the animation.
-      const opened = openDoor(doorNumber)
-      router.prefetch(route)
-      setTimeout(
-        () => {
-          opened.then(() => router.push(route))
-        },
-        doorNumber === 24 ? OPENING_MS_DOOR_24 : OPENING_MS,
-      )
-    },
-    [selectedYear, openDoor, router, playOpen, playChristmas],
-  )
+    const handleReview = useCallback(
+      (doorNumber: number) => {
+        if (selectedYear) router.push(doorPath(selectedYear.year, doorNumber))
+      },
+      [selectedYear, router],
+    )
 
-  if (error) {
-    return <div>{ERROR_TEXT}</div>
-  }
+    // Answered doors are just a look back: get their pages ready beforehand.
+    useEffect(() => {
+      if (!selectedYear || !doorStates) return
+      doorStates.forEach((state, i) => {
+        if (state === "answered" || state === "past") {
+          router.prefetch(doorPath(selectedYear.year, i + 1))
+        }
+      })
+    }, [selectedYear, doorStates, router])
 
-  if (!selectedYear || loading || !doorStates) {
-    return <Loading />
-  }
+    const handleOpen = useCallback(
+      (doorNumber: number) => {
+        if (!selectedYear) return
+        const route = doorPath(selectedYear.year, doorNumber)
+        // One door at a time: a second tap would open it twice.
+        setOpeningDoor(doorNumber)
+        playOpen()
+        if (doorNumber === 24) playChristmas()
 
-  // Past years without content (2024) say so; the current year always shows
-  // its doors, which stay locked until December.
-  if (
-    !selectedYear.questionCount &&
-    Number(selectedYear.year) < new Date().getFullYear()
-  ) {
-    return <div>Keine Fragen für dieses Jahr</div>
-  }
+        // Save the opening and load the door page while the door opens, so
+        // the question is there right after the animation.
+        const opened = openDoor(doorNumber)
+        router.prefetch(route)
+        setTimeout(
+          () => {
+            opened.then(() => router.push(route))
+          },
+          doorNumber === 24 ? OPENING_MS_DOOR_24 : OPENING_MS,
+        )
+      },
+      [selectedYear, openDoor, router, playOpen, playChristmas],
+    )
 
-  const answered = doorStates.filter((state) => state === "answered").length
+    if (error) {
+      return <div>{ERROR_TEXT}</div>
+    }
 
-  return (
-    <div className="flex w-full flex-col items-center gap-10">
-      {hasDecorations(Number(selectedYear.year), Number(currentYear)) && (
-        <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
-      )}
-      <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
-        {doorStates.map((doorState, i) => {
-          const doorNumber = i + 1
-          const isToday = today === doorNumber
-          // An earlier door that can still be answered.
-          const isMissed =
-            !isToday &&
-            (doorState === "closed" || doorState === "open") &&
-            (today === null || doorNumber < today)
-          return (
-            <li key={doorNumber}>
-              <CalendarDoor
-                doorNumber={doorNumber}
-                doorState={doorState}
-                variant={doorNumber % 4 < 2 ? "closed-one" : "closed-two"}
-                isToday={isToday}
-                isMissed={isMissed}
-                isOpening={openingDoor === doorNumber}
-                isBusy={openingDoor !== null && openingDoor !== doorNumber}
-                onOpen={handleOpen}
-                onLocked={handleLocked}
-                onReview={handleReview}
-              />
-            </li>
-          )
-        })}
-      </ol>
-    </div>
-  )
-})
+    if (!selectedYear || loading || !doorStates) {
+      return <Loading />
+    }
+
+    // Past years without content (2024) say so; the current year always shows
+    // its doors, which stay locked until December.
+    if (
+      !selectedYear.questionCount &&
+      Number(selectedYear.year) < new Date().getFullYear()
+    ) {
+      return <div>Keine Fragen für dieses Jahr</div>
+    }
+
+    const answered = doorStates.filter((state) => state === "answered").length
+
+    return (
+      <div className="flex w-full flex-col items-center gap-10">
+        {hasDecorations(Number(selectedYear.year), Number(currentYear)) && (
+          <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
+        )}
+        {greeting}
+        <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
+          {doorStates.map((doorState, i) => {
+            const doorNumber = i + 1
+            const isToday = today === doorNumber
+            // An earlier door that can still be answered.
+            const isMissed =
+              !isToday &&
+              (doorState === "closed" || doorState === "open") &&
+              (today === null || doorNumber < today)
+            return (
+              <li key={doorNumber}>
+                <CalendarDoor
+                  doorNumber={doorNumber}
+                  doorState={doorState}
+                  variant={doorNumber % 4 < 2 ? "closed-one" : "closed-two"}
+                  isToday={isToday}
+                  isMissed={isMissed}
+                  isOpening={openingDoor === doorNumber}
+                  isBusy={openingDoor !== null && openingDoor !== doorNumber}
+                  onOpen={handleOpen}
+                  onLocked={handleLocked}
+                  onReview={handleReview}
+                />
+              </li>
+            )
+          })}
+        </ol>
+      </div>
+    )
+  },
+)
 
 export default Calendar
