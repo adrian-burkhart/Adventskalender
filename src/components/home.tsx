@@ -10,6 +10,7 @@ import title from "../../public/images/title.webp"
 import { Duration } from "luxon"
 import { useSelectedYear } from "@/lib/context"
 import { doorUnlocksAt } from "@/lib/doors"
+import { greeting } from "@/lib/greeting"
 import type { InitialDoors } from "@/lib/hooks"
 
 /** "1 Tag", "2 Tage", "0 Tage". */
@@ -70,8 +71,14 @@ const Home = memo(
               greeting={
                 <div className="flex flex-col items-center justify-center gap-2 text-center">
                   {player.name && (
-                    <h1 className="text-3xl sm:text-4xl">
-                      Hallo {player.name}!
+                    // By the player's own clock. The server renders with
+                    // its time; right after loading it switches to the
+                    // device's, so the first render may differ.
+                    <h1
+                      className="text-3xl sm:text-4xl"
+                      suppressHydrationWarning
+                    >
+                      {greeting(player.name, new Date(now))}
                     </h1>
                   )}
                   {!calendarHasStarted && (
