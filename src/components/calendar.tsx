@@ -38,6 +38,44 @@ const LOCKED_MS = 3000
 type DoorVariant = "closed-one" | "closed-two"
 
 /** What a door says about itself, for screen readers. */
+// Where each door number's string is tied on, measured in the Cochin font
+// (in em, from the baseline up and from the middle sideways): the top of the
+// digit nearest the middle. The figures lean right, so their tops sit a
+// little right of centre; on two-digit numbers it is the first digit.
+const HOOKS: [ascent: number, x: number][] = [
+  [0.665, 0.105],
+  [0.665, 0.065],
+  [0.655, 0.098],
+  [0.68, 0.258],
+  [0.65, 0.025],
+  [0.69, 0.212],
+  [0.65, 0.13],
+  [0.665, 0.095],
+  [0.665, 0.08],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.107],
+  [0.665, -0.133],
+  [0.665, -0.087],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.185],
+  [0.665, -0.185],
+  [0.665, -0.185],
+  [0.665, -0.185],
+  [0.665, -0.182],
+]
+
+/** The hook of a door number, from the top-left of a line of height 1. */
+function hook(doorNumber: number) {
+  const [ascent, x] = HOOKS[doorNumber - 1] ?? [0.665, 0]
+  // The baseline sits 0.845em below the top of a line of height 1.
+  return { top: 0.845 - ascent, x }
+}
+
 function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
   if (state === "answered") return "schon beantwortet"
   if (state === "past") return "zum Anhören"
@@ -165,9 +203,23 @@ const CalendarDoor = memo(
               className="door-hanger absolute inset-0"
               style={{ animationDelay: `${-((doorNumber * 1.7) % 5)}s` }}
             >
-              <span className="absolute top-0 left-1/2 h-[39%] w-[1.5px] -translate-x-1/2 bg-[#e8d9b0] shadow-[0_0_2px_rgb(0_0_0/0.6)]" />
-              <span className="absolute top-[37.5%] left-1/2 h-2 w-2 -translate-x-1/2 rounded-full border-[1.5px] border-[#d9b25a]" />
-              <span className="absolute inset-x-0 top-[38%] text-center font-door text-5xl text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl">
+              <span className="absolute inset-x-0 top-[38%] text-center font-door text-5xl leading-none text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl">
+                {/* The string runs from the top edge down to the very top of
+                    the digits, where the little ring holds them. */}
+                <span
+                  className="absolute h-[20em] w-[1.5px] -translate-x-1/2 bg-[#e8d9b0] shadow-[0_0_2px_rgb(0_0_0/0.6)]"
+                  style={{
+                    left: `calc(50% + ${hook(doorNumber).x}em)`,
+                    bottom: `calc(100% - ${hook(doorNumber).top - 0.1}em)`,
+                  }}
+                />
+                <span
+                  className="absolute h-[0.17em] w-[0.17em] -translate-x-1/2 rounded-full border-[1.5px] border-[#d9b25a]"
+                  style={{
+                    left: `calc(50% + ${hook(doorNumber).x}em)`,
+                    top: `${hook(doorNumber).top - 0.12}em`,
+                  }}
+                />
                 {doorNumber}
               </span>
             </span>
