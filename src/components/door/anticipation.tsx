@@ -2,7 +2,7 @@
 
 import clsx from "clsx"
 import { memo, useEffect, useRef, type CSSProperties } from "react"
-import { DrawnWichtel, RED_WICHTEL } from "./drawn-wichtel"
+import giftWichtel from "../../../public/images/gift-wichtel.webp"
 
 /**
  * How long the jingle at the start of the outro audio runs, from the moment
@@ -110,6 +110,16 @@ function Box({ id }: { id: string }) {
 
 // --- A Wichtel brings the present -------------------------------------------
 
+/** The painted Wichtel, drawn at this height in the SVG. */
+const WICHTEL_HEIGHT = 190
+const WICHTEL_WIDTH = (WICHTEL_HEIGHT * giftWichtel.width) / giftWichtel.height
+const WICHTEL_X = 72
+const WICHTEL_Y = 14
+/** The present sits on his raised mitten, at this scale and spot. */
+const BOX_SCALE = 0.72
+const BOX_X = 201 - 30 * BOX_SCALE
+const BOX_Y = 102 - 56 * BOX_SCALE
+
 function WichtelWithPresent() {
   return (
     <svg
@@ -129,35 +139,36 @@ function WichtelWithPresent() {
         opacity="0.18"
       />
       <g className="anticipation-carry">
-        <g className="anticipation-steps" filter="url(#paint-carry)">
-          <g transform="translate(66 38) scale(1.1)">
-            <DrawnWichtel look={RED_WICHTEL} lookDown />
-            {/* The present in his hands. */}
-            {/* The wobble is a CSS transform, so the position sits on
-                a wrapper (CSS would replace it). */}
-            <g transform="translate(96 82)">
-              <g className="anticipation-box">
-                <Box id="carry" />
-              </g>
+        <g className="anticipation-steps">
+          <ellipse
+            cx={WICHTEL_X + WICHTEL_WIDTH / 2}
+            cy={WICHTEL_Y + WICHTEL_HEIGHT - 2}
+            rx="46"
+            ry="5"
+            fill="black"
+            opacity="0.25"
+          />
+          <image
+            href={giftWichtel.src}
+            x={WICHTEL_X}
+            y={WICHTEL_Y}
+            width={WICHTEL_WIDTH}
+            height={WICHTEL_HEIGHT}
+          />
+          {/* The present on his raised mitten. The wobble is a CSS
+              transform, so the position sits on a wrapper (CSS would
+              replace it). */}
+          <g
+            transform={`translate(${BOX_X} ${BOX_Y}) scale(${BOX_SCALE})`}
+            filter="url(#paint-carry)"
+          >
+            <g className="anticipation-box">
+              <Box id="carry" />
             </g>
-            <ellipse
-              cx="100"
-              cy="114"
-              rx="7"
-              ry="6"
-              fill={RED_WICHTEL.mittens}
-            />
-            <ellipse
-              cx="99"
-              cy="128"
-              rx="7"
-              ry="6"
-              fill={RED_WICHTEL.mittens}
-            />
           </g>
         </g>
       </g>
-      <RisingFlakes x={222} y={120} />
+      <RisingFlakes x={201} y={66} />
     </svg>
   )
 }
