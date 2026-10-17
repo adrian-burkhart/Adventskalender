@@ -10,8 +10,6 @@ import {
 } from "react"
 import { useRouter } from "next/navigation"
 import { useSelectedYear } from "@/lib/context"
-import doorClosedOne from "../../public/images/door-closed-1.webp"
-import doorClosedTwo from "../../public/images/door-closed-2.webp"
 import doorOpen from "../../public/images/door-open.webp"
 import doorAnswered from "../../public/images/door-answered.webp"
 import doorLocked from "../../public/images/door-locked.webp"
@@ -25,13 +23,6 @@ import ChristmasTree from "./christmas-tree"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
 import { hasDecorations } from "@/lib/doors"
-import {
-  DoorNumberOutside,
-  DoorNumberOverlay,
-  isOutside,
-  useDoorNumberStyle,
-  type DoorNumberStyle,
-} from "./door-number"
 
 /**
  * How long the door opens before the question page shows. The opening sound
@@ -42,7 +33,10 @@ const OPENING_MS_DOOR_24 = 6500
 /** How long a locked door shows its padlock. */
 const LOCKED_MS = 3000
 
-type DoorVariant = "closed-one" | "closed-two"
+/** The closed door, painted with its number. */
+function closedDoorImage(doorNumber: number) {
+  return `/images/doors/door-${String(doorNumber).padStart(2, "0")}.webp`
+}
 
 /** What a door says about itself, for screen readers. */
 function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
@@ -57,7 +51,6 @@ function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
 interface CalendarDoorProps {
   doorNumber: number
   doorState: DoorState
-  variant: DoorVariant
   isToday: boolean
   isMissed: boolean
   /** True while this door opens. */
@@ -67,15 +60,12 @@ interface CalendarDoorProps {
   onOpen: (doorNumber: number) => void
   onLocked: () => void
   onReview: (doorNumber: number) => void
-  /** How the door shows its number. */
-  numberStyle: DoorNumberStyle
 }
 
-export const CalendarDoor = memo(
+const CalendarDoor = memo(
   ({
     doorNumber,
     doorState,
-    variant,
     isToday,
     isMissed,
     isOpening,
@@ -83,7 +73,6 @@ export const CalendarDoor = memo(
     onOpen,
     onLocked,
     onReview,
-    numberStyle,
   }: CalendarDoorProps) => {
     const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
     const [showLock, setShowLock] = useState(false)
@@ -93,7 +82,6 @@ export const CalendarDoor = memo(
     const isAnswered = doorState === "answered"
     const isLocked = doorState === "locked"
     const isPast = doorState === "past"
-    const closedImage = variant === "closed-one" ? doorClosedOne : doorClosedTwo
     const showOpen = isOpening || doorState === "open"
 
     const handleClick = () => {
@@ -120,62 +108,45 @@ export const CalendarDoor = memo(
         onClick={handleClick}
         aria-disabled={isBusy}
         className={clsx(
-          "group relative w-full rounded-2xl transition-transform duration-200 focus-visible:ring-4 focus-visible:ring-gold/70 focus-visible:outline-hidden",
-          numberStyle === "darueber" && "flex flex-col items-center",
-          numberStyle === "daneben" && "flex items-center",
-          !isOutside(numberStyle) && "block",
+          "group relative block w-full rounded-2xl transition-transform duration-200 focus-visible:ring-4 focus-visible:ring-gold/70 focus-visible:outline-hidden",
           !isBusy && "cursor-pointer hover:scale-[1.03]",
           isBusy && "cursor-default",
           isToday && !isAnswered && "animate-glow",
           showLock && "animate-[shake_0.5s_ease-in-out]",
         )}
       >
-        {isOutside(numberStyle) && (
-          <DoorNumberOutside
-            doorNumber={doorNumber}
-            style={numberStyle}
-            opening={isOpening}
+        <div className="relative overflow-hidden rounded-2xl shadow-lg">
+          <Image
+            src={isAnswered ? doorAnswered : closedDoorImage(doorNumber)}
+            alt={`Tür Nummer ${doorNumber}`}
+            width={400}
+            height={411}
+            sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
+            className="h-auto w-full"
           />
-        )}
-        <span className="relative block w-full min-w-0">
-          <span className="relative block overflow-hidden rounded-2xl shadow-lg">
+          {!isAnswered && (
             <Image
-              src={isAnswered ? doorAnswered : closedImage}
-              alt={`Tür Nummer ${doorNumber}`}
-              sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
-              className="h-auto w-full"
-            />
-            {!isAnswered && (
-              <Image
-                src={doorOpen}
-                alt=""
-                aria-hidden
-                sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
-                className={clsx(
-                  "absolute inset-0 h-full w-full transition-opacity duration-700",
-                  showOpen ? "opacity-100" : "opacity-0",
-                )}
-              />
-            )}
-            <Image
-              src={doorLocked}
+              src={doorOpen}
               alt=""
               aria-hidden
               sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
               className={clsx(
-                "absolute inset-0 h-full w-full transition-opacity duration-300",
-                showLock ? "opacity-100" : "opacity-0",
+                "absolute inset-0 h-full w-full transition-opacity duration-700",
+                showOpen ? "opacity-100" : "opacity-0",
               )}
             />
-          </span>
-          {/* When the door opens (or shows its lock) the number makes way. */}
-          <DoorNumberOverlay
-            doorNumber={doorNumber}
-            style={numberStyle}
-            lifted={isOpening || showLock}
-            opening={isOpening}
+          )}
+          <Image
+            src={doorLocked}
+            alt=""
+            aria-hidden
+            sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
+            className={clsx(
+              "absolute inset-0 h-full w-full transition-opacity duration-300",
+              showLock ? "opacity-100" : "opacity-0",
+            )}
           />
-        </span>
+        </div>
         {status && <span className="sr-only">({status})</span>}
       </button>
     )
@@ -198,7 +169,6 @@ const Calendar = memo(
     )
     const router = useRouter()
     const [openingDoor, setOpeningDoor] = useState<number | null>(null)
-    const [numberStyle] = useDoorNumberStyle()
 
     const [playOpen, { stop: stopOpen }] = useSound("/sounds/opening-door.mp3")
     const [playLocked, { stop: stopLocked }] = useSound(
@@ -305,7 +275,6 @@ const Calendar = memo(
                 <CalendarDoor
                   doorNumber={doorNumber}
                   doorState={doorState}
-                  variant={doorNumber % 4 < 2 ? "closed-one" : "closed-two"}
                   isToday={isToday}
                   isMissed={isMissed}
                   isOpening={openingDoor === doorNumber}
@@ -313,7 +282,6 @@ const Calendar = memo(
                   onOpen={handleOpen}
                   onLocked={handleLocked}
                   onReview={handleReview}
-                  numberStyle={numberStyle}
                 />
               </li>
             )
