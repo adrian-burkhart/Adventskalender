@@ -1,31 +1,20 @@
-import { DateTime } from "luxon"
-import { DOOR_COUNT, TIME_ZONE, type DoorState } from "@/lib/doors"
+import type { DoorState } from "@/lib/doors"
 
-// The rules of the "Austausch" page. On 1 to 24 December comments belong to
-// the door of the day; on all other days they go to the general corner.
-// Nobody sees the comments of a door before answering it, so nothing gets
-// spoiled; once the season is over, everyone sees everything.
+// The rules of the "Austausch" page: one shared column of comments. Only
+// players who have answered every door of the current year that is open so
+// far may come in, so nothing in there can spoil a door for them.
 
 export const COMMENT_MAX_LENGTH = 1000
 
-/** Where a comment written now goes: today's door, or null for general. */
-export function commentTarget(
-  now: Date,
-): { year: number; door: number } | null {
-  const day = DateTime.fromJSDate(now).setZone(TIME_ZONE)
-  if (day.month !== 12 || day.day > DOOR_COUNT) return null
-  return { year: day.year, door: day.day }
-}
-
-/** The season whose doors the page shows: this December, or the last one. */
-export function exchangeSeason(now: Date): number {
-  const day = DateTime.fromJSDate(now).setZone(TIME_ZONE)
-  return day.month === 12 ? day.year : day.year - 1
-}
-
-/** Whether a player may read the comments of a door in that state. */
-export function canReadDoor(state: DoorState | undefined): boolean {
-  return state === "answered" || state === "past"
+/**
+ * The open doors of the year a player hasn't answered yet, e.g. [20, 22].
+ * Empty means they may come in. Outside December no door is open, so the
+ * page is open for everyone.
+ */
+export function missingDoors(states: DoorState[], unlocked: number): number[] {
+  return states
+    .slice(0, unlocked)
+    .flatMap((state, i) => (state === "answered" ? [] : [i + 1]))
 }
 
 /** Trims a comment; null when it is empty or too long. */

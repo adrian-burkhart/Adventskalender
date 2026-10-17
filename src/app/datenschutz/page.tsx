@@ -480,8 +480,8 @@ export default function Datenschutz() {
           <p>
             Auf der Seite „Austausch“ können Sie Kommentare schreiben. Wir
             speichern den Text, den Zeitpunkt und Ihr Konto. Andere angemeldete
-            Teilnehmer sehen den Kommentar zusammen mit Ihrem Namen; Kommentare
-            zu einem Türchen erst, wenn sie es selbst beantwortet haben. Die
+            Teilnehmer sehen den Kommentar zusammen mit Ihrem Namen, sobald sie
+            alle bisher geöffneten Türchen des Jahres beantwortet haben. Die
             Kommentare löschen wir zusammen mit Ihrem Konto, oder vorher, wenn
             Sie uns darum bitten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b
             DSGVO.
