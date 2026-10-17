@@ -168,26 +168,38 @@ function WichtelWithPresent() {
           </g>
         </g>
       </g>
-      <RisingFlakes x={201} y={66} />
+      <RisingStars x={201} y={66} />
     </svg>
   )
 }
 
-/** A few soft flakes that float up out of the opened present. */
-function RisingFlakes({ x, y }: { x: number; y: number }) {
+/** A five-pointed star around (cx, cy), as an SVG path. */
+function starPath(cx: number, cy: number, r: number) {
+  const points = Array.from({ length: 10 }, (_, i) => {
+    const angle = (Math.PI / 5) * i - Math.PI / 2
+    const radius = i % 2 ? r * 0.45 : r
+    return `${(cx + radius * Math.cos(angle)).toFixed(2)} ${(cy + radius * Math.sin(angle)).toFixed(2)}`
+  })
+  return `M${points.join(" L")} Z`
+}
+
+/** A few little golden stars that float up out of the opened present. */
+function RisingStars({ x, y }: { x: number; y: number }) {
   return (
     <g>
       {Array.from({ length: 8 }, (_, i) => (
-        <circle
+        <path
           key={i}
-          className="anticipation-flake"
-          cx={x - 24 + ((i * 13) % 48)}
-          cy={y}
-          r={2 + (i % 3)}
-          fill="white"
+          className="anticipation-star"
+          d={starPath(x - 24 + ((i * 13) % 48), y, 3.5 + (i % 3) * 1.2)}
+          fill={i % 3 ? "#fde68a" : "#ffffff"}
+          stroke="#ecd08a"
+          strokeWidth="0.5"
+          strokeLinejoin="round"
           style={
             {
               "--drift": `${(i % 2 ? 1 : -1) * (6 + ((i * 7) % 14))}px`,
+              "--spin": `${(i % 2 ? 1 : -1) * (40 + ((i * 17) % 60))}deg`,
               animationDelay: `${6.5 + i * 0.05}s`,
             } as CSSProperties
           }
