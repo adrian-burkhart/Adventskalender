@@ -276,8 +276,10 @@
 .anticipation-glow {
   opacity: 0;
 }
-.anticipation-flake {
+.anticipation-star {
   opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
 }
 .anticipation-box,
 .anticipation-lid {
@@ -304,8 +306,8 @@
 .anticipation-playing .anticipation-glow {
   animation: glow-in 0.5s 5.95s ease-out forwards;
 }
-.anticipation-playing .anticipation-flake {
-  animation-name: flake-up;
+.anticipation-playing .anticipation-star {
+  animation-name: star-up;
   animation-duration: 1.6s;
   animation-timing-function: ease-out;
   animation-fill-mode: forwards;
@@ -366,17 +368,18 @@
     opacity: 1;
   }
 }
-@keyframes flake-up {
+@keyframes star-up {
   0% {
     opacity: 0;
-    transform: translate(0, 0);
+    transform: translate(0, 0) scale(0.4);
   }
   20% {
-    opacity: 0.9;
+    opacity: 1;
+    transform: translate(0, -16px) scale(1);
   }
   100% {
     opacity: 0;
-    transform: translate(var(--drift), -80px);
+    transform: translate(var(--drift), -80px) rotate(var(--spin)) scale(0.8);
   }
 }
 /* --- Christmas tree ------------------------------------------------------ */
