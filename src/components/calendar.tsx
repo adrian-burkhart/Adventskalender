@@ -72,8 +72,17 @@ function FloatingNumber({
           className="door-float absolute inset-0"
           style={{ animationDelay: `${-((doorNumber * 1.3) % 4)}s` }}
         >
-          <span className="absolute inset-x-0 top-[38%] text-center font-door text-5xl leading-none text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl">
-            {doorNumber}
+          {/* Sits right in the middle of the wreath on the door. */}
+          <span className="absolute top-[43.8%] left-[49.3%] h-[13.5%] -translate-x-1/2 -translate-y-1/2">
+            <Image
+              src={`/images/numbers/${String(doorNumber).padStart(2, "0")}.webp`}
+              alt=""
+              width={170}
+              height={150}
+              sizes="(min-width: 640px) 90px, 70px"
+              className="h-full max-w-none drop-shadow-[0_1px_2px_rgb(0_0_0/0.6)]"
+              style={{ width: "auto" }}
+            />
           </span>
         </span>
       </span>
