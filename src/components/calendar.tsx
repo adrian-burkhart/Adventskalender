@@ -6,6 +6,7 @@ import {
   useCallback,
   useEffect,
   useRef,
+  type CSSProperties,
   type ReactNode,
 } from "react"
 import { useRouter } from "next/navigation"
@@ -37,45 +38,75 @@ const LOCKED_MS = 3000
 
 type DoorVariant = "closed-one" | "closed-two"
 
-/** What a door says about itself, for screen readers. */
-// Where each door number's string is tied on, measured in the Cochin font
-// (in em, from the baseline up and from the middle sideways): the top of the
-// digit nearest the middle. The figures lean right, so their tops sit a
-// little right of centre; on two-digit numbers it is the first digit.
-const HOOKS: [ascent: number, x: number][] = [
-  [0.665, 0.105],
-  [0.665, 0.065],
-  [0.655, 0.098],
-  [0.68, 0.258],
-  [0.65, 0.025],
-  [0.69, 0.212],
-  [0.65, 0.13],
-  [0.665, 0.095],
-  [0.665, 0.08],
-  [0.665, -0.145],
-  [0.665, -0.145],
-  [0.665, -0.145],
-  [0.665, -0.145],
-  [0.665, -0.107],
-  [0.665, -0.133],
-  [0.665, -0.087],
-  [0.665, -0.145],
-  [0.665, -0.145],
-  [0.665, -0.145],
-  [0.665, -0.185],
-  [0.665, -0.185],
-  [0.665, -0.185],
-  [0.665, -0.185],
-  [0.665, -0.182],
+// Where the little stars appear around the number, in % of the door, and
+// how far each one drifts.
+const SPARKS = [
+  { left: 30, top: 34, dx: -14, dy: -18, size: 13, delay: 0 },
+  { left: 68, top: 30, dx: 16, dy: -20, size: 10, delay: 0.08 },
+  { left: 40, top: 55, dx: -12, dy: 6, size: 8, delay: 0.18 },
+  { left: 62, top: 52, dx: 12, dy: 4, size: 12, delay: 0.12 },
+  { left: 50, top: 22, dx: 2, dy: -24, size: 9, delay: 0.26 },
+  { left: 24, top: 46, dx: -16, dy: -4, size: 7, delay: 0.32 },
+  { left: 76, top: 44, dx: 14, dy: -6, size: 7, delay: 0.22 },
 ]
 
-/** The hook of a door number, from the top-left of a line of height 1. */
-function hook(doorNumber: number) {
-  const [ascent, x] = HOOKS[doorNumber - 1] ?? [0.665, 0]
-  // The baseline sits 0.845em below the top of a line of height 1.
-  return { top: 0.845 - ascent, x }
+/** The door number floats; it flies up with a few sparkling stars. */
+function FloatingNumber({
+  doorNumber,
+  lifted,
+}: {
+  doorNumber: number
+  lifted: boolean
+}) {
+  return (
+    <span aria-hidden className="pointer-events-none absolute inset-0">
+      <span
+        className={clsx(
+          "absolute inset-0 transition-[translate,opacity,scale] duration-1000",
+          lifted
+            ? "-translate-y-[45%] scale-75 opacity-0 ease-in"
+            : "translate-y-0 scale-100 opacity-100 ease-out",
+        )}
+      >
+        <span
+          className="door-float absolute inset-0"
+          style={{ animationDelay: `${-((doorNumber * 1.3) % 4)}s` }}
+        >
+          <span className="absolute inset-x-0 top-[38%] text-center font-door text-5xl leading-none text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl">
+            {doorNumber}
+          </span>
+        </span>
+      </span>
+      {lifted &&
+        SPARKS.map((spark, i) => (
+          <svg
+            key={i}
+            viewBox="-10 -10 20 20"
+            className="door-spark absolute"
+            style={
+              {
+                left: `${spark.left}%`,
+                top: `${spark.top}%`,
+                width: spark.size * 1.6,
+                height: spark.size * 1.6,
+                animationDelay: `${spark.delay}s`,
+                "--dx": `${spark.dx}px`,
+                "--dy": `${spark.dy}px`,
+              } as CSSProperties
+            }
+          >
+            <path
+              d="M0 -10 Q1.2 -1.2 10 0 Q1.2 1.2 0 10 Q-1.2 1.2 -10 0 Q-1.2 -1.2 0 -10Z"
+              fill="#fdf6c8"
+            />
+            <circle r="1.8" fill="#fff" />
+          </svg>
+        ))}
+    </span>
+  )
 }
 
+/** What a door says about itself, for screen readers. */
 function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
   if (state === "answered") return "schon beantwortet"
   if (state === "past") return "zum Anhören"
@@ -185,46 +216,12 @@ const CalendarDoor = memo(
             )}
           />
         </div>
-        {/* The number hangs from the top on a thin string. When the door
-            opens (or shows its lock) it is pulled up and out of the way. */}
-        <span
-          aria-hidden
-          className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
-        >
-          <span
-            className={clsx(
-              "absolute inset-0 transition-[translate] duration-700",
-              isOpening || showLock
-                ? "-translate-y-full ease-in"
-                : "translate-y-0 ease-out",
-            )}
-          >
-            <span
-              className="door-hanger absolute inset-0"
-              style={{ animationDelay: `${-((doorNumber * 1.7) % 5)}s` }}
-            >
-              <span className="absolute inset-x-0 top-[38%] text-center font-door text-5xl leading-none text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl">
-                {/* The string runs from the top edge down to the very top of
-                    the digits, where the little ring holds them. */}
-                <span
-                  className="absolute h-[20em] w-[1.5px] -translate-x-1/2 bg-[#e8d9b0] shadow-[0_0_2px_rgb(0_0_0/0.6)]"
-                  style={{
-                    left: `calc(50% + ${hook(doorNumber).x}em)`,
-                    bottom: `calc(100% - ${hook(doorNumber).top - 0.1}em)`,
-                  }}
-                />
-                <span
-                  className="absolute h-[0.17em] w-[0.17em] -translate-x-1/2 rounded-full border-[1.5px] border-[#d9b25a]"
-                  style={{
-                    left: `calc(50% + ${hook(doorNumber).x}em)`,
-                    top: `${hook(doorNumber).top - 0.12}em`,
-                  }}
-                />
-                {doorNumber}
-              </span>
-            </span>
-          </span>
-        </span>
+        {/* The number floats on the door. When the door opens (or shows
+            its lock) it flies up and a few little stars sparkle. */}
+        <FloatingNumber
+          doorNumber={doorNumber}
+          lifted={isOpening || showLock}
+        />
         {status && <span className="sr-only">({status})</span>}
       </button>
     )

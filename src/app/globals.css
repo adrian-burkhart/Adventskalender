@@ -505,22 +505,56 @@
 }
 
 /* --- Door numbers ---------------------------------------------------------
-   They hang on a thin string and sway a little, each door in its own time. */
+   They float a little, each door in its own time. When a door opens the
+   number flies up and a few little stars sparkle. */
 
-.door-hanger {
-  transform-origin: 50% 0;
-  animation: hanger-sway 5s ease-in-out infinite alternate;
+.door-float {
+  animation: door-float 4s ease-in-out infinite alternate;
 }
-@keyframes hanger-sway {
+@keyframes door-float {
   from {
-    rotate: -1.6deg;
+    translate: 0 -2px;
+    rotate: -1deg;
   }
   to {
-    rotate: 1.6deg;
+    translate: 0 3px;
+    rotate: 1deg;
   }
 }
+
+.door-spark {
+  translate: -50% -50%;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px rgb(254 240 138 / 0.95))
+    drop-shadow(0 0 7px rgb(233 196 106 / 0.6));
+  animation: door-spark 1.3s ease-out both;
+}
+@keyframes door-spark {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * 0.4))
+      scale(1.1) rotate(25deg);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translate(calc(var(--dx) * 0.75), calc(var(--dy) * 0.75))
+      scale(0.75) rotate(50deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.1) rotate(80deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .door-hanger {
+  .door-float {
     animation: none;
+  }
+  .door-spark {
+    display: none;
   }
 }
