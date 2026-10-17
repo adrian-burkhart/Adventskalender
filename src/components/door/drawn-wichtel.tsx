@@ -99,41 +99,18 @@ export function DrawnWichtel({
         <path d="M72 86 Q72 102 68 120" />
       </g>
 
-      <g transform={lookDown ? "rotate(16 60 80) translate(3 2)" : undefined}>
-        {lookDown ? (
-          // Turned towards what he holds: the face moves to the right,
-          // the eyes peek out under the hat and look down at it.
-          <>
-            <ellipse cx="65" cy="73" rx="17" ry="8" fill="#f2c4a8" />
-            <ellipse cx="57.5" cy="71" rx="3.2" ry="3.6" fill="white" />
-            <ellipse cx="68" cy="71" rx="2.8" ry="3.4" fill="white" />
-            <circle cx="59" cy="72.6" r="1.9" fill="#2b1d16" />
-            <circle cx="69.3" cy="72.6" r="1.7" fill="#2b1d16" />
-            <path
-              d="M52 82 Q62 76 71 81 Q78 77 83 82"
-              stroke={look.beard[0]}
-              strokeWidth="5"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <circle cx="76" cy="80" r="6.5" fill="#e98b7a" />
-            <circle cx="74" cy="78" r="2" fill="white" opacity="0.6" />
-          </>
-        ) : (
-          <>
-            {/* Face: cheeks and the round nose. */}
-            <ellipse cx="60" cy="72" rx="15" ry="7" fill="#f2c4a8" />
-            <path
-              d="M44 80 Q52 74 60 79 Q68 74 76 80"
-              stroke={look.beard[0]}
-              strokeWidth="5"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <circle cx="60" cy="78" r="6.5" fill="#e98b7a" />
-            <circle cx="58" cy="76" r="2" fill="white" opacity="0.6" />
-          </>
-        )}
+      <g transform={lookDown ? "rotate(14 60 80) translate(4 2)" : undefined}>
+        {/* Face: cheeks and the round nose. */}
+        <ellipse cx="60" cy="72" rx="15" ry="7" fill="#f2c4a8" />
+        <path
+          d="M44 80 Q52 74 60 79 Q68 74 76 80"
+          stroke={look.beard[0]}
+          strokeWidth="5"
+          strokeLinecap="round"
+          fill="none"
+        />
+        <circle cx="60" cy="78" r="6.5" fill="#e98b7a" />
+        <circle cx="58" cy="76" r="2" fill="white" opacity="0.6" />
 
         {/* The long hat, flopping to the side. */}
         <path
@@ -150,9 +127,7 @@ export function DrawnWichtel({
             fill="none"
           />
           <ellipse cx="38" cy="70" rx="5.5" ry="7" fill="#262626" />
-          {!lookDown && (
-            <ellipse cx="82" cy="70" rx="5.5" ry="7" fill="#262626" />
-          )}
+          <ellipse cx="82" cy="70" rx="5.5" ry="7" fill="#262626" />
           <path
             d="M36 77 Q30 100 38 116 Q42 126 36 134"
             stroke="#262626"

@@ -71,6 +71,14 @@ async function logOut(page: Page) {
  */
 const visible = (locator: Locator) => locator.filter({ visible: true })
 
+/** The greeting over the calendar changes with the time of day and Advent. */
+const greetingFor = (page: Page, name: string) =>
+  page.getByRole("heading", {
+    name: new RegExp(
+      `^(Hallo|Guten Morgen|Guten Abend|Guten Rutsch|Frohes Neues|Frohen .+), ${name}!$`,
+    ),
+  })
+
 async function startQuestion(page: Page, door: number) {
   await page.goto(`/${env.year()}/${door}`)
   await tap(visible(page.getByAltText("Bereit button")), { force: true })
@@ -104,7 +112,7 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await tap(page.getByRole("button", { name: "Einloggen" }))
 
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
+    await expect(greetingFor(page, name)).toBeVisible()
   })
 
   await test.step("Tür 1 öffnen und richtig antworten", async () => {
@@ -225,7 +233,7 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await page.getByLabel("Dein Passwort").fill(newPassword)
     await tap(page.getByRole("button", { name: "Einloggen" }))
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
+    await expect(greetingFor(page, name)).toBeVisible()
   })
 
   await test.step("Login-Code per E-Mail", async () => {
@@ -243,6 +251,6 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await tap(page.getByRole("button", { name: "Einloggen" }))
 
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
+    await expect(greetingFor(page, name)).toBeVisible()
   })
 })

@@ -32,17 +32,11 @@ const Result = memo(
           className={clsx(
             // The farewell on door 24 is a whole sentence: a little smaller.
             !result.isCorrect && doorNumber === 24 ? "text-2xl" : "text-4xl",
-            // Dark red like a Christmas ribbon, lit softly to read well.
-            "text-[#b3121f] [text-shadow:0_0_2px_rgb(255_245_225/0.9),0_0_14px_rgb(255_235_200/0.45)]",
           )}
         >
           <Headline result={result} doorNumber={doorNumber} />
         </h2>
-        <div
-          className={clsx(
-            "flex w-full flex-col gap-3 card px-5 py-5 text-lg shadow-[0_0_0_2px_rgb(179_18_31/0.95),0_0_18px_3px_rgb(179_18_31/0.45),0_8px_30px_rgb(0_0_0/0.35)]",
-          )}
-        >
+        <div className="flex w-full flex-col gap-3 card px-5 py-5 text-lg">
           <Explanation result={result} />
           <Standing result={result} />
         </div>

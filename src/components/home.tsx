@@ -10,6 +10,7 @@ import title from "../../public/images/title.webp"
 import { Duration } from "luxon"
 import { useSelectedYear } from "@/lib/context"
 import { doorUnlocksAt } from "@/lib/doors"
+import { greeting } from "@/lib/greeting"
 import type { InitialDoors } from "@/lib/hooks"
 
 /** "1 Tag", "2 Tage", "0 Tage". */
@@ -64,35 +65,59 @@ const Home = memo(
             priority
             className="h-auto w-full max-w-2xl"
           />
-          <div className="mb-6 flex flex-col items-center justify-center gap-2 text-center">
-            {player && player.name && (
-              <h1 className="text-3xl sm:text-4xl">Hallo {player.name}!</h1>
-            )}
-            {!calendarHasStarted && (
-              <div className="mt-2 flex max-w-md flex-col items-center justify-center gap-2 card px-6 py-4 text-center">
-                <div>Schön, dass du schon hier bist!</div>
-                <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
-                <div>
-                  Bis dahin sind es noch:{" "}
-                  {plural(countdown.days, "Tag", "Tage")},{" "}
-                  {plural(countdown.hours, "Stunde", "Stunden")} und{" "}
-                  {plural(Math.floor(countdown.minutes), "Minute", "Minuten")}
+          {player && (
+            <Calendar
+              initialDoors={initialDoors}
+              greeting={
+                <div className="flex flex-col items-center justify-center gap-2 text-center">
+                  {player.name && (
+                    // By the player's own clock. The server renders with
+                    // its time; right after loading it switches to the
+                    // device's, so the first render may differ.
+                    <h1
+                      className="text-3xl sm:text-4xl"
+                      suppressHydrationWarning
+                    >
+                      {greeting(player.name, new Date(now))}
+                    </h1>
+                  )}
+                  {!calendarHasStarted && (
+                    <div className="flex max-w-md flex-col items-center justify-center gap-2 px-6 text-center">
+                      <div>Schön, dass du schon hier bist!</div>
+                      <div>Die erste Tür kannst du am 1. Dezember öffnen.</div>
+                      <div>
+                        Bis dahin sind es noch:{" "}
+                        {plural(countdown.days, "Tag", "Tage")},{" "}
+                        {plural(countdown.hours, "Stunde", "Stunden")} und{" "}
+                        {plural(
+                          Math.floor(countdown.minutes),
+                          "Minute",
+                          "Minuten",
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </div>
-            )}
-          </div>
-          {player && selectedYear && choices.length > 1 && (
-            <YearSelect
-              tone="gold"
-              years={choices}
-              value={selectedYear.year}
-              onChange={(value) => {
-                const year = years.find((y) => y.year === value)
-                if (year) setSelectedYear(year)
-              }}
+              }
             />
           )}
-          {player && <Calendar initialDoors={initialDoors} />}
+          {player && selectedYear && choices.length > 1 && (
+            // Below all doors: earlier years are only for a look back.
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-x-4 gap-y-3 text-center">
+              <span className="text-lg">
+                Hier kannst du nochmal die Türen aus den letzten Jahren sehen
+              </span>
+              <YearSelect
+                tone="gold"
+                years={choices}
+                value={selectedYear.year}
+                onChange={(value) => {
+                  const year = years.find((y) => y.year === value)
+                  if (year) setSelectedYear(year)
+                }}
+              />
+            </div>
+          )}
         </div>
       </Layout>
     )
