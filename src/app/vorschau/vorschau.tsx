@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useSyncExternalStore, type ReactNode } from "react"
+import Link from "next/link"
 import Layout from "@/components/layout"
 import Loading from "@/components/loading"
 import Countdown from "@/components/door/countdown"
@@ -12,6 +13,12 @@ import ChristmasTree from "@/components/christmas-tree"
 import { Board } from "@/components/rangliste"
 import type { LeaderboardEntry } from "@/lib/hooks"
 import { QUESTION_SECONDS } from "@/lib/doors"
+import { CalendarDoor } from "@/components/calendar"
+import {
+  DOOR_NUMBER_STYLES,
+  useDoorNumberStyle,
+} from "@/components/door-number"
+import type { DoorState } from "@/lib/hooks"
 
 // Previews with example data, for what is hard to reach on staging without
 // answering a door.
@@ -85,6 +92,7 @@ export default function Vorschau() {
           </p>
           <nav className="mt-4 flex flex-wrap justify-center gap-2 text-base">
             {[
+              ["#tuernummern", "Türnummern"],
               ["#countdown", "Countdown"],
               ["#vor-dem-ergebnis", "Vor dem Ergebnis"],
               ["#ergebnis", "Ergebnis"],
@@ -102,6 +110,8 @@ export default function Vorschau() {
             ))}
           </nav>
         </header>
+
+        <DoorNumberSection />
 
         <Section
           id="countdown"
@@ -179,6 +189,78 @@ function Replay({
     >
       {children}
     </button>
+  )
+}
+
+// Four doors to try the styles on: today's, an earlier one, a locked one
+// and an answered one.
+const demoDoors: { doorNumber: number; state: DoorState; isToday?: boolean }[] =
+  [
+    { doorNumber: 10, state: "closed", isToday: true },
+    { doorNumber: 7, state: "closed" },
+    { doorNumber: 18, state: "locked" },
+    { doorNumber: 3, state: "answered" },
+  ]
+
+function DoorNumberSection() {
+  const [style, setStyle] = useDoorNumberStyle()
+  const [opening, setOpening] = useState<number | null>(null)
+  const current = DOOR_NUMBER_STYLES.find((s) => s.id === style)
+
+  const open = (doorNumber: number) => {
+    setOpening(doorNumber)
+    setTimeout(() => setOpening(null), 3000)
+  }
+
+  const picker = (
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+      {DOOR_NUMBER_STYLES.map((s) => (
+        <button
+          key={s.id}
+          type="button"
+          aria-pressed={style === s.id}
+          onClick={() => setStyle(s.id)}
+          className="rounded-[12px] border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
+        >
+          {s.name}
+        </button>
+      ))}
+    </div>
+  )
+
+  return (
+    <Section
+      id="tuernummern"
+      title="Türnummern"
+      intro="Sechs Ideen für die Zahlen an den Türen. Tippe auf eine Tür, um sie zu öffnen; die 18 ist verschlossen. Deine Wahl gilt auf diesem Gerät auch im echten Kalender."
+      extra={picker}
+    >
+      <div className="mx-auto flex w-full max-w-3xl flex-col items-center gap-5">
+        <p className="max-w-xl text-center text-lg">{current?.description}</p>
+        <ol className="grid w-full grid-cols-2 gap-4 sm:grid-cols-4 sm:gap-6">
+          {demoDoors.map(({ doorNumber, state, isToday }) => (
+            <li key={doorNumber}>
+              <CalendarDoor
+                doorNumber={doorNumber}
+                doorState={state}
+                variant={doorNumber % 4 < 2 ? "closed-one" : "closed-two"}
+                isToday={!!isToday}
+                isMissed={false}
+                isOpening={opening === doorNumber}
+                isBusy={opening !== null && opening !== doorNumber}
+                onOpen={open}
+                onLocked={() => {}}
+                onReview={() => {}}
+                numberStyle={style}
+              />
+            </li>
+          ))}
+        </ol>
+        <Link href="/" className="text-base underline underline-offset-4">
+          Im Kalender ansehen
+        </Link>
+      </div>
+    </Section>
   )
 }
 

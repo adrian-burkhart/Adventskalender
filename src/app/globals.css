@@ -524,3 +524,120 @@
     animation: none;
   }
 }
+
+/* Door number proposals: a floating number with sparks, and the lantern. */
+
+.door-float {
+  animation: door-float 4s ease-in-out infinite alternate;
+}
+@keyframes door-float {
+  from {
+    translate: 0 -2px;
+    rotate: -1deg;
+  }
+  to {
+    translate: 0 3px;
+    rotate: 1deg;
+  }
+}
+
+.door-spark {
+  translate: -50% -50%;
+  opacity: 0;
+  filter: drop-shadow(0 0 3px rgb(254 240 138 / 0.95))
+    drop-shadow(0 0 7px rgb(233 196 106 / 0.6));
+  animation: door-spark 1.3s ease-out both;
+}
+@keyframes door-spark {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.2) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(calc(var(--dx) * 0.4), calc(var(--dy) * 0.4))
+      scale(1.1) rotate(25deg);
+  }
+  60% {
+    opacity: 0.9;
+    transform: translate(calc(var(--dx) * 0.75), calc(var(--dy) * 0.75))
+      scale(0.75) rotate(50deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(var(--dx), var(--dy)) scale(0.1) rotate(80deg);
+  }
+}
+
+.lantern-halo {
+  transform-box: fill-box;
+  transform-origin: center;
+  opacity: 0.8;
+  transition:
+    opacity 0.8s ease,
+    scale 0.8s ease;
+  animation: lantern-halo 2.8s ease-in-out infinite alternate;
+}
+@keyframes lantern-halo {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 0.95;
+  }
+}
+.lantern-halo-bright {
+  scale: 1.6;
+  animation-name: lantern-halo-bright;
+}
+@keyframes lantern-halo-bright {
+  from {
+    opacity: 0.95;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.lantern-glass {
+  opacity: 0;
+  transition: opacity 0.8s ease;
+}
+.lantern-glass-bright {
+  opacity: 0.45;
+}
+
+.lantern-flame {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transition: scale 0.6s ease;
+  animation: lantern-flame 1.7s ease-in-out infinite alternate;
+}
+.lantern-flame-bright {
+  scale: 1.5;
+}
+@keyframes lantern-flame {
+  0% {
+    rotate: -3deg;
+    opacity: 0.95;
+  }
+  45% {
+    rotate: 2deg;
+    opacity: 1;
+  }
+  100% {
+    rotate: -1deg;
+    opacity: 0.88;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .door-float,
+  .lantern-halo,
+  .lantern-flame {
+    animation: none;
+  }
+  .door-spark {
+    display: none;
+  }
+}
