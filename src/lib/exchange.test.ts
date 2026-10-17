@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { DoorState } from "./doors"
-import { cleanComment, missingDoors } from "./exchange"
+import { cleanComment, isReaction, missingDoors } from "./exchange"
 
 const year = (answered: number[], unlocked: number): DoorState[] =>
   Array.from({ length: 24 }, (_, i) =>
@@ -35,5 +35,14 @@ describe("cleanComment", () => {
     expect(cleanComment(42)).toBeNull()
     expect(cleanComment("a".repeat(1000))).toHaveLength(1000)
     expect(cleanComment("a".repeat(1001))).toBeNull()
+  })
+})
+
+describe("isReaction", () => {
+  it("accepts only the offered emojis", () => {
+    expect(isReaction("❤️")).toBe(true)
+    expect(isReaction("⛄")).toBe(true)
+    expect(isReaction("💩")).toBe(false)
+    expect(isReaction(undefined)).toBe(false)
   })
 })

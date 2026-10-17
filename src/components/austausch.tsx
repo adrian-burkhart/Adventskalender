@@ -1,11 +1,24 @@
 "use client"
 
+import clsx from "clsx"
 import Image from "next/image"
-import { memo, useState, useTransition, type FormEvent } from "react"
-import { postComment } from "@/app/austausch/actions"
+import {
+  memo,
+  useRef,
+  useState,
+  useTransition,
+  type FormEvent,
+  type RefObject,
+} from "react"
+import {
+  deleteComment,
+  editComment,
+  postComment,
+  toggleReaction,
+} from "@/app/austausch/actions"
 import Button, { ButtonLink } from "@/components/button"
 import Layout from "@/components/layout"
-import { COMMENT_MAX_LENGTH } from "@/lib/exchange"
+import { COMMENT_MAX_LENGTH, REACTIONS, WRITE_EMOJIS } from "@/lib/exchange"
 import type { ExchangeComment, ExchangeData } from "@/lib/exchange-data"
 import { doorPath } from "@/lib/routes"
 import { ERROR_TEXT } from "@/lib/texts"
@@ -16,6 +29,9 @@ function doorList(doors: number[]): string {
   if (doors.length === 1) return `Türchen ${doors[0]}`
   return `Türchen ${doors.slice(0, -1).join(", ")} und ${doors.at(-1)}`
 }
+
+const TEXTAREA =
+  "w-full resize-y rounded-[12px] border border-gold/50 bg-black/30 px-4 py-3 text-lg text-white focus:border-gold focus:ring-2 focus:ring-gold/40 focus:outline-hidden"
 
 /** The page to talk about the calendar, around the campfire. */
 const Austausch = memo(({ data }: { data: ExchangeData | null }) => {
@@ -29,18 +45,15 @@ const Austausch = memo(({ data }: { data: ExchangeData | null }) => {
           priority
           className="mx-auto w-full max-w-sm rounded-[12px] shadow-xl"
         />
+        <Welcome />
         {!data ? (
           <p role="alert" className="text-center text-lg">
             {ERROR_TEXT}
           </p>
         ) : data.allowed ? (
           <>
-            <p className="text-center text-lg">
-              Setzt euch ans Lagerfeuer und erzählt, wie euch die Türchen
-              gefallen haben!
-            </p>
-            <WriteBox />
             <Comments comments={data.comments} />
+            <WriteBox />
           </>
         ) : (
           <Closed year={data.year} missing={data.missing} />
@@ -49,6 +62,30 @@ const Austausch = memo(({ data }: { data: ExchangeData | null }) => {
     </Layout>
   )
 })
+
+function Welcome() {
+  return (
+    <div className="flex flex-col gap-3 text-center text-lg">
+      <p className="font-display text-2xl text-candle">
+        Willkommen im Austausch! 🎄
+      </p>
+      <p>
+        Sobald du das aktuelle Türchen geöffnet hast, kannst du dich hier mit
+        den anderen Mitspielern austauschen. 💬
+      </p>
+      <p>
+        Hier kannst du über die Rätsel sprechen, deine Gedanken und Ideen teilen
+        oder einfach etwas zu den Türchen schreiben. Natürlich ist auch Platz
+        für alles Weitere, was du gerne mit der Gruppe teilen möchtest. ❤️
+      </p>
+      <p>
+        Wir sind eine große Runde voller lieber Menschen. Ob du viel schreibst
+        oder lieber still mitliest. Du bist herzlich willkommen und kannst
+        nichts falsch machen.
+      </p>
+    </div>
+  )
+}
 
 /** Why the door is shut, and the way to the first missing door. */
 function Closed({ year, missing }: { year: number; missing: number[] }) {
@@ -70,10 +107,55 @@ function Closed({ year, missing }: { year: number; missing: number[] }) {
   )
 }
 
+/** A row of emojis that go into the text where the cursor is. */
+function EmojiBar({
+  field,
+  setText,
+}: {
+  field: RefObject<HTMLTextAreaElement | null>
+  setText: (update: (text: string) => string) => void
+}) {
+  const insert = (emoji: string) => {
+    const el = field.current
+    const start = el?.selectionStart ?? null
+    const end = el?.selectionEnd ?? null
+    setText((text) => {
+      const at = start ?? text.length
+      return (text.slice(0, at) + emoji + text.slice(end ?? at)).slice(
+        0,
+        COMMENT_MAX_LENGTH,
+      )
+    })
+    // Put the cursor behind the new emoji.
+    requestAnimationFrame(() => {
+      if (!el) return
+      const pos = (start ?? el.value.length - emoji.length) + emoji.length
+      el.focus()
+      el.setSelectionRange(pos, pos)
+    })
+  }
+  return (
+    <div className="flex flex-wrap gap-1 self-start">
+      {WRITE_EMOJIS.map((emoji) => (
+        <button
+          key={emoji}
+          type="button"
+          onClick={() => insert(emoji)}
+          aria-label={`${emoji} einfügen`}
+          className="h-10 w-10 rounded-[12px] bg-black/25 text-xl hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:outline-hidden"
+        >
+          {emoji}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 function WriteBox() {
   const [text, setText] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const field = useRef<HTMLTextAreaElement>(null)
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -92,14 +174,16 @@ function WriteBox() {
         Schreib etwas für alle:
       </label>
       <textarea
+        ref={field}
         id="comment"
         rows={4}
         maxLength={COMMENT_MAX_LENGTH}
         value={text}
         onChange={(e) => setText(e.target.value)}
         placeholder="Dein Kommentar"
-        className="w-full resize-y rounded-[12px] border border-gold/50 bg-black/30 px-4 py-3 text-lg text-white focus:border-gold focus:ring-2 focus:ring-gold/40 focus:outline-hidden"
+        className={TEXTAREA}
       />
+      <EmojiBar field={field} setText={setText} />
       {error && (
         <p role="alert" className="text-[#ff9b9b]">
           {error}
@@ -112,7 +196,7 @@ function WriteBox() {
   )
 }
 
-/** All comments in one column, newest first. */
+/** All comments in one column, oldest first, so the newest sits above the form. */
 function Comments({ comments }: { comments: ExchangeComment[] }) {
   if (comments.length === 0) {
     return (
@@ -124,19 +208,159 @@ function Comments({ comments }: { comments: ExchangeComment[] }) {
   return (
     <ul className="flex flex-col card px-5 py-2">
       {comments.map((c) => (
-        <li key={c.id} className="border-b border-gold/20 py-4 last:border-b-0">
-          <p className="flex flex-wrap items-baseline gap-x-2">
-            <strong className="text-lg text-gold-light">
-              {c.mine ? `${c.name} (du)` : c.name}
-            </strong>
-            <span className="text-sm text-candle/70">{c.time}</span>
-          </p>
-          <p className="mt-1 text-lg wrap-break-word whitespace-pre-wrap text-white">
-            {c.body}
-          </p>
-        </li>
+        <CommentItem key={c.id} comment={c} />
       ))}
     </ul>
+  )
+}
+
+function CommentItem({ comment: c }: { comment: ExchangeComment }) {
+  const [editing, setEditing] = useState(false)
+  const [text, setText] = useState(c.body)
+  const [error, setError] = useState<string | null>(null)
+  const [pending, startTransition] = useTransition()
+  const field = useRef<HTMLTextAreaElement>(null)
+
+  const act = (action: () => Promise<string | null>, then?: () => void) => {
+    setError(null)
+    startTransition(async () => {
+      const failure = await action()
+      if (failure) setError(failure)
+      else then?.()
+    })
+  }
+
+  const remove = () => {
+    const question = c.mine
+      ? "Möchtest du deinen Kommentar wirklich löschen?"
+      : `Möchtest du den Kommentar von ${c.name} wirklich löschen?`
+    if (window.confirm(question)) act(() => deleteComment(c.id))
+  }
+
+  const save = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    act(
+      () => editComment(c.id, text),
+      () => setEditing(false),
+    )
+  }
+
+  return (
+    <li
+      className={clsx(
+        "border-b border-gold/20 py-4 last:border-b-0",
+        pending && "opacity-60",
+      )}
+    >
+      <p className="flex flex-wrap items-baseline gap-x-2">
+        <strong className="text-lg text-gold-light">
+          {c.mine ? `${c.name} (du)` : c.name}
+        </strong>
+        <span className="text-sm text-candle/70">
+          {c.time}
+          {c.edited && " · bearbeitet"}
+        </span>
+      </p>
+
+      {editing ? (
+        <form onSubmit={save} className="mt-2 flex flex-col gap-3">
+          <label htmlFor={`edit-${c.id}`} className="sr-only">
+            Kommentar bearbeiten
+          </label>
+          <textarea
+            ref={field}
+            id={`edit-${c.id}`}
+            rows={3}
+            maxLength={COMMENT_MAX_LENGTH}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className={TEXTAREA}
+          />
+          <EmojiBar field={field} setText={setText} />
+          <div className="flex flex-wrap gap-3">
+            <Button type="submit" disabled={pending || !text.trim()}>
+              Speichern
+            </Button>
+            <Button
+              type="button"
+              quiet
+              onClick={() => {
+                setEditing(false)
+                setText(c.body)
+              }}
+            >
+              Abbrechen
+            </Button>
+          </div>
+        </form>
+      ) : (
+        <p className="mt-1 text-lg wrap-break-word whitespace-pre-wrap text-white">
+          {c.body}
+        </p>
+      )}
+
+      {!editing && (
+        <div className="mt-3 flex flex-wrap items-center gap-1">
+          {REACTIONS.map((emoji) => {
+            const r = c.reactions.find((x) => x.emoji === emoji)
+            return (
+              <button
+                key={emoji}
+                type="button"
+                disabled={pending}
+                onClick={() => act(() => toggleReaction(c.id, emoji))}
+                title={r?.names}
+                aria-pressed={!!r?.mine}
+                aria-label={
+                  r
+                    ? `${emoji} ${r.count}: ${r.names}`
+                    : `Mit ${emoji} reagieren`
+                }
+                className={clsx(
+                  "flex h-9 items-center gap-1 rounded-full border px-2 text-lg",
+                  r?.mine
+                    ? "border-gold bg-gold/20"
+                    : "border-gold/20 bg-black/20 hover:bg-black/40",
+                  !r && "opacity-60 hover:opacity-100",
+                )}
+              >
+                <span>{emoji}</span>
+                {r && <span className="text-base text-candle">{r.count}</span>}
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {!editing && (c.mine || c.canDelete) && (
+        <div className="mt-3 flex gap-4 text-base">
+          {c.mine && (
+            <button
+              type="button"
+              onClick={() => setEditing(true)}
+              className="text-candle/80 underline decoration-gold/50 underline-offset-4 hover:text-candle"
+            >
+              Bearbeiten
+            </button>
+          )}
+          {c.canDelete && (
+            <button
+              type="button"
+              onClick={remove}
+              className="text-[#ff9b9b] underline decoration-[#ff9b9b]/50 underline-offset-4 hover:text-[#ffb8b8]"
+            >
+              Löschen
+            </button>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <p role="alert" className="mt-2 text-[#ff9b9b]">
+          {error}
+        </p>
+      )}
+    </li>
   )
 }
 

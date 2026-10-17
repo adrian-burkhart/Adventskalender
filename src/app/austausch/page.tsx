@@ -7,7 +7,7 @@ export default async function Page() {
   const { supabase, user } = await getSession()
   if (!user) redirect("/login")
 
-  const data = await loadExchange(supabase, user.id).catch((error) => {
+  const data = await loadExchange(supabase, user).catch((error) => {
     console.error("austausch", error)
     return null
   })
