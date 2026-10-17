@@ -70,8 +70,8 @@ function Welcome() {
         Willkommen im Austausch! 🎄
       </p>
       <p>
-        Sobald du das aktuelle Türchen geöffnet hast, kannst du dich hier mit
-        den anderen Mitspielern austauschen. 💬
+        Sobald du alle bisherigen Türchen beantwortet hast, kannst du dich hier
+        mit den anderen Mitspielern austauschen. 💬
       </p>
       <p>
         Hier kannst du über die Rätsel sprechen, deine Gedanken und Ideen teilen
