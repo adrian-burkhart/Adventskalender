@@ -503,3 +503,24 @@
     animation: none;
   }
 }
+
+/* --- Door numbers ---------------------------------------------------------
+   They hang on a thin string and sway a little, each door in its own time. */
+
+.door-hanger {
+  transform-origin: 50% 0;
+  animation: hanger-sway 5s ease-in-out infinite alternate;
+}
+@keyframes hanger-sway {
+  from {
+    rotate: -1.6deg;
+  }
+  to {
+    rotate: 1.6deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .door-hanger {
+    animation: none;
+  }
+}

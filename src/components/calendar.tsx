@@ -10,10 +10,10 @@ import {
 } from "react"
 import { useRouter } from "next/navigation"
 import { useSelectedYear } from "@/lib/context"
-import doorOpenRed from "../../public/images/doors/door-open-red.webp"
-import doorOpenBrown from "../../public/images/doors/door-open-brown.webp"
-import doorAnsweredRed from "../../public/images/doors/door-answered-red.webp"
-import doorAnsweredBrown from "../../public/images/doors/door-answered-brown.webp"
+import doorClosedOne from "../../public/images/door-closed-1.webp"
+import doorClosedTwo from "../../public/images/door-closed-2.webp"
+import doorOpen from "../../public/images/door-open.webp"
+import doorAnswered from "../../public/images/door-answered.webp"
 import doorLocked from "../../public/images/door-locked.webp"
 import Image from "next/image"
 import useSound from "use-sound"
@@ -35,24 +35,47 @@ const OPENING_MS_DOOR_24 = 6500
 /** How long a locked door shows its padlock. */
 const LOCKED_MS = 3000
 
-/** The closed door, painted with its number. */
-function closedDoorImage(doorNumber: number) {
-  return `/images/doors/door-${String(doorNumber).padStart(2, "0")}.webp`
-}
-
-/**
- * Odd doors have a red and white frame, even ones a brown one, closed, while
- * opening and once answered.
- */
-function doorImages(doorNumber: number) {
-  const isRed = doorNumber % 2 === 1
-  return {
-    open: isRed ? doorOpenRed : doorOpenBrown,
-    answered: isRed ? doorAnsweredRed : doorAnsweredBrown,
-  }
-}
+type DoorVariant = "closed-one" | "closed-two"
 
 /** What a door says about itself, for screen readers. */
+// Where each door number's string is tied on, measured in the Cochin font
+// (in em, from the baseline up and from the middle sideways): the top of the
+// digit nearest the middle. The figures lean right, so their tops sit a
+// little right of centre; on two-digit numbers it is the first digit.
+const HOOKS: [ascent: number, x: number][] = [
+  [0.665, 0.105],
+  [0.665, 0.065],
+  [0.655, 0.098],
+  [0.68, 0.258],
+  [0.65, 0.025],
+  [0.69, 0.212],
+  [0.65, 0.13],
+  [0.665, 0.095],
+  [0.665, 0.08],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.107],
+  [0.665, -0.133],
+  [0.665, -0.087],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.145],
+  [0.665, -0.185],
+  [0.665, -0.185],
+  [0.665, -0.185],
+  [0.665, -0.185],
+  [0.665, -0.182],
+]
+
+/** The hook of a door number, from the top-left of a line of height 1. */
+function hook(doorNumber: number) {
+  const [ascent, x] = HOOKS[doorNumber - 1] ?? [0.665, 0]
+  // The baseline sits 0.845em below the top of a line of height 1.
+  return { top: 0.845 - ascent, x }
+}
+
 function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
   if (state === "answered") return "schon beantwortet"
   if (state === "past") return "zum Anhören"
@@ -65,6 +88,7 @@ function statusText(state: DoorState, isToday: boolean, isMissed: boolean) {
 interface CalendarDoorProps {
   doorNumber: number
   doorState: DoorState
+  variant: DoorVariant
   isToday: boolean
   isMissed: boolean
   /** True while this door opens. */
@@ -80,6 +104,7 @@ const CalendarDoor = memo(
   ({
     doorNumber,
     doorState,
+    variant,
     isToday,
     isMissed,
     isOpening,
@@ -96,8 +121,8 @@ const CalendarDoor = memo(
     const isAnswered = doorState === "answered"
     const isLocked = doorState === "locked"
     const isPast = doorState === "past"
+    const closedImage = variant === "closed-one" ? doorClosedOne : doorClosedTwo
     const showOpen = isOpening || doorState === "open"
-    const images = doorImages(doorNumber)
 
     const handleClick = () => {
       if (isBusy || isOpening) return
@@ -132,16 +157,14 @@ const CalendarDoor = memo(
       >
         <div className="relative overflow-hidden rounded-2xl shadow-lg">
           <Image
-            src={isAnswered ? images.answered : closedDoorImage(doorNumber)}
+            src={isAnswered ? doorAnswered : closedImage}
             alt={`Tür Nummer ${doorNumber}`}
-            width={400}
-            height={411}
             sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
             className="h-auto w-full"
           />
           {!isAnswered && (
             <Image
-              src={images.open}
+              src={doorOpen}
               alt=""
               aria-hidden
               sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
@@ -162,6 +185,46 @@ const CalendarDoor = memo(
             )}
           />
         </div>
+        {/* The number hangs from the top on a thin string. When the door
+            opens (or shows its lock) it is pulled up and out of the way. */}
+        <span
+          aria-hidden
+          className="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+        >
+          <span
+            className={clsx(
+              "absolute inset-0 transition-[translate] duration-700",
+              isOpening || showLock
+                ? "-translate-y-full ease-in"
+                : "translate-y-0 ease-out",
+            )}
+          >
+            <span
+              className="door-hanger absolute inset-0"
+              style={{ animationDelay: `${-((doorNumber * 1.7) % 5)}s` }}
+            >
+              <span className="absolute inset-x-0 top-[38%] text-center font-door text-5xl leading-none text-berry-light [text-shadow:0_0_6px_rgb(255_255_255/0.85),0_2px_4px_rgb(0_0_0/0.6)] sm:text-6xl">
+                {/* The string runs from the top edge down to the very top of
+                    the digits, where the little ring holds them. */}
+                <span
+                  className="absolute h-[20em] w-[1.5px] -translate-x-1/2 bg-[#e8d9b0] shadow-[0_0_2px_rgb(0_0_0/0.6)]"
+                  style={{
+                    left: `calc(50% + ${hook(doorNumber).x}em)`,
+                    bottom: `calc(100% - ${hook(doorNumber).top - 0.1}em)`,
+                  }}
+                />
+                <span
+                  className="absolute h-[0.17em] w-[0.17em] -translate-x-1/2 rounded-full border-[1.5px] border-[#d9b25a]"
+                  style={{
+                    left: `calc(50% + ${hook(doorNumber).x}em)`,
+                    top: `${hook(doorNumber).top - 0.12}em`,
+                  }}
+                />
+                {doorNumber}
+              </span>
+            </span>
+          </span>
+        </span>
         {status && <span className="sr-only">({status})</span>}
       </button>
     )
@@ -290,6 +353,7 @@ const Calendar = memo(
                 <CalendarDoor
                   doorNumber={doorNumber}
                   doorState={doorState}
+                  variant={doorNumber % 4 < 2 ? "closed-one" : "closed-two"}
                   isToday={isToday}
                   isMissed={isMissed}
                   isOpening={openingDoor === doorNumber}
