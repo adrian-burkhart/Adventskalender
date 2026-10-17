@@ -64,9 +64,24 @@ async function logOut(page: Page) {
   await hydrated(page.getByLabel("Deine E-Mail-Adresse"))
 }
 
+/**
+ * Only the element on screen. While a door page streams in, Next.js keeps a
+ * hidden copy of it next to the loading screen for a moment, which would
+ * otherwise match twice.
+ */
+const visible = (locator: Locator) => locator.filter({ visible: true })
+
+/** The greeting over the calendar changes with the time of day and Advent. */
+const greetingFor = (page: Page, name: string) =>
+  page.getByRole("heading", {
+    name: new RegExp(
+      `^(Hallo|Guten Morgen|Guten Abend|Guten Rutsch|Frohes Neues|Frohen .+), ${name}!$`,
+    ),
+  })
+
 async function startQuestion(page: Page, door: number) {
   await page.goto(`/${env.year()}/${door}`)
-  await tap(page.getByAltText("Bereit button"), { force: true })
+  await tap(visible(page.getByAltText("Bereit button")), { force: true })
   await expect(page.getByLabel(/^Noch \d+ Sekunden?$/)).toBeVisible()
 }
 
@@ -97,7 +112,7 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await tap(page.getByRole("button", { name: "Einloggen" }))
 
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
+    await expect(greetingFor(page, name)).toBeVisible()
   })
 
   await test.step("Tür 1 öffnen und richtig antworten", async () => {
@@ -108,8 +123,8 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await expect(page).toHaveURL(new RegExp(`/${year}/1$`), {
       timeout: 15_000,
     })
-    await expect(page.getByAltText("Bereit button")).toBeVisible()
-    await tap(page.getByAltText("Bereit button"), { force: true })
+    await expect(visible(page.getByAltText("Bereit button"))).toBeVisible()
+    await tap(visible(page.getByAltText("Bereit button")), { force: true })
     await expect(page.getByLabel(/^Noch \d+ Sekunden?$/)).toBeVisible()
 
     await page.getByLabel(door1.answer.trim(), { exact: true }).check()
@@ -147,14 +162,18 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
   })
 
   await test.step("Beantwortete und verschlossene Türen", async () => {
+    // An answered door opens again to look back at it.
     await page.goto(`/${year}/1`)
     await expect(
-      page.getByText("Du hast diese Frage bereits beantwortet."),
+      visible(page.getByText("Türchen 1 · schon beantwortet")),
+    ).toBeVisible()
+    await expect(
+      visible(page.getByText("Deine Antwort, richtig")),
     ).toBeVisible()
 
     await page.goto(`/${year}/${env.lockedDoor()}`)
     await expect(
-      page.getByText("Diese Tür ist gerade verschlossen."),
+      visible(page.getByText("Diese Tür ist gerade verschlossen.")),
     ).toBeVisible()
 
     await page.goto("/")
@@ -214,7 +233,7 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await page.getByLabel("Dein Passwort").fill(newPassword)
     await tap(page.getByRole("button", { name: "Einloggen" }))
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
+    await expect(greetingFor(page, name)).toBeVisible()
   })
 
   await test.step("Login-Code per E-Mail", async () => {
@@ -232,6 +251,6 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     await tap(page.getByRole("button", { name: "Einloggen" }))
 
     await expect(page).toHaveURL(/\/$/)
-    await expect(page.getByText(`Hallo ${name}!`)).toBeVisible()
+    await expect(greetingFor(page, name)).toBeVisible()
   })
 })

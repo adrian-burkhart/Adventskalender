@@ -200,7 +200,7 @@ function RisingStars({ x, y }: { x: number; y: number }) {
             {
               "--drift": `${(i % 2 ? 1 : -1) * (6 + ((i * 7) % 14))}px`,
               "--spin": `${(i % 2 ? 1 : -1) * (40 + ((i * 17) % 60))}deg`,
-              animationDelay: `${6.5 + i * 0.05}s`,
+              animationDelay: `${6 + i * 0.05}s`,
             } as CSSProperties
           }
         />

@@ -7,7 +7,19 @@ export const QUESTION_SECONDS = 30
 /** Extra seconds the server accepts, for slow networks. */
 export const GRACE_SECONDS = 3
 
-export type DoorState = "closed" | "open" | "locked" | "answered"
+/** "past": a door of a season that is over, now only to listen to. */
+/**
+ * The Christmas trees started in 2026. Earlier seasons
+ * didn't have them, so they show only for 2026 on, and for the season of
+ * now (on staging that can be an older one).
+ */
+export const FIRST_DECORATED_YEAR = 2026
+
+export function hasDecorations(year: number, currentYear: number): boolean {
+  return year >= FIRST_DECORATED_YEAR || year === currentYear
+}
+
+export type DoorState = "closed" | "open" | "locked" | "answered" | "past"
 
 /** Door N of a year opens at midnight Berlin time on N December. */
 export function doorUnlocksAt(year: number, door: number): Date {
@@ -61,6 +73,7 @@ export function doorState({
   answered: boolean
 }): DoorState {
   if (answered) return "answered"
+  if (now >= seasonEndsAt(year)) return "past"
   if (!isDoorAnswerable(year, door, now)) return "locked"
   return opened ? "open" : "closed"
 }

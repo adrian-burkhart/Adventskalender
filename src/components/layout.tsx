@@ -6,30 +6,23 @@ import Navbar from "./navbar"
 import { useMyScores } from "@/lib/hooks"
 import { useSelectedYear } from "@/lib/context"
 import Footer from "./footer"
-import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import star from "../../public/images/star.webp"
 
 const Layout = memo(({ children }: { children: ReactNode }) => {
-  const enabledTestMode = useFeatureFlag(FeatureFlag.ENABLE_TEST_MODE)
-
-  const { years, selectedYear, setSelectedYear } = useSelectedYear()
+  // Always this season's points, whatever year the calendar shows.
+  const { currentYear } = useSelectedYear()
   const { scores } = useMyScores()
 
-  const currentScore = selectedYear
-    ? scores?.find((score) => score.year === Number(selectedYear.year))
+  const currentScore = currentYear
+    ? scores?.find((score) => score.year === Number(currentYear))
     : null
-
-  const handleOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const year = years.find((y) => y.year === e.target.value)
-    if (year) setSelectedYear(year)
-  }
 
   return (
     <>
       <header className="mx-auto flex w-full max-w-5xl flex-wrap items-start justify-between gap-x-4 gap-y-2 px-2 pt-2">
         <div className="flex flex-col items-start gap-2">
           {currentScore && (
-            <div className="flex items-center gap-2 card rounded-full py-1 pr-4 pl-1.5">
+            <div className="flex items-center gap-2 rounded-[12px] bg-linear-to-b from-[#7a4a26] to-[#4a2c16] pt-[3.5px] pr-4 pb-[4.5px] pl-1.5 shadow-[inset_0_2px_0_#5a3820,0_10px_15px_-3px_rgb(0_0_0/0.3)]">
               <Image src={star} width={28} height={28} alt="" />
               <span className="text-base">
                 Deine Punkte:{" "}
@@ -38,18 +31,6 @@ const Layout = memo(({ children }: { children: ReactNode }) => {
                 </strong>
               </span>
             </div>
-          )}
-          {enabledTestMode && years.length > 0 && (
-            <select
-              aria-label="Jahr (Testmodus)"
-              onChange={handleOnChange}
-              value={selectedYear?.year}
-              className="rounded-sm bg-berry px-2 py-1 text-base text-white"
-            >
-              {years.map((year) => (
-                <option key={year.year}>{year.year}</option>
-              ))}
-            </select>
           )}
         </div>
         <Navbar />

@@ -6,9 +6,10 @@ import Button, { ButtonLink } from "./button"
 import Countdown from "./door/countdown"
 import Anticipation from "./door/anticipation"
 import ResultView from "./door/result"
+import Review from "./door/review"
 import ReadyButton from "./ready-button"
 import { apiFetch } from "@/lib/api-client"
-import type { DoorResponse } from "@/lib/door-api"
+import type { DoorResponse, DoorReview } from "@/lib/door-api"
 import { ERROR_TEXT } from "@/lib/texts"
 import { useScoresContext } from "@/lib/context"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
@@ -21,7 +22,7 @@ type Step =
   | { kind: "error" }
   | { kind: "missing" }
   | { kind: "locked" }
-  | { kind: "answered" }
+  | { kind: "answered"; review: DoorReview }
   | { kind: "intro"; introAudio: string | null }
   | {
       kind: "question"
@@ -50,6 +51,8 @@ function toStep(response: DoorResponse): Step {
       return { kind: "intro", introAudio: response.introAudio }
     case "result":
       return { ...response, kind: "result" }
+    case "answered":
+      return { kind: "answered", review: response.review }
     default:
       return { kind: response.status }
   }
@@ -290,7 +293,9 @@ const QuestionForm = memo(
       case "locked":
         return <Message>Diese Tür ist gerade verschlossen.</Message>
       case "answered":
-        return <Message>Du hast diese Frage bereits beantwortet.</Message>
+        return (
+          <Review review={step.review} year={year} doorNumber={doorNumber} />
+        )
       case "question":
         return (
           <QuestionStep

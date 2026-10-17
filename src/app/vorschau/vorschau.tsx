@@ -6,6 +6,8 @@ import Loading from "@/components/loading"
 import Countdown from "@/components/door/countdown"
 import Anticipation from "@/components/door/anticipation"
 import Result, { type ResultData } from "@/components/door/result"
+import Review from "@/components/door/review"
+import type { DoorReview } from "@/lib/door-api"
 import ChristmasTree from "@/components/christmas-tree"
 import { Board } from "@/components/rangliste"
 import type { LeaderboardEntry } from "@/lib/hooks"
@@ -25,7 +27,18 @@ const demoResult = (isCorrect: boolean): ResultData => ({
   leftPage: false,
   timedOut: false,
   rank: isCorrect ? 2 : 4,
-  playerCount: 12,
+})
+
+const demoReview = (isCorrect: boolean): DoorReview => ({
+  question: "Was trinkt man traditionell auf dem Weihnachtsmarkt?",
+  options: ["Glühwein", "Eierlikör", "Apfelschorle", "Kakao"],
+  correctAnswer: "Glühwein",
+  selected: isCorrect ? "Glühwein" : "Kakao",
+  isCorrect,
+  points: isCorrect ? 30 : 0,
+  image: null,
+  played: true,
+  audio: { intro: null, question: null, outro: null },
 })
 
 const ME = "demo-me"
@@ -77,11 +90,12 @@ export default function Vorschau() {
               ["#ergebnis", "Ergebnis"],
               ["#baum", "Baum"],
               ["#rangliste", "Rangliste"],
+              ["#rueckblick", "Beantwortetes Türchen"],
             ].map(([href, text]) => (
               <a
                 key={href}
                 href={href}
-                className="rounded-full border border-gold/50 px-3 py-1 hover:bg-gold/10"
+                className="rounded-[12px] border border-gold/50 px-3 py-1 hover:bg-gold/10"
               >
                 {text}
               </a>
@@ -115,9 +129,11 @@ export default function Vorschau() {
           intro="„Gemeinsam geschafft“ über der Liste, neben jedem Namen der eigene Weihnachtsbaum. Den Fallschirm-Wichtel siehst du auf der echten Rangliste."
         >
           <div className="flex justify-center">
-            <Board entries={demoEntries} myId={ME} unlocked={10} />
+            <Board entries={demoEntries} myId={ME} unlocked={10} decorated />
           </div>
         </Section>
+
+        <ReviewSection />
       </div>
     </Layout>
   )
@@ -230,7 +246,7 @@ function ResultSection() {
           type="button"
           aria-pressed={isCorrect === value}
           onClick={() => setIsCorrect(value as boolean)}
-          className="rounded-full border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
+          className="rounded-[12px] border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
         >
           {text as string}
         </button>
@@ -278,5 +294,50 @@ function TreeSection() {
         </label>
       </div>
     </Section>
+  )
+}
+
+function ReviewSection() {
+  const [isCorrect, setIsCorrect] = useState(false)
+  return (
+    <Section
+      id="rueckblick"
+      title="Beantwortetes Türchen"
+      intro="Schon beantwortete Türchen lassen sich wieder anklicken: Frage, richtige Antwort und die eigene, nur zum Anschauen."
+      extra={<Toggle value={isCorrect} onChange={setIsCorrect} />}
+    >
+      <div className="flex justify-center">
+        <Review review={demoReview(isCorrect)} year="2025" doorNumber={7} />
+      </div>
+    </Section>
+  )
+}
+
+function Toggle({
+  value,
+  onChange,
+}: {
+  value: boolean
+  onChange: (value: boolean) => void
+}) {
+  return (
+    <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+      {(
+        [
+          [true, "Richtig beantwortet"],
+          [false, "Falsch beantwortet"],
+        ] as const
+      ).map(([option, text]) => (
+        <button
+          key={String(option)}
+          type="button"
+          aria-pressed={value === option}
+          onClick={() => onChange(option)}
+          className="rounded-[12px] border-2 border-gold/60 px-4 py-1 text-base aria-pressed:bg-gold aria-pressed:text-pine-950"
+        >
+          {text}
+        </button>
+      ))}
+    </div>
   )
 }
