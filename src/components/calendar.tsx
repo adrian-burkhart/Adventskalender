@@ -10,8 +10,10 @@ import {
 } from "react"
 import { useRouter } from "next/navigation"
 import { useSelectedYear } from "@/lib/context"
-import doorOpen from "../../public/images/door-open.webp"
-import doorAnswered from "../../public/images/door-answered.webp"
+import doorOpenRed from "../../public/images/doors/door-open-red.webp"
+import doorOpenBrown from "../../public/images/doors/door-open-brown.webp"
+import doorAnsweredRed from "../../public/images/doors/door-answered-red.webp"
+import doorAnsweredBrown from "../../public/images/doors/door-answered-brown.webp"
 import doorLocked from "../../public/images/door-locked.webp"
 import Image from "next/image"
 import useSound from "use-sound"
@@ -36,6 +38,18 @@ const LOCKED_MS = 3000
 /** The closed door, painted with its number. */
 function closedDoorImage(doorNumber: number) {
   return `/images/doors/door-${String(doorNumber).padStart(2, "0")}.webp`
+}
+
+/**
+ * Odd doors have a red and white frame, even ones a brown one, closed, while
+ * opening and once answered.
+ */
+function doorImages(doorNumber: number) {
+  const isRed = doorNumber % 2 === 1
+  return {
+    open: isRed ? doorOpenRed : doorOpenBrown,
+    answered: isRed ? doorAnsweredRed : doorAnsweredBrown,
+  }
 }
 
 /** What a door says about itself, for screen readers. */
@@ -83,6 +97,7 @@ const CalendarDoor = memo(
     const isLocked = doorState === "locked"
     const isPast = doorState === "past"
     const showOpen = isOpening || doorState === "open"
+    const images = doorImages(doorNumber)
 
     const handleClick = () => {
       if (isBusy || isOpening) return
@@ -117,7 +132,7 @@ const CalendarDoor = memo(
       >
         <div className="relative overflow-hidden rounded-2xl shadow-lg">
           <Image
-            src={isAnswered ? doorAnswered : closedDoorImage(doorNumber)}
+            src={isAnswered ? images.answered : closedDoorImage(doorNumber)}
             alt={`Tür Nummer ${doorNumber}`}
             width={400}
             height={411}
@@ -126,7 +141,7 @@ const CalendarDoor = memo(
           />
           {!isAnswered && (
             <Image
-              src={doorOpen}
+              src={images.open}
               alt=""
               aria-hidden
               sizes="(min-width: 1024px) 260px, (min-width: 640px) 33vw, 50vw"
