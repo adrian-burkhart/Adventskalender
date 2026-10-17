@@ -6,18 +6,6 @@ import type { DoorState } from "@/lib/doors"
 
 export const COMMENT_MAX_LENGTH = 1000
 
-/** The reactions under each comment. */
-export const REACTIONS = ["😂", "❤️", "⛄", "🎄", "👍"] as const
-
-/** Emojis to put into a comment with one tap. */
-export const WRITE_EMOJIS = ["😂", "❤️", "⛄", "🎄", "👍", "🎅"]
-
-export function isReaction(
-  emoji: unknown,
-): emoji is (typeof REACTIONS)[number] {
-  return REACTIONS.includes(emoji as (typeof REACTIONS)[number])
-}
-
 /**
  * The open doors of the year a player hasn't answered yet, e.g. [20, 22].
  * Empty means they may come in. Outside December no door is open, so the

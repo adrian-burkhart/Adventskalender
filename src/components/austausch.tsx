@@ -2,23 +2,15 @@
 
 import clsx from "clsx"
 import Image from "next/image"
-import {
-  memo,
-  useRef,
-  useState,
-  useTransition,
-  type FormEvent,
-  type RefObject,
-} from "react"
+import { memo, useState, useTransition, type FormEvent } from "react"
 import {
   deleteComment,
   editComment,
   postComment,
-  toggleReaction,
 } from "@/app/austausch/actions"
 import Button, { ButtonLink } from "@/components/button"
 import Layout from "@/components/layout"
-import { COMMENT_MAX_LENGTH, REACTIONS, WRITE_EMOJIS } from "@/lib/exchange"
+import { COMMENT_MAX_LENGTH } from "@/lib/exchange"
 import type { ExchangeComment, ExchangeData } from "@/lib/exchange-data"
 import { doorPath } from "@/lib/routes"
 import { ERROR_TEXT } from "@/lib/texts"
@@ -92,7 +84,7 @@ function Closed({ year, missing }: { year: number; missing: number[] }) {
   return (
     <div className="flex flex-col items-center gap-4 card px-5 py-5 text-center">
       <p className="text-xl">
-        🔒 Bitte beantworte erst alle bisherigen Türchen, um den Austausch zu
+        Bitte beantworte erst alle bisherigen Türchen, um den Austausch zu
         öffnen.
       </p>
       <p className="text-lg text-candle/85">
@@ -107,55 +99,10 @@ function Closed({ year, missing }: { year: number; missing: number[] }) {
   )
 }
 
-/** A row of emojis that go into the text where the cursor is. */
-function EmojiBar({
-  field,
-  setText,
-}: {
-  field: RefObject<HTMLTextAreaElement | null>
-  setText: (update: (text: string) => string) => void
-}) {
-  const insert = (emoji: string) => {
-    const el = field.current
-    const start = el?.selectionStart ?? null
-    const end = el?.selectionEnd ?? null
-    setText((text) => {
-      const at = start ?? text.length
-      return (text.slice(0, at) + emoji + text.slice(end ?? at)).slice(
-        0,
-        COMMENT_MAX_LENGTH,
-      )
-    })
-    // Put the cursor behind the new emoji.
-    requestAnimationFrame(() => {
-      if (!el) return
-      const pos = (start ?? el.value.length - emoji.length) + emoji.length
-      el.focus()
-      el.setSelectionRange(pos, pos)
-    })
-  }
-  return (
-    <div className="flex flex-wrap gap-1 self-start">
-      {WRITE_EMOJIS.map((emoji) => (
-        <button
-          key={emoji}
-          type="button"
-          onClick={() => insert(emoji)}
-          aria-label={`${emoji} einfügen`}
-          className="h-10 w-10 rounded-[12px] bg-black/25 text-xl hover:bg-black/40 focus-visible:ring-2 focus-visible:ring-gold/60 focus-visible:outline-hidden"
-        >
-          {emoji}
-        </button>
-      ))}
-    </div>
-  )
-}
-
 function WriteBox() {
   const [text, setText] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
-  const field = useRef<HTMLTextAreaElement>(null)
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -174,7 +121,6 @@ function WriteBox() {
         Schreib etwas für alle:
       </label>
       <textarea
-        ref={field}
         id="comment"
         rows={4}
         maxLength={COMMENT_MAX_LENGTH}
@@ -183,7 +129,6 @@ function WriteBox() {
         placeholder="Dein Kommentar"
         className={TEXTAREA}
       />
-      <EmojiBar field={field} setText={setText} />
       {error && (
         <p role="alert" className="text-[#ff9b9b]">
           {error}
@@ -219,7 +164,6 @@ function CommentItem({ comment: c }: { comment: ExchangeComment }) {
   const [text, setText] = useState(c.body)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
-  const field = useRef<HTMLTextAreaElement>(null)
 
   const act = (action: () => Promise<string | null>, then?: () => void) => {
     setError(null)
@@ -268,7 +212,6 @@ function CommentItem({ comment: c }: { comment: ExchangeComment }) {
             Kommentar bearbeiten
           </label>
           <textarea
-            ref={field}
             id={`edit-${c.id}`}
             rows={3}
             maxLength={COMMENT_MAX_LENGTH}
@@ -276,7 +219,6 @@ function CommentItem({ comment: c }: { comment: ExchangeComment }) {
             onChange={(e) => setText(e.target.value)}
             className={TEXTAREA}
           />
-          <EmojiBar field={field} setText={setText} />
           <div className="flex flex-wrap gap-3">
             <Button type="submit" disabled={pending || !text.trim()}>
               Speichern
@@ -297,39 +239,6 @@ function CommentItem({ comment: c }: { comment: ExchangeComment }) {
         <p className="mt-1 text-lg wrap-break-word whitespace-pre-wrap text-white">
           {c.body}
         </p>
-      )}
-
-      {!editing && (
-        <div className="mt-3 flex flex-wrap items-center gap-1">
-          {REACTIONS.map((emoji) => {
-            const r = c.reactions.find((x) => x.emoji === emoji)
-            return (
-              <button
-                key={emoji}
-                type="button"
-                disabled={pending}
-                onClick={() => act(() => toggleReaction(c.id, emoji))}
-                title={r?.names}
-                aria-pressed={!!r?.mine}
-                aria-label={
-                  r
-                    ? `${emoji} ${r.count}: ${r.names}`
-                    : `Mit ${emoji} reagieren`
-                }
-                className={clsx(
-                  "flex h-9 items-center gap-1 rounded-full border px-2 text-lg",
-                  r?.mine
-                    ? "border-gold bg-gold/20"
-                    : "border-gold/20 bg-black/20 hover:bg-black/40",
-                  !r && "opacity-60 hover:opacity-100",
-                )}
-              >
-                <span>{emoji}</span>
-                {r && <span className="text-base text-candle">{r.count}</span>}
-              </button>
-            )
-          })}
-        </div>
       )}
 
       {!editing && (c.mine || c.canDelete) && (
