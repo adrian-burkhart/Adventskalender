@@ -79,12 +79,14 @@ export async function loadExchange(
   const [comments, reactions] = await Promise.all([
     admin
       .from("comments")
-      .select("id, created_at, edited_at, player_id, body, players(name)")
+      .select(
+        "id, created_at, edited_at, player_id, body, players!player_id(name)",
+      )
       .order("created_at", { ascending: true })
       .returns<Row[]>(),
     admin
       .from("comment_reactions")
-      .select("comment_id, player_id, emoji, players(name)")
+      .select("comment_id, player_id, emoji, players!player_id(name)")
       .order("created_at", { ascending: true })
       .returns<ReactionRow[]>(),
   ])
