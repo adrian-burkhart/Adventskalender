@@ -199,6 +199,13 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     ).toBeVisible()
   })
 
+  await test.step("Austausch-Seite", async () => {
+    await page.goto("/austausch")
+    await expect(
+      page.getByRole("heading", { name: "Austausch", exact: true }),
+    ).toBeVisible()
+  })
+
   await test.step("Passwort vergessen", async () => {
     await logOut(page)
     await tap(page.getByRole("button", { name: "Passwort vergessen?" }))

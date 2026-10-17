@@ -476,6 +476,16 @@ export default function Datenschutz() {
             mail@adventskalender-haas.de genügt, dann bekommen Sie diese E-Mails
             nicht mehr.
           </p>
+          <h3 className="font-semibold">Kommentare im Austausch</h3>
+          <p>
+            Auf der Seite „Austausch“ können Sie Kommentare schreiben. Wir
+            speichern den Text, den Zeitpunkt und Ihr Konto. Andere angemeldete
+            Teilnehmer sehen den Kommentar zusammen mit Ihrem Namen; Kommentare
+            zu einem Türchen erst, wenn sie es selbst beantwortet haben. Die
+            Kommentare löschen wir zusammen mit Ihrem Konto, oder vorher, wenn
+            Sie uns darum bitten. Rechtsgrundlage ist Art. 6 Abs. 1 lit. b
+            DSGVO.
+          </p>
           <h3 className="font-semibold">Cookies</h3>
           <p>
             Wir verwenden ausschließlich technisch notwendige Cookies, damit Sie
