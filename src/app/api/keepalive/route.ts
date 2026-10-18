@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js"
 import { NextResponse, type NextRequest } from "next/server"
 import { supabaseUrl } from "@/lib/supabase/env"
+import { serverKey } from "@/lib/supabase/admin"
 
 // Vercel Cron calls this once a day (vercel.json). Free Supabase projects
 // are paused after about a week without database activity, so this makes
@@ -23,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   const targets: [string, string | undefined, string | undefined][] = [
-    ["production", supabaseUrl, process.env.SUPABASE_SERVICE_ROLE_KEY],
+    ["production", supabaseUrl, serverKey()],
     [
       "staging",
       process.env.STAGING_SUPABASE_URL,
