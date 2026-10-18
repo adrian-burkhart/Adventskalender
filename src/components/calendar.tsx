@@ -26,6 +26,7 @@ import ChristmasTree from "./christmas-tree"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
 import { hasDecorations } from "@/lib/doors"
+import Button from "./button"
 
 /**
  * How long the door opens before the question page shows. The opening sound
@@ -50,7 +51,7 @@ const SPARKS = [
   { left: 76, top: 44, dx: 14, dy: -6, size: 7, delay: 0.22 },
 ]
 
-/** The door number floats; it flies up with a few sparkling stars. */
+/** The door number sits on the wreath; it flies up with a few sparkling stars. */
 function FloatingNumber({
   doorNumber,
   lifted,
@@ -68,22 +69,17 @@ function FloatingNumber({
             : "translate-y-0 scale-100 opacity-100 ease-out",
         )}
       >
-        <span
-          className="door-float absolute inset-0"
-          style={{ animationDelay: `${-((doorNumber * 1.3) % 4)}s` }}
-        >
-          {/* Sits right in the middle of the wreath on the door. */}
-          <span className="absolute top-[43.8%] left-[49.3%] h-[13.5%] -translate-x-1/2 -translate-y-1/2">
-            <Image
-              src={`/images/numbers/${String(doorNumber).padStart(2, "0")}.webp`}
-              alt=""
-              width={170}
-              height={150}
-              sizes="(min-width: 640px) 90px, 70px"
-              className="h-full max-w-none drop-shadow-[0_1px_2px_rgb(0_0_0/0.6)]"
-              style={{ width: "auto" }}
-            />
-          </span>
+        {/* Sits right in the middle of the wreath on the door. */}
+        <span className="absolute top-[43.8%] left-[49.3%] h-[13.5%] -translate-x-1/2 -translate-y-1/2">
+          <Image
+            src={`/images/numbers/${String(doorNumber).padStart(2, "0")}.webp`}
+            alt=""
+            width={170}
+            height={150}
+            sizes="(min-width: 640px) 90px, 70px"
+            className="h-full max-w-none drop-shadow-[0_1px_2px_rgb(0_0_0/0.6)]"
+            style={{ width: "auto" }}
+          />
         </span>
       </span>
       {lifted &&
@@ -225,7 +221,7 @@ const CalendarDoor = memo(
             )}
           />
         </div>
-        {/* The number floats on the door. When the door opens (or shows
+        {/* The number sits on the door. When the door opens (or shows
             its lock) it flies up and a few little stars sparkle. */}
         <FloatingNumber
           doorNumber={doorNumber}
@@ -253,6 +249,7 @@ const Calendar = memo(
     )
     const router = useRouter()
     const [openingDoor, setOpeningDoor] = useState<number | null>(null)
+    const doorsRef = useRef<HTMLOListElement>(null)
 
     const [playOpen, { stop: stopOpen }] = useSound("/sounds/opening-door.mp3")
     const [playLocked, { stop: stopLocked }] = useSound(
@@ -345,7 +342,27 @@ const Calendar = memo(
           <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
         )}
         {greeting}
-        <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
+        {/* On a phone the title, tree and greeting fill the screen, so a
+            button takes you down to the doors. */}
+        <Button
+          quiet
+          className="sm:hidden"
+          onClick={() =>
+            doorsRef.current?.scrollIntoView({
+              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
+                .matches
+                ? "auto"
+                : "smooth",
+              block: "start",
+            })
+          }
+        >
+          Zum Kalender ↓
+        </Button>
+        <ol
+          ref={doorsRef}
+          className="grid w-full max-w-5xl scroll-mt-4 grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
+        >
           {doorStates.map((doorState, i) => {
             const doorNumber = i + 1
             const isToday = today === doorNumber

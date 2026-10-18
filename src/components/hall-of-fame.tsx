@@ -20,7 +20,7 @@ const EXAMPLES: HallEntry[] = [
 
 const names = (entry: HallEntry) => entry.winners.join(" & ")
 
-/** The winners of all past seasons, engraved on the challenge cup. */
+/** The winners of all past seasons, engraved below the golden star. */
 const HallOfFame = memo(
   ({
     entries,
@@ -66,7 +66,7 @@ const HallOfFame = memo(
               Nach dem ersten Advent steht hier, wer gewonnen hat.
             </p>
           ) : (
-            <Trophy entries={shown} />
+            <GoldenStar entries={shown} />
           )}
         </div>
       </Layout>
@@ -74,70 +74,42 @@ const HallOfFame = memo(
   },
 )
 
+// The ten facets of the star, lit from the upper left.
+const FACETS = [
+  ["M120 118 L120 10 L145.9 82.4 Z", "#f2c94c"],
+  ["M120 118 L145.9 82.4 L222.7 84.6 Z", "#e9b949"],
+  ["M120 118 L222.7 84.6 L161.8 131.6 Z", "#c99230"],
+  ["M120 118 L161.8 131.6 L183.5 205.4 Z", "#b8862b"],
+  ["M120 118 L183.5 205.4 L120 162 Z", "#9a6a1c"],
+  ["M120 118 L120 162 L56.5 205.4 Z", "#c08a2a"],
+  ["M120 118 L56.5 205.4 L78.2 131.6 Z", "#a87520"],
+  ["M120 118 L78.2 131.6 L17.3 84.6 Z", "#e0aa3e"],
+  ["M120 118 L17.3 84.6 L94.1 82.4 Z", "#f7d774"],
+  ["M120 118 L94.1 82.4 L120 10 Z", "#fff2b8"],
+]
+
 /**
- * A golden challenge cup on a wooden plinth. Every winner gets a brass
- * plate engraved with year and name; the newest sits on top and shines.
+ * A golden star above a wooden plinth. Every winner gets a brass plate
+ * engraved with year and name; the newest sits on top and shines.
  */
-function Trophy({ entries }: { entries: HallEntry[] }) {
+function GoldenStar({ entries }: { entries: HallEntry[] }) {
   return (
     <div className="flex w-full max-w-md flex-col items-center">
       <svg
         viewBox="0 0 240 230"
-        className="w-64 drop-shadow-[0_0_30px_rgb(250_204_21/0.35)] sm:w-72"
+        className="mb-4 w-56 drop-shadow-[0_0_30px_rgb(250_204_21/0.45)] sm:w-64"
         aria-hidden
       >
-        <defs>
-          <linearGradient id="cup-gold" x1="0" x2="1">
-            <stop offset="0" stopColor="#8a5a12" />
-            <stop offset="0.3" stopColor="#f7d774" />
-            <stop offset="0.5" stopColor="#fff2b8" />
-            <stop offset="0.75" stopColor="#d9a43a" />
-            <stop offset="1" stopColor="#7a4d0e" />
-          </linearGradient>
-        </defs>
-        {/* Handles. */}
+        {FACETS.map(([d, fill]) => (
+          <path key={d} d={d} fill={fill} />
+        ))}
         <path
-          d="M58 52 C14 52 14 118 70 122"
-          stroke="url(#cup-gold)"
-          strokeWidth="11"
+          d="M120 10 L145.9 82.4 L222.7 84.6 L161.8 131.6 L183.5 205.4 L120 162 L56.5 205.4 L78.2 131.6 L17.3 84.6 L94.1 82.4 Z"
           fill="none"
+          stroke="#8a5a12"
+          strokeWidth="3"
+          strokeLinejoin="round"
         />
-        <path
-          d="M182 52 C226 52 226 118 170 122"
-          stroke="url(#cup-gold)"
-          strokeWidth="11"
-          fill="none"
-        />
-        {/* Bowl. */}
-        <path
-          d="M50 30 H190 C190 110 160 142 120 146 C80 142 50 110 50 30 Z"
-          fill="url(#cup-gold)"
-        />
-        <ellipse cx="120" cy="30" rx="70" ry="9" fill="#fff2b8" />
-        <ellipse cx="120" cy="31" rx="62" ry="6" fill="#b07d1e" />
-        {/* A star on the bowl. */}
-        <path
-          d="M120 62 l7 15 16 2 -12 11 3 16 -14 -8 -14 8 3 -16 -12 -11 16 -2 z"
-          fill="#fff6cf"
-          opacity="0.9"
-        />
-        {/* Stem and foot. */}
-        <path d="M110 146 H130 L128 182 H112 Z" fill="url(#cup-gold)" />
-        <path
-          d="M82 200 Q82 182 120 182 Q158 182 158 200 Z"
-          fill="url(#cup-gold)"
-        />
-        <rect
-          x="70"
-          y="198"
-          width="100"
-          height="12"
-          rx="3"
-          fill="url(#cup-gold)"
-        />
-        {/* A ribbon on one handle. */}
-        <path d="M172 60 l18 -6 -4 12 6 10 -18 -2 z" fill="#b91c1c" />
-        <path d="M180 66 l-4 30 8 -6 6 8 -2 -32 z" fill="#991b1b" />
       </svg>
 
       {/* The plinth with its plates. */}

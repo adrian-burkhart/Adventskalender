@@ -508,22 +508,8 @@
 }
 
 /* --- Door numbers ---------------------------------------------------------
-   They float a little, each door in its own time. When a door opens the
-   number flies up and a few little stars sparkle. */
-
-.door-float {
-  animation: door-float 4s ease-in-out infinite alternate;
-}
-@keyframes door-float {
-  from {
-    translate: 0 -2px;
-    rotate: -1deg;
-  }
-  to {
-    translate: 0 3px;
-    rotate: 1deg;
-  }
-}
+   They sit still. When a door opens the number flies up and a few little
+   stars sparkle. */
 
 .door-spark {
   translate: -50% -50%;
@@ -554,9 +540,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .door-float {
-    animation: none;
-  }
   .door-spark {
     display: none;
   }
