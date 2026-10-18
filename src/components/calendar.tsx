@@ -338,12 +338,8 @@ const Calendar = memo(
 
     return (
       <div className="flex w-full flex-col items-center gap-10">
-        {hasDecorations(Number(selectedYear.year), Number(currentYear)) && (
-          <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
-        )}
-        {greeting}
         {/* On a phone the title, tree and greeting fill the screen, so a
-            button takes you down to the doors. */}
+            button right under the title takes you down to the doors. */}
         <Button
           quiet
           className="sm:hidden"
@@ -359,6 +355,10 @@ const Calendar = memo(
         >
           Zum Kalender ↓
         </Button>
+        {hasDecorations(Number(selectedYear.year), Number(currentYear)) && (
+          <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
+        )}
+        {greeting}
         <ol
           ref={doorsRef}
           className="grid w-full max-w-5xl scroll-mt-4 grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
