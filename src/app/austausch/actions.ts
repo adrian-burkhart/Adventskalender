@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache"
 import { isAdminEmail } from "@/lib/admins"
 import { cleanComment } from "@/lib/exchange"
-import { missingForPlayer } from "@/lib/exchange-data"
+import { missingForPlayer } from "@/lib/door-api"
 import { getSession } from "@/lib/session"
 import { createAdminClient } from "@/lib/supabase/admin"
 

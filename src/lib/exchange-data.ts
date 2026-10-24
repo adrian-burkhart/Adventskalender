@@ -2,10 +2,8 @@ import "server-only"
 import type { SupabaseClient } from "@supabase/supabase-js"
 import { DateTime } from "luxon"
 import { isAdminEmail } from "@/lib/admins"
-import { calendarNow } from "@/lib/clock"
-import { loadDoorStates } from "@/lib/door-api"
-import { TIME_ZONE, doorsUnlocked } from "@/lib/doors"
-import { missingDoors } from "@/lib/exchange"
+import { missingForPlayer } from "@/lib/door-api"
+import { TIME_ZONE } from "@/lib/doors"
 import type { SessionUser } from "@/lib/session"
 import { createAdminClient } from "@/lib/supabase/admin"
 
@@ -25,17 +23,6 @@ export type ExchangeData =
   | { allowed: true; comments: ExchangeComment[] }
   /** Not answered yet: the open doors of this year, e.g. [20, 22]. */
   | { allowed: false; year: number; missing: number[] }
-
-/** The open doors of this year the player still has to answer. */
-export async function missingForPlayer(
-  supabase: SupabaseClient,
-  userId: string,
-) {
-  const now = calendarNow()
-  const year = DateTime.fromJSDate(now).setZone(TIME_ZONE).year
-  const states = await loadDoorStates(supabase, userId, year, false)
-  return { year, missing: missingDoors(states, doorsUnlocked(year, now)) }
-}
 
 interface Row {
   id: number

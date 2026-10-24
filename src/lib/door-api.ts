@@ -8,6 +8,7 @@ import {
   TIME_ZONE,
   doorOfTheDay,
   doorState,
+  doorsUnlocked,
   isCorrectAnswer,
   isDoorAnswerable,
   seasonEndsAt,
@@ -19,6 +20,7 @@ import {
   type LegacyDoor,
 } from "@/lib/doors"
 import { calendarNow } from "@/lib/clock"
+import { missingDoors } from "@/lib/exchange"
 import { rankOf } from "@/lib/ranking"
 import { parseDoorParams } from "@/lib/routes"
 import { getQuestion, listYears, type QuestionContent } from "@/lib/sanity"
@@ -56,6 +58,8 @@ export type DoorResponse =
       timedOut: boolean
       /** Place in this year's Rangliste after the answer; ties share one. */
       rank: number | null
+      /** True when the player has answered every open door of this year. */
+      exchangeOpen: boolean
     }
 
 /**
@@ -169,6 +173,17 @@ export async function loadDoorStates(
       ? "closed"
       : state
   })
+}
+
+/** The open doors of this year the player still has to answer. */
+export async function missingForPlayer(
+  supabase: SupabaseClient,
+  userId: string,
+) {
+  const now = calendarNow()
+  const year = DateTime.fromJSDate(now).setZone(TIME_ZONE).year
+  const states = await loadDoorStates(supabase, userId, year, false)
+  return { year, missing: missingDoors(states, doorsUnlocked(year, now)) }
 }
 
 /** Today's door in that year, by the calendar's clock. */
@@ -390,6 +405,20 @@ async function standing(ctx: DoorContext): Promise<{ rank: number | null }> {
   }
 }
 
+/**
+ * Whether the "Austausch" is open for the player now, for a button on the
+ * result screen. If it can't be checked, the button stays away.
+ */
+async function exchangeOpen(ctx: DoorContext): Promise<boolean> {
+  try {
+    const { missing } = await missingForPlayer(ctx.supabase, ctx.user.id)
+    return missing.length === 0
+  } catch (error) {
+    console.error("exchangeOpen", error)
+    return false
+  }
+}
+
 /** Where the player stands with this door. */
 async function doorStep(ctx: DoorContext): Promise<DoorResponse> {
   if (ctx.testMode) {
@@ -529,6 +558,7 @@ export function submitAnswer(request: NextRequest, params: DoorParams) {
       leftPage,
       timedOut,
       ...(await standing(ctx)),
+      exchangeOpen: await exchangeOpen(ctx),
     })
 
     if (ctx.testMode) {

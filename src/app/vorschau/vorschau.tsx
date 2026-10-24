@@ -27,6 +27,7 @@ const demoResult = (isCorrect: boolean): ResultData => ({
   leftPage: false,
   timedOut: false,
   rank: isCorrect ? 2 : 4,
+  exchangeOpen: true,
 })
 
 const demoReview = (isCorrect: boolean): DoorReview => ({
