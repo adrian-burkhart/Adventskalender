@@ -184,7 +184,7 @@ test("Neue Mitspielerin: registrieren, spielen, Passwort und Login-Code", async 
     }
   })
 
-  await test.step("Rangliste und Profil zeigen die Punkte", async () => {
+  await test.step("Rangliste und Meine Seite zeigen die Punkte", async () => {
     await page.goto("/rangliste")
     const row = page.getByRole("listitem").filter({ hasText: name })
     await expect(row).toContainText(`Punkte: ${door1.reward}`)

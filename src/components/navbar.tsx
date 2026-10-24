@@ -8,7 +8,7 @@ const LINKS = [
   { text: "Kalender", href: "/" },
   { text: "Rangliste", href: "/rangliste" },
   { text: "Austausch", href: "/austausch" },
-  { text: "Profil", href: "/profile" },
+  { text: "Meine Seite", href: "/profile" },
 ]
 
 /**

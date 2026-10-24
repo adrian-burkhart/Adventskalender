@@ -1,7 +1,14 @@
 "use client"
 
 import { createClient as createBrowserClient } from "@/lib/supabase/client"
-import { useMyScores, usePlayer, useUpdatePlayerName } from "@/lib/hooks"
+import {
+  useDoors,
+  useMyScores,
+  usePlayer,
+  useUpdatePlayerName,
+} from "@/lib/hooks"
+import { useSelectedYear } from "@/lib/context"
+import ChristmasTree from "@/components/christmas-tree"
 import Layout from "@/components/layout"
 import { useState } from "react"
 import Button from "@/components/button"
@@ -10,6 +17,12 @@ export default function Profile() {
   const [supabaseClient] = useState(() => createBrowserClient())
   const { player } = usePlayer()
   const { scores } = useMyScores()
+  // The tree grows with this year's answered doors.
+  const { years, currentYear } = useSelectedYear()
+  const thisYear = years.find((y) => y.year === currentYear) ?? null
+  const { doorStates } = useDoors(thisYear)
+  const answered =
+    doorStates?.filter((state) => state === "answered").length ?? 0
   const { updatePlayerName, loading, error, updateSuccess } =
     useUpdatePlayerName()
   const [newName, setNewName] = useState(player?.name ?? "")
@@ -39,9 +52,15 @@ export default function Profile() {
   return (
     <Layout>
       <div className="flex w-full max-w-md flex-col gap-6 px-3 text-center">
-        <h1 className="text-4xl">Profil</h1>
+        <h1 className="text-4xl">Meine Seite</h1>
         {player && (
           <>
+            {doorStates && (
+              <section className="flex flex-col items-center gap-2">
+                <h2 className="text-2xl">Dein Weihnachtsbaum</h2>
+                <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
+              </section>
+            )}
             <section className="flex flex-col gap-3">
               <label htmlFor="name" className="text-lg">
                 Hier kannst du deinen Namen ändern:

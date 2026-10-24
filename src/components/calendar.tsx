@@ -22,11 +22,8 @@ import { useDoors, DoorState, type InitialDoors } from "@/lib/hooks"
 import clsx from "clsx"
 import { ERROR_TEXT } from "@/lib/texts"
 import Loading from "./loading"
-import ChristmasTree from "./christmas-tree"
 import { FeatureFlag, useFeatureFlag } from "@/lib/feature-flags"
 import { doorPath } from "@/lib/routes"
-import { hasDecorations } from "@/lib/doors"
-import Button from "./button"
 
 /**
  * How long the door opens before the question page shows. The opening sound
@@ -239,17 +236,16 @@ const Calendar = memo(
     greeting,
   }: {
     initialDoors?: InitialDoors
-    /** Shown under the tree, above the doors. */
+    /** Shown above the doors. */
     greeting?: ReactNode
   }) => {
-    const { selectedYear, currentYear } = useSelectedYear()
+    const { selectedYear } = useSelectedYear()
     const { doorStates, today, openDoor, loading, error } = useDoors(
       selectedYear,
       initialDoors,
     )
     const router = useRouter()
     const [openingDoor, setOpeningDoor] = useState<number | null>(null)
-    const doorsRef = useRef<HTMLOListElement>(null)
 
     const [playOpen, { stop: stopOpen }] = useSound("/sounds/opening-door.mp3")
     const [playLocked, { stop: stopLocked }] = useSound(
@@ -334,35 +330,10 @@ const Calendar = memo(
       return <div>Keine Fragen für dieses Jahr</div>
     }
 
-    const answered = doorStates.filter((state) => state === "answered").length
-
     return (
       <div className="flex w-full flex-col items-center gap-10">
-        {/* On a phone the title, tree and greeting fill the screen, so a
-            button right under the title takes you down to the doors. */}
-        <Button
-          quiet
-          className="sm:hidden"
-          onClick={() =>
-            doorsRef.current?.scrollIntoView({
-              behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-                .matches
-                ? "auto"
-                : "smooth",
-              block: "start",
-            })
-          }
-        >
-          Zum Kalender ↓
-        </Button>
-        {hasDecorations(Number(selectedYear.year), Number(currentYear)) && (
-          <ChristmasTree ornaments={answered} className="w-48 sm:w-60" />
-        )}
         {greeting}
-        <ol
-          ref={doorsRef}
-          className="grid w-full max-w-5xl scroll-mt-4 grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4"
-        >
+        <ol className="grid w-full max-w-5xl grid-cols-2 gap-4 px-1 sm:grid-cols-3 sm:gap-6 lg:grid-cols-4">
           {doorStates.map((doorState, i) => {
             const doorNumber = i + 1
             const isToday = today === doorNumber

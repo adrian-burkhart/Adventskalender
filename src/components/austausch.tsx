@@ -59,16 +59,16 @@ function Welcome() {
   return (
     <div className="flex flex-col gap-3 text-center text-lg">
       <p className="font-display text-2xl text-candle">
-        Willkommen im Austausch! 🎄
+        Willkommen im Austausch!
       </p>
       <p>
         Sobald du alle bisherigen Türchen beantwortet hast, kannst du dich hier
-        mit den anderen Mitspielern austauschen. 💬
+        mit den anderen Mitspielern austauschen.
       </p>
       <p>
         Hier kannst du über die Rätsel sprechen, deine Gedanken und Ideen teilen
         oder einfach etwas zu den Türchen schreiben. Natürlich ist auch Platz
-        für alles Weitere, was du gerne mit der Gruppe teilen möchtest. ❤️
+        für alles Weitere, was du gerne mit der Gruppe teilen möchtest.
       </p>
       <p>
         Wir sind eine große Runde voller lieber Menschen. Ob du viel schreibst

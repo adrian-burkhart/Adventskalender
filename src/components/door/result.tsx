@@ -41,7 +41,7 @@ const Result = memo(
           <Standing result={result} />
         </div>
         <SolutionPicture image={result.image} />
-        <Actions />
+        <Actions exchangeOpen={result.exchangeOpen} />
       </div>
     )
   },
@@ -132,13 +132,19 @@ export function SolutionPicture({ image }: { image: string | null }) {
   )
 }
 
-function Actions() {
+/** The Austausch only shows up once every open door is answered. */
+function Actions({ exchangeOpen }: { exchangeOpen: boolean }) {
   return (
-    <div className="flex flex-col items-center gap-3 sm:flex-row">
+    <div className="flex flex-col flex-wrap items-center justify-center gap-3 sm:flex-row">
       <ButtonLink href="/">Zurück zum Kalender</ButtonLink>
       <ButtonLink href="/rangliste" quiet>
         Zur Rangliste
       </ButtonLink>
+      {exchangeOpen && (
+        <ButtonLink href="/austausch" quiet>
+          Zum Austausch
+        </ButtonLink>
+      )}
     </div>
   )
 }
